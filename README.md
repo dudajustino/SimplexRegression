@@ -12,22 +12,15 @@ This repository contains the R package and associated data for the scientific ar
 
 - [🎯 Overview](#-Overview)
 - [🌟Key Features](#-key-features)
-- [Repository Structure](repository-structure)
+- [📂 Repository Structure](repository-structure)
 - [🛠️ Installation](#-installation)
-- [🚀 Quick Start](#-quick-start)
-- [Usage Examples](#-usage-examples)
-  - [Basic Model](#basic-model)
-  - [Parametric Mean Link Functions](#parametric-mean-link-functions)
-  - [Model Diagnostics](#model-diagnostics)
-  - [Model Selection](#model-selection)
-- [Vignettes](#-vignettes)
-- [Real Data Application](#-real-data-application)
-- [Functions Reference](#-functions-reference)
-- [Contributing](#-contributing)
-- [References](#-references)
+- [🚀 Getting Started & Examples](#-getting-start)
+- [📚 Vignettes](#-vignettes)
+- [🎯 Code of Conduct](#-code-of-conduct)
+- [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
-- [Citation](#-citation)
-- [📬 Contact](#-contact)
+- [📖 Citation](#-citation)
+- [📧 Contact](#-contact)
 
 ---
 
@@ -78,6 +71,20 @@ Traditional approaches use **fixed mean link functions** (logit, probit, log-log
 
 ---
 
+📂 Repository Structure
+
+.
+├── R/                  # Source code for all R functions.
+├── data/               # Processed data included in the package (.rda).
+├── man/                # R package documentation files for functions.
+├── vignettes/          # Detailed tutorials and case studies (.Rmd).
+├── DESCRIPTION         # Package metadata and dependencies.
+├── NAMESPACE           # Manages the package's namespace.
+├── LICENSE             # MIT License file.
+└── README.md           # This file.
+
+--- 
+
 ## 🛠 Installation
 
 ### Development version from GitHub
@@ -90,7 +97,7 @@ install.packages("devtools")
 devtools::install_github("dudajustino/SimplexRegression")
 ```
 
-## 🚀 Quick Start
+## 🚀 Getting Started & Examples
 
 ```r
 library(SimplexRegression)
@@ -99,7 +106,7 @@ library(SimplexRegression)
 data("impunity_dataset")
 
 # Fit a simplex regression model with parametric mean link
-model <- simplexreg(
+model1 <- simplexreg(
   Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic | 
              EconomicFreedom + HealthSpending + Democracy,
   data = impunity_dataset,
@@ -108,32 +115,93 @@ model <- simplexreg(
 )
 
 # View results
-summary(model)
+summary(model1)
 
 # Model diagnostics
-plot(model, which = 1:7, type = "quantile")
+plot(model1, which = 1:7, type = "quantile")
 
 # Half-normal plot with simulated envelope
-hnp.simplexreg(model, type = "sweighted2")
+hnp.simplexreg(model1, type = "sweighted2")
+
+# Fit a simplex regression with fixed log-log mean link:
+
+# Simple model with logit link
+model2 <- simplexreg(
+  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic | 
+             EconomicFreedom + HealthSpending + Democracy,
+  data = impunity_dataset,
+  link.mu = "loglog",
+  link.sigma2 = "log"
+)
+
+summary(model2)
+```
+
+## 📚 Vignettes
+
+Detailed tutorials and applications:
+
+```r
+# List all vignettes
+browseVignettes("SimplexRegression")
+
+# View specific vignette
+vignette("impunity-analysis", package = "SimplexRegression")
+```
+
+### Available vignettes:
+
+1. **Impunity Analysis**: Complete analysis of impunity data across 119 countries
+   - Parametric vs fixed mean link functions
+   - Model selection strategies
+   - Comprehensive diagnostics
+   - Influence analysis
+
+---
+
+## 🎯 Code of Conduct
+
+Please note that the SimplexRegression project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 📖 Citation
+
+If you use this package in your research, please cite:
+
+```r
+citation("SimplexRegression")
+```
+
+```bibtex
+@Article{Justino+Cribari_2025,
+  title = {Simplex Regression with a Flexible Logit Link: Inference and Application to Cross-Country Impunity Data},
+  author = {Maria Eduarda da Cruz Justino and Francisco Cribari-Neto},
+  year = {2025},
+  url = {https://github.com/dudajustino/SimplexRegression},
+}
 ```
 
 ---
 
-## Example
+## 📧 Contact
 
-This is a basic example which shows you how to solve a common problem:
+**Maria Eduarda da Cruz Justino**
+- 📫 Email: eueduardacruz@gmail.com
+- 🐙 GitHub: [@dudajustino](https://github.com/dudajustino)
 
-``` r
-library(SimplexRegression)
-## Fit simplex regression model
-model <- simplexreg(y ~ x1 + x2, data = your_data, 
-                    link.mu = "plogit1", 
-                    link.sigma2 = "log")
+**Francisco Cribari-Neto**
+- 🏛️ Departamento de Estatística, UFPE
 
-# Model summary
-summary(model)
-```
-
-## Code of Conduct
-
-Please note that the SimplexRegression project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
