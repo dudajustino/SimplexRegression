@@ -11,10 +11,10 @@ This repository contains the R package and associated data for the scientific ar
 ## 📑 Table of Contents
 
 - [🎯 Overview](#-Overview)
-- [✨ Key Features](#-key-features)
-- [📂 Repository Structure](repository-structure)
+- [🌟Key Features](#-key-features)
+- [Repository Structure](repository-structure)
 - [🛠️ Installation](#-installation)
-- [Quick Start](#-quick-start)
+- [🚀 Quick Start](#-quick-start)
 - [Usage Examples](#-usage-examples)
   - [Basic Model](#basic-model)
   - [Parametric Mean Link Functions](#parametric-mean-link-functions)
@@ -23,7 +23,7 @@ This repository contains the R package and associated data for the scientific ar
 - [Vignettes](#-vignettes)
 - [Real Data Application](#-real-data-application)
 - [Functions Reference](#-functions-reference)
-- [🤝 Contributing](#-contributing)
+- [Contributing](#-contributing)
 - [References](#-references)
 - [📄 License](#-license)
 - [Citation](#-citation)
@@ -78,7 +78,7 @@ Traditional approaches use **fixed mean link functions** (logit, probit, log-log
 
 ---
 
-## 📦 Installation
+## 🛠 Installation
 
 ### Development version from GitHub
 
@@ -89,6 +89,35 @@ install.packages("devtools")
 # Install SimplexRegression
 devtools::install_github("dudajustino/SimplexRegression")
 ```
+
+## 🚀 Quick Start
+
+```r
+library(SimplexRegression)
+
+# Load example dataset
+data("impunity_dataset")
+
+# Fit a simplex regression model with parametric mean link
+model <- simplexreg(
+  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic | 
+             EconomicFreedom + HealthSpending + Democracy,
+  data = impunity_dataset,
+  link.mu = "plogit1",
+  link.sigma2 = "log"
+)
+
+# View results
+summary(model)
+
+# Model diagnostics
+plot(model, which = 1:7, type = "quantile")
+
+# Half-normal plot with simulated envelope
+hnp.simplexreg(model, type = "sweighted2")
+```
+
+---
 
 ## Example
 
