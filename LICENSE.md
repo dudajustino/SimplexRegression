@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) 2025 Maria Eduarda da Cruz Justino
+Copyright (c) 2025 Maria Eduarda da Cruz Justino and Francisco Cribari-Neto
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
