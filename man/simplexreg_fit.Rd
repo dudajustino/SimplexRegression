@@ -25,8 +25,8 @@ simplexreg_fit(
 
 \item{diag}{Diagnostic level}
 
-\item{link.mu}{Mean link function (parametric: "plogit1","plogit2"; fixed:
-"logit","probit","cauchit","loglog","cloglog")}
+\item{link.mu}{Mean link function (parametric: "plogit1", "plogit2"; fixed:
+"logit", "probit", "cauchit", "loglog", "cloglog")}
 
 \item{link.sigma2}{Dispersion link function ("log", "sqrt", "identity")}
 

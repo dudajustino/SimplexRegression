@@ -2,7 +2,7 @@
 % Please edit documentation in R/simplexreg_methods.R
 \name{print.simplexregression}
 \alias{print.simplexregression}
-\title{Print Method for Simplex Regression with Parametric Link}
+\title{Print Method for Simplex Regression}
 \usage{
 \method{print}{simplexregression}(x, digits = max(3, getOption("digits") - 3), ...)
 }

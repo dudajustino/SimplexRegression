@@ -2,35 +2,36 @@
 % Please edit documentation in R/simplexreg_penalized_ic.R
 \name{penalized_ic}
 \alias{penalized_ic}
-\title{Penalized Information Criteria for Parametric Simplex Regression}
+\title{Penalized Information Criteria for Simplex Regression}
 \usage{
 penalized_ic(model, kappa = 0.1)
 }
 \arguments{
 \item{model}{An object of class \code{"simplexregression"} fitted with a
-parametric link ("plogit1" or "plogit2").}
+parametric mean link functions ("plogit1" or "plogit2").}
 
 \item{kappa}{A numeric constant controlling the penalization strength
 (default is 0.1).}
 }
 \value{
-A named vector with components \code{AICc}, \code{BICc}, and \code{HQc}.
+A named vector with components \eqn{AIC^{(\lambda)}}, \eqn{BIC^{(\lambda)}},
+and \eqn{HQIC^{(\lambda)}}.
 }
 \description{
 Computes AIC, BIC, and HQ information criteria with a penalty term
-depending on the estimated parameter \eqn{\lambda} of the parametric link
-function ("plogit1" or "plogit2").
+depending on the estimated parameter \eqn{\lambda} of the parametric mean link
+functions ("plogit1" or "plogit2").
 }
 \details{
 The penalized criteria are computed as:
-\deqn{AIC_c = -2 \ell + (2 + c \, |\log(\lambda)|)(n - df_{res})}
-\deqn{BIC_c = -2 \ell + (\log n + c \, |\log(\lambda)|)(n - df_{res})}
-\deqn{HQ_c  = -2 \ell + (2 \log(\log n) + c \, |\log(\lambda)|)(n - df_{res})}
+\deqn{AIC^{(\lambda)} = -2 \ell + (2 + c \, |\log(\lambda)|)r}
+\deqn{BIC^{(\lambda)} = -2 \ell + (\log(n) + c \, |\log(\lambda)|)r}
+\deqn{HQIC^{(\lambda)}  = -2 \ell + (2 \log(\log(n)) + c \, |\log(\lambda)|)r}
 where:
 \itemize{
-  \item \eqn{\ell} is the log-likelihood at the maximum;
-  \item \eqn{\lambda} is the power parameter of the parametric link function;
-  \item \eqn{df_{res}} is the number of residual degrees of freedom.
+  \item \eqn{\ell} denotes the maximized log-likelihood function;
+  \item \eqn{\lambda} is the parameter of the parametric mean link function;
+  \item \eqn{r} is the number of parameters in the model.
 }
 
 These penalized versions add a smooth penalty on the magnitude of
@@ -38,7 +39,7 @@ These penalized versions add a smooth penalty on the magnitude of
 }
 \examples{
 \dontrun{
-# Fit two models with parametric links
+# Fit two models with parametric mean link functions
 fit1 <- simplexreg(y ~ x1 + x2, link = "plogit1")
 fit2 <- simplexreg(y ~ x1 + x2, link = "plogit2")
 

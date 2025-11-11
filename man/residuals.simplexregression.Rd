@@ -41,7 +41,7 @@ Numeric vector of residuals
 }
 \description{
 Computes various types of residuals for simplex regression models
-with Parametric or fixed Link.
+with Parametric or Fixed Mean Link Functions.
 }
 \details{
 Different residual types are suitable for different diagnostic purposes:

@@ -25,16 +25,16 @@ Numeric vector (gradient)
 }
 \description{
 Computes the score vector for given parameters in the
-  simplex regression models with parametric and fixed mean link functins.
+  simplex regression models with parametric or fixed mean link functins.
 }
 \details{
 The parameter vector \eqn{\boldsymbol{\theta}} has different structures
 depending on the type of mean link:
 \itemize{
-  \item For parametric links ("plogit1" or "plogit2"):
+  \item For parametric mean link functions ("plogit1" or "plogit2"):
     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\delta}^\top, \lambda)^\top},
     with \eqn{p + q + 1} elements.
-  \item For fixed links ("logit", "probit", "cloglog", "loglog", "cauchit"):
+  \item For fixed mean link functions ("logit", "probit", "cloglog", "loglog", "cauchit"):
     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\delta}^\top)^\top},
     with \eqn{p + q} elements.
 }

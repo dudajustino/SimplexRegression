@@ -2,7 +2,7 @@
 % Please edit documentation in R/simplexreg_scoretest.R
 \name{scoretest.simplexreg}
 \alias{scoretest.simplexreg}
-\title{Rao Score Test for Simplex Regression with Parametric Link}
+\title{Rao Score Test for Simplex Regression with Parametric Mean Link Function}
 \usage{
 scoretest.simplexreg(model, link.mu = c("plogit1", "plogit2"))
 }
@@ -25,7 +25,7 @@ An object of class \code{"htest"} containing:
 \description{
 Performs a Rao score test to test whether the link parameter
 \eqn{\lambda} equals 1, which corresponds to testing between different
-parametric link functions.
+parametric mean link functions.
 }
 \details{
 The score test (also known as the Rao test or Lagrange multiplier test)
@@ -38,11 +38,12 @@ hypothesis. The advantage of the score test is that it only requires fitting
 the model under the null hypothesis.
 
 The test statistic is:
-\deqn{SC = U_\lambda^2 / \mathcal{K}^{\lambda\lambda}}
+\deqn{S_R = \boldsymbol{U}_\lambda(\boldsymbol{\theta})^\top \boldsymbol{K}^{\lambda \lambda}
+\boldsymbol{U}_\lambda(\boldsymbol{\theta})}
 
-where \eqn{U_\lambda} is the score function with respect to \eqn{\lambda}
-and \eqn{\mathcal{K}^{\lambda\lambda}} is the corresponding element of the
-Fisher information matrix.
+where \eqn{\boldsymbol{U}_\lambda} is the score function with respect to \eqn{\lambda}
+and \eqn{\boldsymbol{K}^{\lambda \lambda}} is the corresponding element of the
+inverse Fisher information matrix.
 
 Under the null hypothesis, the test statistic follows a chi-squared
 distribution with 1 degree of freedom.

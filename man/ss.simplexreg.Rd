@@ -9,7 +9,7 @@ ss.simplexreg(..., kappa = 0.1, verbose = TRUE)
 \arguments{
 \item{...}{Two or more objects of class \code{"simplexregression"} to be compared}
 
-\item{kappa}{Numeric value controlling the additional penalty for the link
+\item{kappa}{Numeric value controlling the additional penalty for the link mean
 parameter. Default is 0.1. Use \code{kappa = 0} for standard Scout Score}
 
 \item{verbose}{Logical. If \code{TRUE} (default), prints the SS values for
@@ -30,7 +30,8 @@ competing simplex regression models with parametric and fixed mean link function
 }
 \details{
 The Scout Score criterion, originally proposed by Costa et al. (2022) for
-beta ARMA models, extends Vuong's test statistic to compare M ≥ 2 competing
+\eqn{\beta\text{ARMA}} A (beta autoregressive moving average) models,
+extends Vuong's test statistic to compare M ≥ 2 competing
 non-nested models using their individual log-likelihood contributions.
 
 For each candidate model \eqn{j \in {1, ..., M}}, the Scout Score is defined as:
@@ -41,20 +42,20 @@ is Vuong's test statistic comparing models j and k:
 \deqn{\Delta_{jk} = n^{-1/2} \hat{\omega}_{jk}^{-1} \left[\sum_{i=1}^n
 \log\frac{f_{ji}(\hat{\theta}_j)}{f_{ki}(\hat{\theta}_k)} - \delta_{jk}\right]}
 
-For simplex regression models, the penalization term is:
+For simplex regression models with parametric mean link function, the penalization
+term is:
 \deqn{\delta_{jk} = \frac{1}{2}[(r_j - r_k) + \kappa(|\log(\hat{\lambda}_j)| -
 |\log(\hat{\lambda}_k)|)]\log(n)}
 
-where \eqn{\kappa \geq 0} controls the additional penalty. The term
-\eqn{\kappa(|\log(\hat{\lambda}_j)| - |\log(\hat{\lambda}_k)|)} measures
-link complexity on a logarithmic scale, ensuring symmetry around \eqn{\lambda = 1}
-in the simplex regression models with parametric link function.
+where \eqn{\kappa \geq 0} controls the additional penalty associated with the link
+parameter. The term \eqn{\kappa(|\log(\hat{\lambda}_j)| - |\log(\hat{\lambda}_k)|)}
+measures link complexity on a logarithmic scale, ensuring symmetry around \eqn{\lambda = 1}.
 
 The model with the highest Scout Score is selected as most adequate.
 
-**Important**: This penalized version (\eqn{SS^(\lambda)}) should only be used
-when all candidate models employ a parametric link function. For models with fixed
-links, use \code{kappa = 0}.
+**Important**: This penalized version \eqn{SS^{(\lambda)}} should only be used
+when all candidate models employ a parametric mean link function. For models with fixed
+mean links, use \code{kappa = 0}.
 }
 \examples{
 \dontrun{
@@ -76,11 +77,11 @@ result <- ss.simplexreg(model3, model4, kappa = 0)
 
 }
 \references{
-Costa, E., Cribari-Neto, F., and Scher, V. T. (2024). Test inferences and
-link function selection in dynamic beta modeling of seasonal hydro-environmental
-time series with temporary abnormal regimes. \emph{Journal of Hydrology}, 638,
-131489.
+E. Costa, F. Cribari-Neto, V. T. Scher, Test inferences and link function selection
+ in dynamic beta modeling of seasonal hydro-environmental time series with temporary
+ abnormal regimes, Journal of Hydrology 638 (2024) 131489.
+ https://doi.org/10.1016/j.jhydrol.2024.131489.
 
-Vuong, Q. H. (1989). Likelihood ratio tests for model selection and non-nested
-hypotheses. \emph{Econometrica}, 57(2), 307-333.
+Q. H. Vuong, Likelihood ratio tests for model selection and non-nested hypotheses,
+Econometrica 57 (1989) 307–333. https://doi.org/10.2307/1912557.
 }

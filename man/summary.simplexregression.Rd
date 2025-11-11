@@ -2,7 +2,7 @@
 % Please edit documentation in R/simplexreg_methods.R
 \name{summary.simplexregression}
 \alias{summary.simplexregression}
-\title{Summary Method for Simplex Regression with Parametric or Fixed Link}
+\title{Summary Method for Simplex Regression}
 \usage{
 \method{summary}{simplexregression}(object, ...)
 }

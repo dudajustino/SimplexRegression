@@ -24,12 +24,12 @@ simplex_loglik(theta, y, x1, z1, link.mu, link.sigma2)
 Numeric scalar (log-likelihood)
 }
 \description{
-Computes the log-likelihood for given parameters in the
-  simplex regression models with parametric and fixed mean link functions.
+Computes the log-likelihood function for given parameters in the
+  simplex regression models with parametric or fixed mean link functions.
 }
 \details{
 The log-likelihood function for the simplex regression model with
-parametric mean link is given by
+parametric or fixed mean link function is given by
 \deqn{
   \ell(\boldsymbol{\theta}) =
   -\frac{1}{2} \sum_{i=1}^{n}
@@ -41,17 +41,16 @@ parametric mean link is given by
   \right],
 }
 where \eqn{d(y_i; \mu_i) = \frac{(y_i - \mu_i)^2}{y_i(1 - y_i)\mu_i^2(1 - \mu_i)^2}} is the
-deviance component of the simplex model, \eqn{\mu_i} is obtained from the
-parametric mean link function, and \eqn{\sigma_i^2} from the dispersion link
-function.
+deviance component of the simplex model, \eqn{\mu_i} is obtained from the mean link function,
+and \eqn{\sigma_i^2} from the dispersion link function.
 
 The parameter vector \eqn{\boldsymbol{\theta}} has different structures
 depending on the type of mean link:
 \itemize{
-  \item For parametric links ("plogit1" or "plogit2"):
+  \item For parametric mean link functions ("plogit1" or "plogit2"):
     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\delta}^\top, \lambda)^\top},
     with \eqn{p + q + 1} elements.
-  \item For fixed links ("logit", "probit", "cloglog", "loglog", "cauchit"):
+  \item For fixed mean link functions ("logit", "probit", "cloglog", "loglog", "cauchit"):
     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\delta}^\top)^\top},
     with \eqn{p + q} elements.
 }

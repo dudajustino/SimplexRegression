@@ -2,7 +2,7 @@
 % Please edit documentation in R/simplexreg_methods.R
 \name{predict.simplexregression}
 \alias{predict.simplexregression}
-\title{Predict Method for Simplex Regression with Parametric Link}
+\title{Predict Method for Simplex Regression}
 \usage{
 \method{predict}{simplexregression}(
   object,

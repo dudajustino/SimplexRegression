@@ -44,3 +44,7 @@ deviance_simplexreg(y = y_vec, mu = mu_vec)
 deviance_simplexreg(y = 0.5, mu = 0.5)
 
 }
+\references{
+O. E. Barndorff-Nielsen, B. Jørgensen, Some parametric models on the simplex, Journal of
+Multivariate Analysis 39 (1991) 106–116. https://doi.org/10.1016/0047-259X(91)90008-P.
+}

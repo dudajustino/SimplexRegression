@@ -19,8 +19,8 @@ simplexreg(
 
 \item{diag}{Diagnostic level (default = 1)}
 
-\item{link.mu}{Mean link function (parametric: "plogit1","plogit2"; fixed:
-"logit","probit","cauchit","loglog","cloglog")}
+\item{link.mu}{Mean link function (parametric: "plogit1", "plogit2"; fixed:
+"logit", "probit", "cauchit", "loglog", "cloglog")}
 
 \item{link.sigma2}{Dispersion link function ("log", "sqrt", "identity")}
 }
@@ -42,8 +42,8 @@ An object of class \code{"simplexregression"} containing:
 }
 }
 \description{
-Fits a simplex regression model with parametric or fixed link
-functions for the mean submodel.
+Fits a simplex regression model with parametric or fixed mean link
+functions.
 }
 \details{
 The model is specified using a two-part formula:
@@ -53,7 +53,7 @@ The model is specified using a two-part formula:
   \item Dispersion submodel: \eqn{h(\sigma^2_i) = z_i'\delta}
 }
 
-The parametric link functions include a power parameter \eqn{\lambda} that
+The parametric mean link functions include a parameter \eqn{\lambda} that
 is estimated along with other model parameters.
 }
 \examples{
