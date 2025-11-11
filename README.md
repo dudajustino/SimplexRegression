@@ -43,8 +43,8 @@ Traditional approaches use **fixed mean link functions** (logit, probit, log-log
 ## 🌟 Key Features
 
 ### Parametric Mean Link Functions
-- **plogit1**: `g(μ, λ) = log((1-μ)^(-λ) - 1)`
-- **plogit2**: `g(μ, λ) = log(μ^λ / (1-μ^λ))`
+- **plogit1**: `g(μ, λ) = log((1-μ)<sup>(-λ)</sup> - 1)`
+- **plogit2**: `g(μ, λ) = log(μ^<sup>λ</sup> / (1-μ<sup>λ</sup>))`
 - **Data-driven selection**: Choose between plogit1 and plogit2 using model selection criteria
 
 ### Fixed Mean Link Functions
@@ -61,7 +61,7 @@ Traditional approaches use **fixed mean link functions** (logit, probit, log-log
 
 ### Model Selection Tools
 - **Scout Score (SS)** criterion with optional penalty for parametric links
-- **Penalized information criteria**: AIC^(λ), BIC^(λ), HQIC^(λ)
+- **Penalized information criteria**: AIC<sup>(λ)</sup>, BIC<sup>(λ)</sup>, HQIC<sup>(λ)</sup>
 - **Score tests**: Test H₀: λ = 1 (logit link) vs. H₁: λ ≠ 1
 
 ### Global and Local Influence Analysis
