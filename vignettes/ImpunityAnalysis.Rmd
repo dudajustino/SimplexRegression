@@ -299,14 +299,6 @@ We test whether the quantile residuals follow a normal distribution:
 tseries::jarque.bera.test(residuals(simplex_par1, type = "quantile"))
 ```
 
-## RESET Test for Specification
-
-The RESET (Regression Specification Error Test) checks for functional form misspecification:
-  
-```{r reset-test}
-reset_simplexreg(simplex_par1)
-```
-
 ## Local Influence Analysis
 
 Local influence analysis helps identify observations that have disproportionate impact on parameter estimates. We consider two perturbation schemes:
