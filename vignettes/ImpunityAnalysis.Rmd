@@ -17,10 +17,10 @@ knitr::opts_chunk$set(
 ## Introduction
 
 This vignette demonstrates the use of the `SimplexRegression` package to model impunity data across countries. 
-We explore the advantages of parametric link functions (plogit1 and plogit2) compared to traditional fixed link functions, 
+We explore the advantages of parametric mean link functions (plogit1 and plogit2) compared to traditional fixed mean link functions, 
 and provide comprehensive model diagnostics.
 
-The impunity dataset contains information about various socioeconomic and political indicators across countries, with the response variable measuring levels of impunity (a bounded variable in the interval (0,1)).
+The impunity dataset contains information about various socioeconomic and political indicators across countries, with the response variable measuring levels of impunity (a bounded variable in the open interval (0,1)).
 
 ## Loading the Data
 ```{r setup}
@@ -54,10 +54,13 @@ head(dados)
 
 ### Descriptive Statistics for the Response Variable
 
-The response variable `Impunity` is bounded in the interval (0,1) and consists of Impunity Index scores for 119 countries in 2023, as in Cribari-Neto and Santos (2024).  
-The Impunity Index is defined as one minus the Rule of Law Index published by the World Justice Project (WJP), meaning that higher values correspond to weaker rule of law and higher levels of impunity.  
+The response variable `Impunity` is bounded in the open interval (0,1) and consists of Impunity Index scores for 119 countries in 2023, as described in Cribari-Neto and Santos (2024).  
+
+The Impunity Index is defined as one minus the Rule of Law Index published by the World Justice Project (WJP). Higher values correspond to weaker rule of law and higher levels of impunity.  
+
 According to the WJP, the Rule of Law Index is built upon eight dimensions: constraints on government powers, absence of corruption, open government, protection of fundamental rights, order and security, regulatory enforcement, civil justice, and criminal justice.
-Let's examine its distribution:
+
+Let's examine the distribution of the response variable:
 
 ```{r descriptive-stats}
 # Summary statistics
@@ -75,15 +78,17 @@ cat("Skewness: ", round(moments::skewness(dados$Impunity), 4), "\n")
 cat("Kurtosis: ", round(moments::kurtosis(dados$Impunity), 4), "\n")
 ```
 
-# Parametric Link Function Models
+# Models with Parametric Mean Link Functions
 
-One of the key features of simplex regression is the ability to use parametric link functions that adapt to the data structure. We begin by fitting models with `plogit1` and `plogit2` link functions.
+One of the key features of simplex regression is the ability to use parametric mean link functions that adapt to the data structure. These functions include an additional parameter (lambda) that is estimated from the data, providing greater flexibility compared to fixed mean link functions.
 
-We estimated simplex regression models with parametric mean link functions `plogit1` and `plogit2`, including all eight covariates, selected powers, and interaction terms.  
-Predictor selection was guided by half-normal residual plots with simulated envelopes, pseudo-R², and penalized information criteria (AIC, SIC, HQIC).
+We estimated simplex regression models with parametric mean link functions `plogit1` and `plogit2`, including all eight covariates, selected power transformations, and interaction terms.  
 
-## Model 1: plogit1 Link Function
-The first model uses the `plogit1` parametric link function for the mean and includes interactions between predictors:
+Predictor selection was guided by half-normal residual plots with simulated envelopes, pseudo-R², and information criteria (AIC, SIC, HQIC).
+
+## Model 1: plogit1 Parametric Mean Link Function
+
+The first model uses the `plogit1` parametric mean link function and includes interactions between predictors:
   
 ```{r model-plogit1}
 simplex_par1 <- simplexreg(
@@ -99,19 +104,21 @@ summary(simplex_par1)
 ```
 
 **Model interpretation:**
-- The mean structure includes transformed and interacted predictors
-- The dispersion structure is modeled as a function of EconomicFreedom, HealthSpending, and Democracy
-- The lambda parameter in plogit1 is estimated from the data
+- The mean structure includes transformed and interacted predictors;
+- The dispersion structure is modeled as a function of EconomicFreedom, HealthSpending, and Democracy;
+- The lambda parameter in plogit1 mean link function is estimated from the data.
 
 ### Half-Normal Plot with simulated envelopes for Model 1
+
+We use weighted residual (Espinheira and Silva, 2020) for Half-Normal plot with simulated envelopes.
 
 ```{r diagnostic-par1, fig.cap="Half-normal plot with simulated envelope for Model 1"}
 hnp.simplexreg(simplex_par1, type = "sweighted2", seed = 2008)
 ```
 
-## Model 2: plogit2 Link Function
+## Model 2: plogit2 Parametric Mean Link Function
 
-The second parametric model uses the `plogit2` link function with a different dispersion structure:
+The second model uses the `plogit2` parametric mean link function with a different dispersion structure:
   
 ```{r model-plogit2}
 simplex_par2 <- simplexreg(
@@ -132,9 +139,9 @@ summary(simplex_par2)
 hnp.simplexreg(simplex_par2, type = "sweighted2", seed = 2008)
 ```
 
-### Model Selection: Parametric Links
+### Model Selection: Parametric Mean Link Functions
 
-We use the Scout Score (SS) criterion to select between parametric models:
+We use the penalized Scout Score (SS) criterion to select between models with parametric mean link functions:
   
 ```{r scout-score}
 ss.simplexreg(simplex_par1, simplex_par2, kappa = 0.1)
@@ -147,12 +154,13 @@ penalized_ic(simplex_par1)
 penalized_ic(simplex_par2)
 ```
 
-# Fixed Link Function Models
+# Models with Fixed Mean Link Functions
 
-For comparison, we also fitted simplex regression models using traditional fixed mean link functions (logit, probit, log-log, complementary log-log, and cauchit).  
-These models help assess whether the flexibility provided by parametric links leads to better fit.
+For comparison, we also fit simplex regression models using traditional fixed mean link functions (logit, probit, log-log, complementary log-log, and cauchit).  
 
-## Model with loglog Link
+These models help assess whether the flexibility provided by parametric mean link functions leads to better fit.
+
+## Model with log-log Mean Link Function
 
 ```{r model-loglog}
 simplex1 <- simplexreg(
@@ -167,7 +175,7 @@ simplex1 <- simplexreg(
 summary(simplex1)
 ```
 
-## Model with logit Link
+## Model with logit Mean Link Function
 
 ```{r model-logit}
 simplex2 <- simplexreg(
@@ -182,7 +190,7 @@ simplex2 <- simplexreg(
 summary(simplex2)
 ```
 
-## Model with probit Link
+## Model with probit Mean Link Function
 
 ```{r model-probit}
 simplex3 <- simplexreg(
@@ -197,7 +205,7 @@ simplex3 <- simplexreg(
 summary(simplex3)
 ```
 
-## Model with cloglog Link
+## Model with complementary log-log Mean Link Function
 
 ```{r model-cloglog}
 simplex4 <- simplexreg(
@@ -212,7 +220,7 @@ simplex4 <- simplexreg(
 summary(simplex4)
 ```
 
-## Model with cauchit Link
+## Model with cauchit Mean Link Function
 
 ```{r model-cauchit}
 simplex5 <- simplexreg(
@@ -227,35 +235,36 @@ simplex5 <- simplexreg(
 summary(simplex5)
 ```
 
-## Model Selection: All Models
+## Model Selection: Comparing All Models
 
-The modified Scout Score and information criteria favored the `plogit1` specification.  
-We now compare it to models using fixed links under the original SS criterion.
+We now compare the model with parametric mean link function (`plogit1`) to models using fixed mean link functions. For this comparison, we use the original Scout Score (`kappa = 0`).
   
 ```{r model-selection-all}
 ss.simplexreg(simplex_par1, simplex1, simplex2, simplex3, simplex4, simplex5, 
               kappa = 0)
 ```
 
-Direct comparison between the best parametric and best fixed link models:
+Direct comparison between the best parametric mean link function model and best fixed mean link model:
   
 ```{r model-selection-best}
 ss.simplexreg(simplex_par1, simplex1, kappa = 0)
 ```
 
-The results indicate that `simplex_par1` (with plogit1 parametric link) provides the best fit.
+The results indicate that `simplex_par1` (with plogit1 parametric mean link function) provides the best fit.
 
-## Testing Lambda = 1
+## Testing lambda = 1
 
-We can test whether the estimated lambda parameter is significantly different from 1 (which would reduce plogit1 to logit):
+We can test whether the estimated lambda parameter is significantly different from 1. If lambda equals 1, the plogit1 parametric mean link function reduces to the logit fixed mean link function.
   
 ```{r test-lambda}
 scoretest.simplexreg(simplex2, link = "plogit1")
 ```
 
-The null hypothesis H₀: λ = 1 (which corresponds to the logit link) was rejected at the 1% level (p = 0.0011), confirming the relevance of the parametric specification.
+The null hypothesis H₀: λ = 1 (which corresponds to the logit mean link) was rejected at the 1% significance level (p = 0.0011), confirming the relevance of using a parametric mean link function specification. 
 
 # Model Diagnostics
+
+We now perform comprehensive diagnostics on the selected model (`simplex_par1`). We use quantile residuals, which should approximately follow a standard normal distribution under correct model specification.
 
 ## Residual Plots
 
@@ -275,7 +284,7 @@ plot(simplex_par1, which = 4, type = "quantile")
 # Q-Q plot
 plot(simplex_par1, which = 5, type = "quantile")
 
-# Worm plots
+# Worm plot
 plot(simplex_par1, which = 6, type = "quantile")
 
 # Cook's distance vs observation indices
@@ -284,13 +293,15 @@ plot(simplex_par1, which = 7, type = "quantile")
 
 ### Normality Test for Quantile Residuals
 
+We test whether the quantile residuals follow a normal distribution:
+
 ```{r normality-test}
 tseries::jarque.bera.test(residuals(simplex_par1, type = "quantile"))
 ```
 
 ## RESET Test for Specification
 
-The RESET test checks for functional form misspecification:
+The RESET (Regression Specification Error Test) checks for functional form misspecification:
   
 ```{r reset-test}
 reset_simplexreg(simplex_par1)
@@ -298,7 +309,7 @@ reset_simplexreg(simplex_par1)
 
 ## Local Influence Analysis
 
-Local influence analysis helps identify observations that have disproportionate impact on parameter estimates.
+Local influence analysis helps identify observations that have disproportionate impact on parameter estimates. We consider two perturbation schemes:
 
 ### Case-Weight Perturbation Scheme
 
@@ -321,9 +332,10 @@ if(length(influential_cw) > 0) {
        labels = influential_cw, 
        pos = 3, cex = 0.7, col = "blue")
 }
-```
 
-Number of influential observations (case-weight): `r sum(influences_cw > 2*mean(influences_cw))`
+cat("\nNumber of influential observations (case-weight):", 
+    sum(influences_cw > 2*mean(influences_cw)), "\n")
+```
 
 ### Response Perturbation Scheme
 
@@ -346,13 +358,14 @@ if(length(influential_resp) > 0) {
        labels = influential_resp, 
        pos = 3, cex = 0.7, col = "blue")
 }
+
+cat("\nNumber of influential observations (response):", 
+    sum(influences_resp > 2*mean(influences_resp)), "\n")
 ```
 
-Number of influential observations (response): `r sum(influences_resp > 2*mean(influences_resp))`
+# Visualizing Mean Link Functions
 
-# Visualizing Link Functions
-
-### Comparing Link Functions: Inverse Links
+### Comparing Mean Link Functions: Inverse Links
 
 This plot shows how different link functions map linear predictors to the mean response:
   
@@ -390,17 +403,17 @@ legend("bottomright",
 
 This analysis demonstrates several key features of the `SimplexRegression` package:
   
-1. **Parametric link functions** (plogit1, plogit2) provide flexibility by estimating the link parameter from the data
+1. **Parametric mean link functions** (plogit1, plogit2) provide flexibility by estimating the link parameter from the data
 2. **Model selection** using Scout Score effectively identifies the best-fitting model
-3. **Comprehensive diagnostics** including residual analysis, influence measures, and specification tests
-4. The **selected model** (simplex_par1 with plogit1 link) shows good fit and appropriate residual behavior
+3. **Comprehensive diagnostics** including residual analysis, influence measures, and specification tests help validate model adequacy
+4. The **selected model** (simplex_par1 with plogit1 parametric mean link function) shows good fit and appropriate residual behavior
 
-The parametric approach offers advantages over fixed link functions when the optimal transformation is unknown a priori, as demonstrated by the superior performance of `simplex_par1` in this application.
+The parametric mean link function approach offers advantages over fixed mean link functions when the optimal transformation is unknown a priori, as demonstrated by the superior performance of `simplex_par1` in this application.
 
 # References
 
-- Add relevant references here
-- Package documentation
-- Theoretical papers on simplex regression
+F. Cribari-Neto, M. A. F. L. Santos, An empirical analysis of worldwide impunity, Humanities and Social Sciences Communications 11 (2024) 1285. https://doi.org/10.1057/s41599-024-03803-x
+
+P. L. Espinheira, A. O. Silva, Residual and influence analysis to a general class of simplex regression, TEST 29 (2020) 523–552. https://doi.org/10.1007/s11749-019-00665-3
 
 ```
