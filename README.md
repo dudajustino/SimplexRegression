@@ -6,13 +6,14 @@
 
 This repository contains the R package and associated data for the scientific article:
 
-“Simplex regression with a flexible logit link: inference and application to cross-country impunity data” by Justino, M.E.C., Cribari-Neto, F.
+“Simplex regression with a flexible logit link: inference and application to cross-country impunity data” by Justino, M. E. C. and Cribari-Neto, F.
 
 ## 📑 Table of Contents
 
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Installation](#-installation)
+- [🎯 Project Motivation](#-project-motivation)
+- [✨ Key Features](#-key-features)
+- [📂 Repository Structure](repository-structure)
+- [🛠️ Installation](#-installation)
 - [Quick Start](#-quick-start)
 - [Usage Examples](#-usage-examples)
   - [Basic Model](#basic-model)
@@ -22,11 +23,11 @@ This repository contains the R package and associated data for the scientific ar
 - [Vignettes](#-vignettes)
 - [Real Data Application](#-real-data-application)
 - [Functions Reference](#-functions-reference)
-- [Contributing](#-contributing)
+- [🤝 Contributing](#-contributing)
 - [References](#-references)
-- [License](#-license)
+- [📄 License](#-license)
 - [Citation](#-citation)
-- [Contact](#-contact)
+- [📬 Contact](#-contact)
 
 ---
 
