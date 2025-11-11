@@ -2,13 +2,12 @@
 #               SIMPLEX REGRESSION - LOCAL AND GLOBAL INFLUENCE                #
 # Author: Maria Eduarda da Cruz Justino and Francisco Cribari-Neto             #
 # Date: 2025-11-08                                                             #
-# Description: Influence measures: Hat values, Cook's distances, Generalized   #
-#              leverage, and Local infuence case-weight and response           #
-#              perturbation scheme                                             #
+# Description: Influence measures: Hat values, Cook's distances, and Local     #
+#              infuence case-weight and response perturbation scheme           #                                         #
 ################################################################################
 
 # ==============================================================================
-# HELPER: Check if model uses parametric link
+# HELPER: Check if model uses parametric mean link function
 # ==============================================================================
 is_parametric <- function(object) {
   !is.na(object$coefficients$lambda)
@@ -76,121 +75,7 @@ cooks.distance.simplexregression <- function(model, ...) {
 }
 
 # ==============================================================================
-# 3. GENERALIZED LEVERAGE
-# ==============================================================================
-
-#' @title Generalized leverage for Simplex Regression
-#' @description Computes generalized leverage measures for simplex regression
-#' model with Parametric or Fixed Link.
-#'
-#' @param model An object of class \code{"simplexregression"}
-#'
-#' @return Numeric vector of leverage values
-#'
-#' @importFrom stats plogis
-#' @export
-gleverage_simplexreg <- function(model) {
-  parametric <- is_parametric(model)
-
-  n <- model$nobs
-  y <- model$y
-  link_mu <- model$mu.link
-  link_sigma2 <- model$sigma2.link
-  mu <- model$mu.fv
-  sigma2 <- model$sigma2.fv
-  eta1 <- model$mu.lp
-  eta2 <- model$sigma2.lp
-
-  diff <- y - mu
-  yoneminy <- y * (1 - y)
-  muonemu <- mu * (1 - mu)
-  dev <- deviance_simplexreg(y, mu)
-
-  X <- model$mu.x
-  Z <- model$sigma2.x
-
-  p <- ncol(X)
-  q <- ncol(Z)
-
-  Ui <- (dev/muonemu) + (1/(muonemu^3))
-  ci <- Ui + (diff / (yoneminy * muonemu)) * (dev + 2*diff / (y * mu * (1 - mu)^2))
-  cidag <- (1 / yoneminy) * (dev + 2*diff / (y * mu * (1 - mu)^2))
-  Vi <- 1/(2*sigma2^2)
-  ai <- -1/(2*sigma2) + dev*Vi
-  Mi <- 2 * ai / sigma2
-
-  sigma2i <- 1/sigma2
-  Dlink.sigma2 <- dispersion_link_inv_deriv1(eta2,  link_sigma2)
-
-  if(link_sigma2 == "log") {
-    deriv2_linksigma2 <- as.vector(- 1 / (sigma2^2))
-  } else {
-    deriv2_linksigma2 <- as.vector(- 1 / (4 * sigma2 * sqrt(sigma2)))
-  }
-
-  sdag <- ai * deriv2_linksigma2
-
-  deriv2_dev <- - (2 / ((1 - y) * muonemu^3)) *
-    (10*y - (3*(y^2 + mu^4) / (y*muonemu)) + (2*(1 + 6*mu^2 - 4*mu) / (1-mu)))
-  dev2 <- deriv2_dev / 2
-
-  if(parametric){
-    lambda <- model$lambda.fv
-    Dlink.mu <- parametric_mean_link_inv_deriv1(eta1, lambda, link_mu)
-
-    if(link_mu == "plogit2") {
-      exp_aval_frac <- plogis(eta1)^(1/lambda)
-      log_aval <- log(plogis(eta1))
-      rho <- as.vector(- exp_aval_frac * log_aval / (lambda^2))
-      deriv2_linkmu <- as.vector((lambda * mu^lambda * (1+lambda) - lambda) /
-                                   (mu^2 * (1-mu^lambda)^2))
-      VARTHETA <- as.vector(- (1 / (lambda^3 * (1 + exp(eta1)))) * exp_aval_frac *
-                              (lambda + log_aval))
-      VARSIG <- as.vector(1/lambda^4 * exp_aval_frac * log_aval * (log_aval + 2*lambda))
-    } else {
-      log_aval <- log(1+exp(eta1))
-      rho <- as.vector((-1/(lambda^2)) * ((1 + exp(eta1)) ^ (-1/lambda)) * log_aval)
-      deriv2_linkmu <- as.vector(lambda * (1 - (1+lambda) * (1-mu)^lambda) /
-                                   ((1-mu)^2 * (1 - (1-mu)^lambda)^2))
-      VARTHETA <- as.vector(exp(eta1) * (1 + exp(eta1))^(-1 - 1/lambda) *
-                              (log_aval - lambda) / (lambda^3))
-      VARSIG <- as.vector((1 + exp(eta1))^(-1/lambda) * log_aval *
-                            (2*lambda - log_aval) / lambda^4)
-    }
-
-    L1 <- crossprod(X, sigma2i^2 * diff * Ui * Dlink.mu * Dlink.sigma2 * Z)
-    L2 <- crossprod(X, sigma2i * (dev2 * Dlink.mu * rho - diff * Ui * VARTHETA))
-    L3 <- crossprod(Z, sigma2i^2 * diff * Ui * Dlink.sigma2 * rho)
-    L <- rbind(
-      cbind(crossprod(X, sigma2i * (dev2 + diff * Ui * Dlink.mu * deriv2_linkmu) *
-                        Dlink.mu^2 * X), L1, L2),
-      cbind(t(L1), crossprod(Z, (Vi + Mi + sdag * Dlink.sigma2) * Dlink.sigma2^2 * Z), L3),
-      cbind(t(L2), t(L3), sum(sigma2i * (dev2 * rho^2 - diff * Ui * VARSIG)))
-    )
-
-    D <- cbind(Dlink.mu * X, matrix(0, nrow = n, ncol = q), rho)
-    Lty <- t(cbind(sigma2i * Dlink.mu * ci * X, Vi * Dlink.sigma2 * cidag * Z,
-                   sigma2i * ci * rho))
-
-  } else {
-    Dlink.mu <- fixed_mean_link_inv_deriv1(eta1, link_mu)
-    deriv2_linkmu <- fixed_mean_link_deriv2(mu, link_mu)
-
-    L1 <- crossprod(X, sigma2i^2 * diff * Ui * Dlink.mu * Dlink.sigma2 * Z)
-    L <- rbind(
-      cbind(crossprod(X, sigma2i * (dev2 + diff * Ui * Dlink.mu * deriv2_linkmu) * Dlink.mu^2 * X), L1),
-      cbind(t(L1), crossprod(Z, (Vi + Mi + sdag * Dlink.sigma2) * Dlink.sigma2^2 * Z)))
-
-    D <- cbind(Dlink.mu * X, matrix(0, nrow = n, ncol = q))
-    Lty <- t(cbind(sigma2i * Dlink.mu * ci * X, Vi * Dlink.sigma2 * cidag * Z))
-  }
-
-  leverage <- D %*% solve(L) %*% Lty
-  return(diag(leverage))
-}
-
-# ==============================================================================
-# 4. LOCAL INFLUENCE
+# 3. LOCAL INFLUENCE
 # ==============================================================================
 
 #' @title Local Influence for Simplex Regression

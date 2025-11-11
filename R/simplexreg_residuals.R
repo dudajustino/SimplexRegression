@@ -7,7 +7,7 @@
 
 #' @title Residuals for Simplex Regression
 #' @description Computes various types of residuals for simplex regression models
-#' with Parametric or fixed Link.
+#' with Parametric or Fixed Mean Link Functions.
 #'
 #' @param object An object of class \code{"simplexregression"}
 #' @param type Character string specifying the type of residual. Options:

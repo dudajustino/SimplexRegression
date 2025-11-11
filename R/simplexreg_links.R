@@ -18,7 +18,7 @@
 #' \code{"plogit1"} and \code{"plogit2"}.
 #'
 #' @details
-#' Two parametric link functions are available:
+#' Two parametric mean link functions are available:
 #' \itemize{
 #'   \item \strong{plogit2}: \eqn{g(\mu; \lambda) = \log(\mu^\lambda / (1 - \mu^\lambda))}
 #'   \item \strong{plogit1}: \eqn{g(\mu; \lambda) = \log((1-\mu)^{-\lambda} - 1)}

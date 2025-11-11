@@ -31,6 +31,10 @@
 #'
 #' @return Numeric vector of unit deviance values
 #'
+#' @references
+#' O. E. Barndorff-Nielsen, B. Jørgensen, Some parametric models on the simplex, Journal of
+#' Multivariate Analysis 39 (1991) 106–116. https://doi.org/10.1016/0047-259X(91)90008-P.
+#'
 #' @examples
 #' # Single value
 #' deviance_simplexreg(y = 0.6, mu = 0.5)

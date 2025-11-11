@@ -30,6 +30,10 @@
 #'
 #' @importFrom expint gammainc
 #'
+#'@references
+#' O. E. Barndorff-Nielsen, B. Jørgensen, Some parametric models on the simplex, Journal of
+#' Multivariate Analysis 39 (1991) 106–116. https://doi.org/10.1016/0047-259X(91)90008-P.
+#'
 #' @examples
 #' # Single value
 #' variance_simplexreg(mu = 0.5, sigma2 = 0.1)

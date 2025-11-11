@@ -9,10 +9,10 @@
 # SCORE TEST
 # ==============================================================================
 
-#' @title Rao Score Test for Simplex Regression with Parametric Link
+#' @title Rao Score Test for Simplex Regression with Parametric Mean Link Function
 #' @description Performs a Rao score test to test whether the link parameter
 #' \eqn{\lambda} equals 1, which corresponds to testing between different
-#' parametric link functions.
+#' parametric mean link functions.
 #'
 #' @param model An object of class \code{"simplexregression"}
 #' @param link.mu Character string specifying the link function under the
@@ -29,11 +29,12 @@
 #' the model under the null hypothesis.
 #'
 #' The test statistic is:
-#' \deqn{SC = U_\lambda^2 / \mathcal{K}^{\lambda\lambda}}
+#' \deqn{S_R = \boldsymbol{U}_\lambda(\boldsymbol{\theta})^\top \boldsymbol{K}^{\lambda \lambda}
+#' \boldsymbol{U}_\lambda(\boldsymbol{\theta})}
 #'
-#' where \eqn{U_\lambda} is the score function with respect to \eqn{\lambda}
-#' and \eqn{\mathcal{K}^{\lambda\lambda}} is the corresponding element of the
-#' Fisher information matrix.
+#' where \eqn{\boldsymbol{U}_\lambda} is the score function with respect to \eqn{\lambda}
+#' and \eqn{\boldsymbol{K}^{\lambda \lambda}} is the corresponding element of the
+#' inverse Fisher information matrix.
 #'
 #' Under the null hypothesis, the test statistic follows a chi-squared
 #' distribution with 1 degree of freedom.

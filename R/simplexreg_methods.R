@@ -7,7 +7,7 @@
 ################################################################################
 
 # ==============================================================================
-# HELPER: Check if model uses parametric link
+# HELPER: Check if model uses parametric mean link function
 # ==============================================================================
 is_parametric <- function(object) {
   !is.na(object$coefficients$lambda)
@@ -17,7 +17,7 @@ is_parametric <- function(object) {
 # 1. SUMMARY METHOD
 # ==============================================================================
 
-#' @title Summary Method for Simplex Regression with Parametric or Fixed Link
+#' @title Summary Method for Simplex Regression
 #' @description Produces a summary of a fitted simplex regression model.
 #'
 #' @param object An object of class \code{"simplexregression"}
@@ -46,7 +46,7 @@ summary.simplexregression <- function(object, ...) {
   se_mean <- se[1:p]
   se_disp <- se[(p+1):(p+q)]
 
-  # Lambda statistics (only for parametric models)
+  # lambda statistics (only for models with parametric mean link)
   if (parametric) {
     se_lambda <- se[p+q+1]
     zstat_lambda <- coef_lambda / se_lambda
@@ -311,7 +311,7 @@ terms.simplexregression <- function(x, type = c("mean", "dispersion"), ...) {
   else return(x$terms$dispersion)
 }
 
-#' @title Print Method for Simplex Regression with Parametric Link
+#' @title Print Method for Simplex Regression
 #' @description Prints a concise summary of a fitted simplex regression model.
 #'
 #' @param x An object of class \code{"simplexregression"}
@@ -379,7 +379,7 @@ BIC.simplexregression <- function(object, ...) {
 # 4. PREDICTION METHOD
 # ==============================================================================
 
-#' @title Predict Method for Simplex Regression with Parametric Link
+#' @title Predict Method for Simplex Regression
 #' @description Computes predictions from a fitted simplex regression model.
 #'
 #' @param object An object of class \code{"simplexregression"}

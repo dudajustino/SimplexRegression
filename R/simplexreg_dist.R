@@ -27,19 +27,23 @@
 #' @param x Numeric vector of quantiles (for density).
 #' @param q Numeric vector of quantiles (for CDF).
 #' @param p Numeric vector of probabilities (for quantile function).
-#' @param mu Mean parameter (0 < mu < 1)
-#' @param sigma2 Dispersion parameter (sigma2 > 0)
+#' @param mu Mean parameter (\eqn{0 < \mu < 1})
+#' @param sigma2 Dispersion parameter (\eqn{\sigma^2 > 0})
 #' @param n Number of observations (for random generation).
 #'
 #' @details
 #' The probability density function of the simplex distribution is:
-#' \deqn{f(x; \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2[x(1-x)]^3}}
-#'       \exp\left(-\frac{1}{2\sigma^2} d(x; \mu)\right)},
-#' where \eqn{d(x; \mu) = \frac{(x - \mu)^2}{x(1 - x)\mu^2(1 - \mu)^2}} is the
+#' \deqn{f(y; \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2[y(1-y)]^3}}
+#'       \exp\left(-\frac{1}{2\sigma^2} d(y; \mu)\right),}
+#' where \eqn{y \in (0,1)}, and \eqn{d(x; \mu) = \frac{(y - \mu)^2}{y(1 - y)\mu^2(1 - \mu)^2}} is the
 #' deviance component of the simplex model.
 #'
 #' @importFrom stats pnorm qnorm integrate rchisq runif uniroot
 #' @return Numeric vector with density, probability, quantile, or simulated values.
+#'
+#' @references
+#' O. E. Barndorff-Nielsen, B. Jørgensen, Some parametric models on the simplex, Journal of
+#' Multivariate Analysis 39 (1991) 106–116. https://doi.org/10.1016/0047-259X(91)90008-P.
 #'
 #' @examples
 #' dsimplex_opt(0.5, mu = 0.3, sigma2 = 0.5)

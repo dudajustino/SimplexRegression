@@ -3,7 +3,7 @@
 # Author: Maria Eduarda da Cruz Justino and Francisco Cribari-Neto             #
 # Date: 2025-11-08                                                             #
 # Description: Main functions for fitting simplex regression models with       #
-#              parametric or fixed link functions for mean submodel.                    #
+#              parametric or fixed mean link functions    .                    #
 ################################################################################
 
 # ==============================================================================
@@ -11,14 +11,14 @@
 # ==============================================================================
 
 #' @title Simplex Regression with Parametric or Fixed Mean Link
-#' @description Fits a simplex regression model with parametric or fixed link
-#' functions for the mean submodel.
+#' @description Fits a simplex regression model with parametric or fixed mean link
+#' functions.
 #'
 #' @param formula A two-part formula: y ~ mean_predictors | dispersion_predictors
 #' @param data A data frame containing the variables in the model
 #' @param diag Diagnostic level (default = 1)
-#' @param link.mu Mean link function (parametric: "plogit1","plogit2"; fixed:
-#' "logit","probit","cauchit","loglog","cloglog")
+#' @param link.mu Mean link function (parametric: "plogit1", "plogit2"; fixed:
+#' "logit", "probit", "cauchit", "loglog", "cloglog")
 #' @param link.sigma2 Dispersion link function ("log", "sqrt", "identity")
 #'
 #' @importFrom stats model.frame model.response model.matrix terms plogis qnorm pnorm cor
@@ -47,7 +47,7 @@
 #'   \item Dispersion submodel: \eqn{h(\sigma^2_i) = z_i'\delta}
 #' }
 #'
-#' The parametric link functions include a power parameter \eqn{\lambda} that
+#' The parametric mean link functions include a parameter \eqn{\lambda} that
 #' is estimated along with other model parameters.
 #'
 #' @examples
@@ -181,8 +181,8 @@ simplexreg <- function(formula, data, diag = 1,
 #' @param x Design matrix for mean model (without intercept)
 #' @param z Design matrix for dispersion model (without intercept)
 #' @param diag Diagnostic level
-#' @param link.mu Mean link function (parametric: "plogit1","plogit2"; fixed:
-#' "logit","probit","cauchit","loglog","cloglog")
+#' @param link.mu Mean link function (parametric: "plogit1", "plogit2"; fixed:
+#' "logit", "probit", "cauchit", "loglog", "cloglog")
 #' @param link.sigma2 Dispersion link function ("log", "sqrt", "identity")
 #' @param x_names Column names for mean design matrix (includes intercept)
 #' @param z_names Column names for dispersion design matrix (includes intercept)
