@@ -11,34 +11,34 @@
 \usage{
 fixed_mean_link(
   mu,
-  link_type = c("logit", "probit", "cloglog", "loglog", "cauchit")
+  link_type = c("logit", "probit", "loglog", "cloglog", "cauchit")
 )
 
 fixed_mean_link_inv(
   eta,
-  link_type = c("logit", "probit", "cloglog", "loglog", "cauchit")
+  link_type = c("logit", "probit", "loglog", "cloglog", "cauchit")
 )
 
 fixed_mean_link_deriv1(
   mu,
-  link_type = c("logit", "probit", "cloglog", "loglog", "cauchit")
+  link_type = c("logit", "probit", "loglog", "cloglog", "cauchit")
 )
 
 fixed_mean_link_deriv2(
   mu,
-  link_type = c("logit", "probit", "cloglog", "loglog", "cauchit")
+  link_type = c("logit", "probit", "loglog", "cloglog", "cauchit")
 )
 
 fixed_mean_link_inv_deriv1(
   eta,
-  link_type = c("logit", "probit", "cloglog", "loglog", "cauchit")
+  link_type = c("logit", "probit", "loglog", "cloglog", "cauchit")
 )
 }
 \arguments{
 \item{mu}{Mean parameter (numeric vector, 0 < mu < 1)}
 
 \item{link_type}{Type of link function: \code{"logit"}, \code{"probit"},
-\code{"cloglog"}, \code{"loglog"}, or \code{"cauchit"}.}
+\code{"loglog"}, \code{"cloglog"}, or \code{"cauchit"}.}
 
 \item{eta}{Linear predictor of mean (numeric vector)}
 }
@@ -49,15 +49,15 @@ its inverse, or derivative depending on the function.
 \description{
 Provides the fixed mean link functions, their inverses, and derivatives
 for the simplex regression model. Supported link types are:
-\code{"logit"}, \code{"probit"}, \code{"cloglog"}, \code{"loglog"}, and \code{"cauchit"}.
+\code{"logit"}, \code{"probit"}, \code{"loglog"}, \code{"cloglog"}, and \code{"cauchit"}.
 }
 \details{
 Available link functions:
 \itemize{
   \item \strong{Logit}: \eqn{g(\mu) = \log(\mu/(1-\mu))}
   \item \strong{Probit}: \eqn{g(\mu) = \Phi^{-1}(\mu)}
-  \item \strong{Complementary loglog}: \eqn{g(\mu) = \log(-\log(1-\mu))}
   \item \strong{Log-log}: \eqn{g(\mu) = -\log(-\log(\mu))}
+  \item \strong{Complementary log-log}: \eqn{g(\mu) = \log(-\log(1-\mu))}
   \item \strong{Cauchit}: \eqn{g(\mu) = \tan(\pi(\mu - 0.5))}
 }
 }

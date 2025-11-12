@@ -8,7 +8,7 @@ simplexreg(
   formula,
   data,
   diag = 1,
-  link.mu = c("plogit1", "plogit2", "logit", "probit", "cauchit", "loglog", "cloglog"),
+  link.mu = c("plogit1", "plogit2", "logit", "probit", "loglog", "cloglog", "cauchit"),
   link.sigma2 = c("log", "sqrt", "identity")
 )
 }
@@ -20,7 +20,7 @@ simplexreg(
 \item{diag}{Diagnostic level (default = 1)}
 
 \item{link.mu}{Mean link function (parametric: "plogit1", "plogit2"; fixed:
-"logit", "probit", "cauchit", "loglog", "cloglog")}
+"logit", "probit", "loglog", "cloglog", "cauchit")}
 
 \item{link.sigma2}{Dispersion link function ("log", "sqrt", "identity")}
 }

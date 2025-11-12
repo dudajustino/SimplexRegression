@@ -15,8 +15,8 @@ simplex_score(theta, y, x1, z1, link.mu, link.sigma2)
 
 \item{z1}{Design matrix for dispersion model (with intercept)}
 
-\item{link.mu}{Mean link function ("logit", "probit", "cloglog", "loglog",
-"cauchit", "plogit1" or "plogit2")}
+\item{link.mu}{Mean link function ("plogit1", "plogit2", "logit", "probit",
+"loglog", "cloglog" or "cauchit")}
 
 \item{link.sigma2}{Dispersion link function ("log", "sqrt", or "identity")}
 }
@@ -34,7 +34,7 @@ depending on the type of mean link:
   \item For parametric mean link functions ("plogit1" or "plogit2"):
     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\gamma}^\top, \lambda)^\top},
     with \eqn{p + q + 1} elements.
-  \item For fixed mean link functions ("logit", "probit", "cloglog", "loglog", "cauchit"):
+  \item For fixed mean link functions ("logit", "probit", "loglog", "cloglog" or "cauchit"):
     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\gamma}^\top)^\top},
     with \eqn{p + q} elements.
 }
