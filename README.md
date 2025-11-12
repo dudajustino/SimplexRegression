@@ -13,10 +13,10 @@ This repository contains the R package and associated data for the scientific ar
 - [🎯 Overview](#-Overview)
 - [🌟Key Features](#-key-features)
 - [📂 Repository Structure](repository-structure)
+- [🎯 Code of Conduct](#-code-of-conduct)
 - [🛠️ Installation](#-installation)
 - [🚀 Getting Started & Examples](#-getting-start)
 - [📚 Vignettes](#-vignettes)
-- [🎯 Code of Conduct](#-code-of-conduct)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
 - [📖 Citation](#-citation)
@@ -87,17 +87,48 @@ Traditional approaches use **fixed mean link functions** (logit, probit, log-log
 
 --- 
 
+## 🎯 Code of Conduct
+
+Please note that the SimplexRegression project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+
+---
+
 ## 🛠 Installation
 
 ### Development version from GitHub
 
-``` r
-# Install devtools if you haven't already
-install.packages("devtools")
+This research compendium can be installed as an R package directly from GitHub. This is the recommended method as it handles all dependencies automatically.
 
-# Install SimplexRegression
-devtools::install_github("dudajustino/SimplexRegression")
+First, ensure you have the remotes package. If not, install it from CRAN:
+
+``` r
+if (!require("remotes")) {
+  install.packages("remotes")
+}
 ```
+
+Then, install the package from GitHub:
+
+``` r
+remotes::install_github("dudajustino/SimplexRegression", 
+                        dependencies = TRUE,
+                        build_vignettes = TRUE)
+```
+Prerequisites
+
+This package requires the following external R packages. You can run the command below to ensure all dependencies are installed on your system before proceeding.
+
+``` r
+install.packages(c("expint", "gamlss", "graphics", "stats", "moments", "tseries"))
+
+```
+
+Last Tested Environment The scripts were last successfully tested on:
+
+R version: 4.4.1
+Platform: x86_64-w64-mingw32 (64-bit)
+
+---
 
 ## 🚀 Getting Started & Examples
 
@@ -139,6 +170,8 @@ model2 <- simplexreg(
 summary(model2)
 ```
 
+---
+
 ## 📚 Vignettes
 
 Detailed tutorials and applications:
@@ -161,12 +194,6 @@ vignette("impunity-analysis", package = "SimplexRegression")
 
 ---
 
-## 🎯 Code of Conduct
-
-Please note that the SimplexRegression project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
-
----
-
 ## 🤝 Contributing
 
 Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
@@ -183,12 +210,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you use this package in your research, please cite:
 
-```r
-citation("SimplexRegression")
-```
-
 ```bibtex
-@Article{Justino+Cribari_2025,
+@article{Justino+Cribari_2025,
   title = {Simplex Regression with a Flexible Logit Link: Inference and Application to Cross-Country Impunity Data},
   author = {Maria Eduarda da Cruz Justino and Francisco Cribari-Neto},
   year = {2025},
