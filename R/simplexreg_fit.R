@@ -18,7 +18,7 @@
 #' @param data A data frame containing the variables in the model
 #' @param diag Diagnostic level (default = 1)
 #' @param link.mu Mean link function (parametric: "plogit1", "plogit2"; fixed:
-#' "logit", "probit", "cauchit", "loglog", "cloglog")
+#' "logit", "probit", "loglog", "cloglog", "cauchit")
 #' @param link.sigma2 Dispersion link function ("log", "sqrt", "identity")
 #'
 #' @importFrom stats model.frame model.response model.matrix terms plogis qnorm pnorm cor
@@ -77,7 +77,7 @@
 #' @export
 simplexreg <- function(formula, data, diag = 1,
                           link.mu = c("plogit1", "plogit2", "logit", "probit",
-                                      "cauchit", "loglog", "cloglog"),
+                                      "loglog", "cloglog", "cauchit"),
                           link.sigma2 = c("log", "sqrt", "identity")) {
 
   # Input validation
@@ -188,7 +188,7 @@ simplexreg <- function(formula, data, diag = 1,
 #' @param z Design matrix for dispersion model (without intercept)
 #' @param diag Diagnostic level
 #' @param link.mu Mean link function (parametric: "plogit1", "plogit2"; fixed:
-#' "logit", "probit", "cauchit", "loglog", "cloglog")
+#' "logit", "probit", "loglog", "cloglog", "cauchit")
 #' @param link.sigma2 Dispersion link function ("log", "sqrt", "identity")
 #' @param x_names Column names for mean design matrix (includes intercept)
 #' @param z_names Column names for dispersion design matrix (includes intercept)
@@ -199,7 +199,7 @@ simplexreg <- function(formula, data, diag = 1,
 #' @keywords internal
 simplexreg_fit <- function(y, x, z, diag = 1,
                               link.mu = c("plogit1", "plogit2", "logit", "probit",
-                                           "cauchit", "loglog", "cloglog"),
+                                           "loglog", "cloglog", "cauchit"),
                               link.sigma2 = c("log", "sqrt", "identity"),
                               x_names = NULL, z_names = NULL, ini_values = NULL){
 

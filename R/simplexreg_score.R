@@ -13,8 +13,8 @@
 #' @param y Response vector (0 < y < 1)
 #' @param x1 Design matrix for mean model (with intercept)
 #' @param z1 Design matrix for dispersion model (with intercept)
-#' @param link.mu Mean link function ("logit", "probit", "cloglog", "loglog",
-#' "cauchit", "plogit1" or "plogit2")
+#' @param link.mu Mean link function ("plogit1", "plogit2", "logit", "probit",
+#' "loglog", "cloglog" or "cauchit")
 #' @param link.sigma2 Dispersion link function ("log", "sqrt", or "identity")
 #'
 #' @details
@@ -24,7 +24,7 @@
 #'   \item For parametric mean link functions ("plogit1" or "plogit2"):
 #'     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\gamma}^\top, \lambda)^\top},
 #'     with \eqn{p + q + 1} elements.
-#'   \item For fixed mean link functions ("logit", "probit", "cloglog", "loglog", "cauchit"):
+#'   \item For fixed mean link functions ("logit", "probit", "loglog", "cloglog" or "cauchit"):
 #'     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\gamma}^\top)^\top},
 #'     with \eqn{p + q} elements.
 #' }

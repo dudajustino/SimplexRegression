@@ -149,20 +149,20 @@ parametric_mean_link_deriv2 <- function(mu, lambda, link_type = c("plogit1", "pl
 #' @description
 #' Provides the fixed mean link functions, their inverses, and derivatives
 #' for the simplex regression model. Supported link types are:
-#' \code{"logit"}, \code{"probit"}, \code{"cloglog"}, \code{"loglog"}, and \code{"cauchit"}.
+#' \code{"logit"}, \code{"probit"}, \code{"loglog"}, \code{"cloglog"}, and \code{"cauchit"}.
 #'
 #' @param mu Mean parameter (numeric vector, 0 < mu < 1)
 #' @param eta Linear predictor of mean (numeric vector)
 #' @param link_type Type of link function: \code{"logit"}, \code{"probit"},
-#'   \code{"cloglog"}, \code{"loglog"}, or \code{"cauchit"}.
+#'   \code{"loglog"}, \code{"cloglog"}, or \code{"cauchit"}.
 #'
 #' @details
 #' Available link functions:
 #' \itemize{
 #'   \item \strong{Logit}: \eqn{g(\mu) = \log(\mu/(1-\mu))}
 #'   \item \strong{Probit}: \eqn{g(\mu) = \Phi^{-1}(\mu)}
-#'   \item \strong{Complementary loglog}: \eqn{g(\mu) = \log(-\log(1-\mu))}
 #'   \item \strong{Log-log}: \eqn{g(\mu) = -\log(-\log(\mu))}
+#'   \item \strong{Complementary log-log}: \eqn{g(\mu) = \log(-\log(1-\mu))}
 #'   \item \strong{Cauchit}: \eqn{g(\mu) = \tan(\pi(\mu - 0.5))}
 #' }
 #'
@@ -181,8 +181,8 @@ NULL
 
 #' @rdname fixed_mean_links
 #' @export
-fixed_mean_link <- function(mu, link_type = c("logit", "probit", "cloglog",
-                                              "loglog", "cauchit")) {
+fixed_mean_link <- function(mu, link_type = c("logit", "probit", "loglog",
+                                              "cloglog", "cauchit")) {
   link_type <- match.arg(link_type)
 
   if (any(mu <= 0 | mu >= 1)) {
@@ -202,8 +202,8 @@ fixed_mean_link <- function(mu, link_type = c("logit", "probit", "cloglog",
 
 #' @rdname fixed_mean_links
 #' @export
-fixed_mean_link_inv <- function(eta, link_type = c("logit", "probit", "cloglog",
-                                                   "loglog", "cauchit")) {
+fixed_mean_link_inv <- function(eta, link_type = c("logit", "probit", "loglog",
+                                                   "cloglog", "cauchit")) {
   link_type <- match.arg(link_type)
 
   result <- switch(link_type,
@@ -219,8 +219,8 @@ fixed_mean_link_inv <- function(eta, link_type = c("logit", "probit", "cloglog",
 
 #' @rdname fixed_mean_links
 #' @export
-fixed_mean_link_deriv1 <- function(mu, link_type = c("logit", "probit", "cloglog",
-                                                     "loglog", "cauchit")) {
+fixed_mean_link_deriv1 <- function(mu, link_type = c("logit", "probit", "loglog",
+                                                     "cloglog", "cauchit")) {
   link_type <- match.arg(link_type)
 
   if (any(mu <= 0 | mu >= 1)) {
@@ -240,8 +240,8 @@ fixed_mean_link_deriv1 <- function(mu, link_type = c("logit", "probit", "cloglog
 
 #' @rdname fixed_mean_links
 #' @export
-fixed_mean_link_deriv2 <- function(mu, link_type = c("logit", "probit", "cloglog",
-                                                     "loglog", "cauchit")) {
+fixed_mean_link_deriv2 <- function(mu, link_type = c("logit", "probit", "loglog",
+                                                     "cloglog", "cauchit")) {
   link_type <- match.arg(link_type)
 
   if (any(mu <= 0 | mu >= 1)) {
@@ -261,8 +261,8 @@ fixed_mean_link_deriv2 <- function(mu, link_type = c("logit", "probit", "cloglog
 
 #' @rdname fixed_mean_links
 #' @export
-fixed_mean_link_inv_deriv1 <- function(eta, link_type = c("logit", "probit", "cloglog",
-                                                          "loglog", "cauchit")) {
+fixed_mean_link_inv_deriv1 <- function(eta, link_type = c("logit", "probit", "loglog",
+                                                          "cloglog", "cauchit")) {
   link_type <- match.arg(link_type)
 
   result <- switch(link_type,
