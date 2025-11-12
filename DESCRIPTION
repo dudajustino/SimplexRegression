@@ -1,4 +1,4 @@
-Package: SimplexRegression
+Package: SimplexRegressionAMM
 Type: Package
 Title: Simplex Regression Models with Parametric or Fixed Mean Link Functions
 Version: 0.1.0
@@ -21,8 +21,8 @@ Description: Provides functions for fitting and analyzing simplex regression mod
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/dudajustino/SimplexRegression
-BugReports: https://github.com/dudajustino/SimplexRegression/issues
+URL: https://github.com/dudajustino/SimplexRegressionAMM
+BugReports: https://github.com/dudajustino/SimplexRegressionAMM/issues
 RoxygenNote: 7.3.3
 Imports: 
     expint,
