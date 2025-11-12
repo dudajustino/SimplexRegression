@@ -35,7 +35,7 @@
 #'   \item \code{vcov}: Variance-covariance matrix
 #'   \item \code{loglik}: Log-likelihood value
 #'   \item \code{AIC}, \code{BIC}, \code{HQ}: Information criteria
-#'   \item \code{R2_RV}, \code{R2_FC}: Pseudo R-squared measures
+#'   \item \code{R2_N}, \code{R2_FC}: Pseudo R-squared measures
 #'
 #' }
 #'
@@ -44,14 +44,13 @@
 #' \itemize{
 #'   \item Mean submodel: \eqn{g(\mu_i, \lambda) = x_i'\beta}
 #'   or \eqn{g(\mu_i) = x_i'\beta}
-#'   \item Dispersion submodel: \eqn{h(\sigma^2_i) = z_i'\delta}
+#'   \item Dispersion submodel: \eqn{h(\sigma^2_i) = z_i'\gamma}
 #' }
 #'
 #' The parametric mean link functions include a parameter \eqn{\lambda} that
 #' is estimated along with other model parameters.
 #'
 #' @examples
-#' \dontrun{
 #' # Simulate data
 #' n <- 100
 #' x1 <- runif(n, 0, 1)
@@ -60,13 +59,20 @@
 #' sigma2 <- 0.5
 #' summary(mu)
 #' y <- rsimplex_opt(n, mu, sigma2)
-#' data <- data.frame(y = y, x = x)
+#' data <- data.frame(y = y, x = cbind(x1, x2))
 #'
 #' # Fit model
 #' fit <- simplexreg(y ~ x1 + x2 | 1, data = data,
 #'                      link.mu = "plogit2", link.sigma2 = "identity")
 #' summary(fit)
-#' }
+#'
+#' @references
+#' Justino, M. E. C. and Cribari-Neto, F. (2025).
+#' Simplex regression with a flexible logit link: Inference and application
+#' to cross-country impunity data.
+#' \emph{Working Paper}, Departamento de Estatística,
+#' Universidade Federal de Pernambuco.
+#' \url{https://github.com/dudajustino/SimplexRegressionAMM}
 #'
 #' @export
 simplexreg <- function(formula, data, diag = 1,
@@ -514,7 +520,7 @@ simplexreg_fit <- function(y, x, z, diag = 1,
 
   # Model diagnostics
   k$quantile.res <- qnorm(psimplex_opt(y, mu_hat, sigma2_hat))
-  k$R2_RV <- 1 - exp((-2/n)*(opt$value - simplexreg.nul(y, link.mu)))
+  k$R2_N <- 1 - exp((-2/n)*(opt$value - simplexreg.nul(y, link.mu)))
   if(parametric)  gy <- parametric_mean_link(y, k$lambda, link.mu) else gy <- fixed_mean_link(y, link.mu)
   k$R2_FC <- cor(eta1_hat, gy)^2
   k$aic <- -2*k$loglik+2*r
@@ -550,7 +556,7 @@ simplexreg_fit <- function(y, x, z, diag = 1,
     BIC = k$bic,
     HQ = k$hq,
     R2_FC = k$R2_FC,
-    R2_RV = k$R2_RV,
+    R2_N = k$R2_N,
     zstat = k$zstat,
     pvalues = k$pvalues,
     call = match.call()

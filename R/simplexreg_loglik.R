@@ -38,14 +38,14 @@
 #' depending on the type of mean link:
 #' \itemize{
 #'   \item For parametric mean link functions ("plogit1" or "plogit2"):
-#'     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\delta}^\top, \lambda)^\top},
+#'     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\gamma}^\top, \lambda)^\top},
 #'     with \eqn{p + q + 1} elements.
 #'   \item For fixed mean link functions ("logit", "probit", "cloglog", "loglog", "cauchit"):
-#'     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\delta}^\top)^\top},
+#'     \eqn{\boldsymbol{\theta} = (\boldsymbol{\beta}^\top, \boldsymbol{\gamma}^\top)^\top},
 #'     with \eqn{p + q} elements.
 #' }
 #'
-#' Here, \eqn{\boldsymbol{\beta}} and \eqn{\boldsymbol{\delta}} are regression
+#' Here, \eqn{\boldsymbol{\beta}} and \eqn{\boldsymbol{\gamma}} are regression
 #' coefficients for the mean and dispersion submodels, respectively.
 #' @return Numeric scalar (log-likelihood)
 #' @export

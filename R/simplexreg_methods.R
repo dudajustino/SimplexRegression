@@ -116,7 +116,7 @@ summary.simplexregression <- function(object, ...) {
     nobs = object$nobs,
     df.residual = object$df.residual,
     counts = object$optim$counts,
-    R2_RV = object$R2_RV,
+    R2_N = object$R2_N,
     R2_FC = object$R2_FC
   )
 
@@ -147,25 +147,39 @@ print.summary.simplexregression <- function(x, digits = max(3, getOption("digits
   cat("Dispersion Link:", x$sigma2.link, "\n")
 
   cat("\nMean model coefficients:\n")
-  printCoefmat(round(x$coef_mean,4), P.values = TRUE, has.Pvalue = TRUE)
+  coef_mean_print <- x$coef_mean
+  coef_mean_print[, "Estimate"] <- round(coef_mean_print[, "Estimate"], 10)
+  coef_mean_print[, "Std. Error"] <- round(coef_mean_print[, "Std. Error"], 10)
+  coef_mean_print[, "z value"] <- round(coef_mean_print[, "z value"], 4)
+  coef_mean_print[, "Pr(>|z|)"] <- round(coef_mean_print[, "Pr(>|z|)"], 4)
+  printCoefmat(coef_mean_print, P.values = TRUE, has.Pvalue = TRUE, digits = 10)
 
   cat("\nDispersion model coefficients:\n")
-  printCoefmat(round(x$coef_disp,4), P.values = TRUE, has.Pvalue = TRUE)
+  coef_disp_print <- x$coef_disp
+  coef_disp_print[, "Estimate"] <- round(coef_disp_print[, "Estimate"], 10)
+  coef_disp_print[, "Std. Error"] <- round(coef_disp_print[, "Std. Error"], 10)
+  coef_disp_print[, "z value"] <- round(coef_disp_print[, "z value"], 4)
+  coef_disp_print[, "Pr(>|z|)"] <- round(coef_disp_print[, "Pr(>|z|)"], 4)
+  printCoefmat(coef_disp_print, P.values = TRUE, has.Pvalue = TRUE, digits = 10)
 
   if (parametric) {
     cat("\nLink function parameter:\n")
-    printCoefmat(x$lambda, P.values = TRUE, has.Pvalue = TRUE, digits = digits)
+    # Mostrar apenas Estimate e Std. Error para lambda (10 casas)
+    lambda_print <- x$lambda[, c("Estimate", "Std. Error"), drop = FALSE]
+    lambda_print[, "Estimate"] <- round(lambda_print[, "Estimate"], 10)
+    lambda_print[, "Std. Error"] <- round(lambda_print[, "Std. Error"], 10)
+    printCoefmat(lambda_print, P.values = FALSE, has.Pvalue = FALSE, digits = 10)
   }
 
-  cat("\nLog-likelihood:", round(x$loglik, digits), "\n")
-  cat("AIC:", round(x$aic, digits), "\n")
-  cat("BIC:", round(x$bic, digits), "\n")
-  cat("HQIC:", round(x$hqic, digits), "\n")
+  cat("\nLog-likelihood:", round(x$loglik, 6), "\n")
+  cat("AIC:", round(x$aic, 6), "\n")
+  cat("BIC:", round(x$bic, 6), "\n")
+  cat("HQIC:", round(x$hqic, 6), "\n")
   cat("Number of observations:", x$nobs, "\n")
   cat("Degrees of freedom:", x$df.residual, "\n")
   cat("Number of iterations in BFGS optim:", x$counts, "\n")
-  cat("Pseudo-R2 Nagelkerke:", round(x$R2_RV, digits), "\n")
-  cat("Pseudo-R2 Ferrari and Cribari-Neto:", round(x$R2_FC, digits), "\n")
+  cat("Pseudo-R2 Nagelkerke:", round(x$R2_N, 6), "\n")
+  cat("Pseudo-R2 Ferrari and Cribari-Neto:", round(x$R2_FC, 6), "\n")
 
   invisible(x)
 }
@@ -330,13 +344,13 @@ print.simplexregression <- function(x, digits = max(3, getOption("digits") - 3),
   cat("Dispersion Link:", x$sigma2.link, "\n")
 
   cat("\nCoefficients (Mean model):\n")
-  print(round(x$coefficients$mean, digits))
+  print(round(x$coefficients$mean, 10))
 
   cat("\nCoefficients (Dispersion model):\n")
-  print(round(x$coefficients$dispersion, digits))
+  print(round(x$coefficients$dispersion, 10))
 
   if (is_parametric(x)) {
-    cat("\nLambda:", round(x$coefficients$lambda, digits), "\n")
+    cat("\nLambda:", round(x$coefficients$lambda, 10), "\n")
   }
 
   invisible(x)

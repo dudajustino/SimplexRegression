@@ -37,7 +37,7 @@
 #' @importFrom stats qqnorm qqline
 #' @importFrom graphics par abline legend text
 #' @importFrom gamlss wp
-#' @importFrom grDevices devAskNewPage
+#' @importFrom grDevices dev.interactive
 #' @export
 plot.simplexregression <- function(x, which = 1:7,
                                type = c("quantile", "pearson", "pearson P",
