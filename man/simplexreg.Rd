@@ -77,7 +77,5 @@ summary(fit)
 Justino, M. E. C. and Cribari-Neto, F. (2025).
 Simplex regression with a flexible logit link: Inference and application
 to cross-country impunity data.
-\emph{Working Paper}, Departamento de Estatística,
-Universidade Federal de Pernambuco.
-\url{https://github.com/dudajustino/SimplexRegressionAMM}
+\emph{Technical report}, Universidade Federal de Pernambuco, Brazil.
 }
