@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-This repository contains the R package and associated data for the scientific article:
+This repository contains the R package and associated data for the article:
 
 “Simplex regression with a flexible logit link: inference and application to cross-country impunity data” by Justino, M. E. C. and Cribari-Neto, F.
 
@@ -28,7 +28,7 @@ This repository contains the R package and associated data for the scientific ar
 
 Simplex regression is a powerful statistical framework for modeling bounded continuous responses in (0,1), such as proportions, rates and indices.
 
-Traditional approaches use **fixed mean link functions** (logit, probit, log-log, complementar log-log, cauchit). This package extends these models by introducing **parametric mean link functions** (plogit1, plogit2), which include an additional parameter λ estimated from the data, providing greater flexibility to the model.
+Traditional approaches use **fixed mean link functions** (logit, probit, log-log, complementary log-log, cauchit). This package extends these models by introducing **parametric mean link functions** (plogit1, plogit2), which include an additional parameter λ estimated from the data, providing greater flexibility to the model.
 
 ### Why Parametric Mean Link Functions?
 
@@ -65,8 +65,8 @@ Traditional approaches use **fixed mean link functions** (logit, probit, log-log
 - **Score tests**: Test H₀: λ = 1 (logit link) vs. H₁: λ ≠ 1
 
 ### Global and Local Influence Analysis
-- **Case-weight perturbation**: Identify observations with high leverage
-- **Response perturbation**: Assess sensitivity to changes in response values
+- **Case-weight perturbation**: Identify influential observations using case-weight perturbation
+- **Response perturbation**: Identify influential observations using response perturbation
 - **Curvature-based measures**: Detect jointly influential observations
 
 ---
@@ -135,7 +135,7 @@ Platform: x86_64-w64-mingw32 (64-bit)
 ```r
 library(SimplexRegression)
 
-# Load example dataset
+# Load the dataset
 data("impunity_dataset")
 
 # Fit a simplex regression model with parametric mean link
@@ -147,18 +147,18 @@ model1 <- simplexreg(
   link.sigma2 = "log"
 )
 
-# View results
+# View the results
 summary(model1)
 
 # Model diagnostics
 plot(model1, which = 1:7, type = "quantile")
 
-# Half-normal plot with simulated envelope
+# Half-normal plot with simulated envelopes
 hnp.simplexreg(model1, type = "sweighted2")
 
 # Fit a simplex regression with fixed log-log mean link:
 
-# Simple model with logit link
+# Simplex model with logit link
 model2 <- simplexreg(
   Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic | 
              EconomicFreedom + HealthSpending + Democracy,
@@ -211,11 +211,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you use this package in your research, please cite:
 
 ```bibtex
+<<<<<<< HEAD
 @article{Justino+Cribari_2025,
   title = {Simplex Regression with a Flexible Logit Link: Inference and Application to Cross-Country Impunity Data},
   author = {Maria Eduarda da Cruz Justino and Francisco Cribari-Neto},
+=======
+@Article{Justino+Cribari_2025,
+  title = {Simplex regression with a flexible logit link: Inference and application to cross-country impunity data},
+  author = {Maria E. C. Justino and Francisco Cribari-Neto},
+>>>>>>> f41e0bec68c086d8869d4f20af4a8a02e42e1b42
   year = {2025},
-  url = {https://github.com/dudajustino/SimplexRegression},
+  url = {https://github.com/dudajustino/SimplexRegressionAMM},
 }
 ```
 
