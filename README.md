@@ -110,7 +110,7 @@ if (!require("remotes")) {
 Then, install the package from GitHub:
 
 ``` r
-remotes::install_github("dudajustino/SimplexRegression", 
+remotes::install_github("dudajustino/SimplexRegressionAMM", 
                         dependencies = TRUE,
                         build_vignettes = TRUE)
 ```
@@ -124,7 +124,6 @@ install.packages(c("expint", "gamlss", "graphics", "stats", "moments", "tseries"
 ```
 
 Last Tested Environment The scripts were last successfully tested on:
-
 R version: 4.4.1
 Platform: x86_64-w64-mingw32 (64-bit)
 
