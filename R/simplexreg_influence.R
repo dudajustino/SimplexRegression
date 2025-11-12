@@ -68,7 +68,7 @@ hatvalues.simplexregression <- function(model, ...) {
 #' @export
 cooks.distance.simplexregression <- function(model, ...) {
   h <- hatvalues.simplexregression(model)
-  res <- residuals.simplexregression(model, type = "sweighted2")
+  res <- residuals.simplexregression(model, type = "weighted")
   cook <- (res^2) * (h / (1 - h))
 
   return(cook)

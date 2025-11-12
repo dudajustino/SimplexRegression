@@ -165,7 +165,7 @@ print.summary.simplexregression <- function(x, digits = max(3, getOption("digits
   cat("Degrees of freedom:", x$df.residual, "\n")
   cat("Number of iterations in BFGS optim:", x$counts, "\n")
   cat("Pseudo-R2 Nagelkerke:", round(x$R2_RV, digits), "\n")
-  cat("Pseudo-R2 Ferrari e Cribari-Neto:", round(x$R2_FC, digits), "\n")
+  cat("Pseudo-R2 Ferrari and Cribari-Neto:", round(x$R2_FC, digits), "\n")
 
   invisible(x)
 }

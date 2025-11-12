@@ -17,11 +17,11 @@
 #'   \item \code{"pearson P"}: Standardized Pearson residuals
 #'   \item \code{"deviance"}: Deviance residuals
 #'   \item \code{"deviance P"}: Standardized deviance residuals
-#'   \item \code{"sweighted1"}: Standardized residuals
-#'   \item \code{"sweighted2"}: Weighted residuals
+#'   \item \code{"standardized"}: Standardized residuals
+#'   \item \code{"weighted"}: Weighted residuals
 #'   \item \code{"variance"}: Variance residuals
 #'   \item \code{"variance P"}: Standardized variance residuals
-#'   \item \code{"combined"}: Bias-variance residuals
+#'   \item \code{"biasvariance"}: Bias-variance residuals
 #'   \item \code{"anscombe"}: Anscombe residuals
 #'   \item \code{"williams"}: Williams residuals
 #'   \item \code{"response"}: Response (ordinary) residuals
@@ -55,9 +55,9 @@
 #' @importFrom expint gammainc
 #' @export
 residuals.simplexregression <- function(object, type = c("quantile", "pearson", "pearson P",
-                                                     "deviance", "deviance P", "sweighted1",
-                                                     "sweighted2", "variance", "variance P",
-                                                     "combined", "anscombe", "williams",
+                                                     "deviance", "deviance P", "standardized",
+                                                     "weighted", "variance", "variance P",
+                                                     "biasvariance", "anscombe", "williams",
                                                      "response", "score", "dualscore"), ...) {
   type <- match.arg(type)
 
@@ -74,13 +74,13 @@ residuals.simplexregression <- function(object, type = c("quantile", "pearson", 
   if(type == "response") return(diff)
 
   # Calculate hat values only when needed
-  hat_beta_needed <- type %in% c("pearson P", "deviance P", "sweighted2", "williams")
+  hat_beta_needed <- type %in% c("pearson P", "deviance P", "weighted", "williams")
   hat_beta <- if(hat_beta_needed) {
     hatvalues.simplexregression(object)
   } else NULL
 
   # Calculate weights for weighted residuals
-  if(type %in% c("sweighted1", "sweighted2", "combined")) {
+  if(type %in% c("standardized", "weighted", "biasvariance")) {
     wi <- (3*sigma2 / muonemu) + (1 / (muonemu^3))
     ui <- (dev/muonemu) + (1/(muonemu^3))
   }
@@ -114,11 +114,11 @@ residuals.simplexregression <- function(object, type = c("quantile", "pearson", 
 
                 },
 
-                "sweighted1" = {
+                "standardized" = {
                   (ui*diff) / sqrt(sigma2*wi)
                 },
 
-                "sweighted2" = {
+                "weighted" = {
                   (ui*diff) / sqrt(sigma2*wi*(1-hat_beta))
                 },
 
@@ -143,7 +143,7 @@ residuals.simplexregression <- function(object, type = c("quantile", "pearson", 
                   (dev - sigma2) / (sigma2*sqrt(2*(1-hat_gamma)))
                 },
 
-                "combined" = {
+                "biasvariance" = {
                   ai <- - 1/(2*sigma2) + dev/(2*sigma2^2)
                   (ui*diff + ai) / sqrt(sigma2*wi + 1/(2*sigma2^2))
                 },

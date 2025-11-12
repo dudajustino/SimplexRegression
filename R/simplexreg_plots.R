@@ -18,6 +18,8 @@
 #' @param which Numeric vector indicating which plots to produce (1:7)
 #' @param type Character string specifying residual type
 #' (see \code{residuals.simplexreg}). Default is \code{"quantile"}.
+#' @param ask Logical. If \code{TRUE}, the user is asked before each plot.
+#' Default is \code{TRUE} when multiple plots are requested.
 #' @param ... Additional graphical parameters
 #'
 #' @details
@@ -35,13 +37,16 @@
 #' @importFrom stats qqnorm qqline
 #' @importFrom graphics par abline legend text
 #' @importFrom gamlss wp
+#' @importFrom grDevices devAskNewPage
 #' @export
 plot.simplexregression <- function(x, which = 1:7,
                                type = c("quantile", "pearson", "pearson P",
-                                        "deviance", "deviance P", "sweighted1",
-                                        "sweighted2", "variance", "variance P",
-                                        "combined", "anscombe", "williams",
-                                        "response", "score", "dualscore"), ...) {
+                                        "deviance", "deviance P", "standardized",
+                                        "weighted", "variance", "variance P",
+                                        "biasvariance", "anscombe", "williams",
+                                        "response", "score", "dualscore"),
+                               ask = prod(par("mfcol")) < length(which) && dev.interactive(),
+                               ...) {
   if(!is.numeric(which) || any(which < 1) || any(which > 7))
     stop("`which' must be in 1:7")
 
@@ -54,8 +59,12 @@ plot.simplexregression <- function(x, which = 1:7,
   show[which] <- TRUE
   one.fig <- prod(par("mfcol")) == 1
 
-  op <- par(no.readonly = TRUE)
-  on.exit(par(op))
+  # Configure ask mode
+  if(ask) {
+    op <- par(ask = TRUE)
+    on.exit(par(op))
+  }
+
   par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(2, 0.6, 0))
 
   # 1. Residuals vs indices
@@ -133,7 +142,7 @@ plot.simplexregression <- function(x, which = 1:7,
 #'
 #' @param model An object of class \code{"simplexregression"}
 #' @param type Character string specifying residual type
-#' (see \code{residuals.simplexregression}). Default is \code{"sweighted2"}.
+#' (see \code{residuals.simplexregression}). Default is \code{"weighted"}.
 #' @param nsim Number of simulations (default: 100)
 #' @param seed Random seed (default: 2025)
 #' @param level Confidence level (default: 0.95)
@@ -142,11 +151,11 @@ plot.simplexregression <- function(x, which = 1:7,
 #' @importFrom stats qqnorm quantile median
 #' @importFrom graphics par legend
 #' @export
-envelope.simplexreg <- function(model, type = c("sweighted2", "quantile", "pearson",
-                                                   "pearson P", "deviance", "deviance P",
-                                                   "sweighted1", "variance", "variance P",
-                                                   "combined", "anscombe", "williams",
-                                                   "response", "score", "dualscore"),
+envelope.simplexreg <- function(model, type = c("weighted", "quantile", "pearson", "pearson P",
+                                                "deviance", "deviance P", "standardized",
+                                                "variance", "variance P", "biasvariance",
+                                                "anscombe", "williams", "response", "score",
+                                                "dualscore"),
                                    nsim = 100, seed = 2025, level = 0.95, ...) {
   set.seed(seed)
 
@@ -215,7 +224,7 @@ envelope.simplexreg <- function(model, type = c("sweighted2", "quantile", "pears
 #'
 #' @param model An object of class \code{"simplexregression"}
 #' @param type Character string specifying residual type
-#' (see \code{residuals.simplexregression}). Default is \code{"sweighted2"}.
+#' (see \code{residuals.simplexregression}). Default is \code{"weighted"}.
 #' @param nsim Number of simulations (default: 100)
 #' @param level Confidence level (default: 0.95)
 #' @param seed Random seed (default: 2025)
@@ -224,11 +233,11 @@ envelope.simplexreg <- function(model, type = c("sweighted2", "quantile", "pears
 #' @importFrom stats qnorm quantile median
 #' @importFrom graphics matplot points legend
 #' @export
-hnp.simplexreg = function (model, type = c("sweighted2", "quantile", "pearson",
-                                              "pearson P", "deviance", "deviance P",
-                                              "sweighted1", "variance", "variance P",
-                                              "combined", "anscombe", "williams",
-                                              "response", "score", "dualscore"),
+hnp.simplexreg = function (model, type = c("weighted", "quantile", "pearson", "pearson P",
+                                           "deviance", "deviance P", "standardized",
+                                           "variance", "variance P", "biasvariance",
+                                           "anscombe", "williams", "response", "score",
+                                           "dualscore"),
                               nsim = 100, level = 0.95, seed = 2025, ...) {
   set.seed(seed)
 
