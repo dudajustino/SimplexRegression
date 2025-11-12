@@ -43,8 +43,8 @@ Traditional approaches use **fixed mean link functions** (logit, probit, log-log
 ## 🌟 Key Features
 
 ### Parametric Mean Link Functions
-- **plogit1**: `g(μ, λ) = log((1-μ)<sup>(-λ)</sup> - 1)`
-- **plogit2**: `g(μ, λ) = log(μ^<sup>λ</sup> / (1-μ<sup>λ</sup>))`
+- **plogit1**: `g(μ, λ) = log((1-μ)^(-λ) - 1)`
+- **plogit2**: `g(μ, λ) = log(μ^λ / (1-μ^λ))`
 - **Data-driven selection**: Choose between plogit1 and plogit2 using model selection criteria
 
 ### Fixed Mean Link Functions
