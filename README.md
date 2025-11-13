@@ -119,7 +119,7 @@ Prerequisites
 This package requires the following external R packages. You can run the command below to ensure all dependencies are installed on your system before proceeding.
 
 ``` r
-install.packages(c("expint", "gamlss", "graphics", "stats", "moments", "tseries"))
+install.packages(c("expint", "gamlss", "moments", "tseries"))
 
 ```
 
