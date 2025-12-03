@@ -20,7 +20,7 @@ This vignette demonstrates the use of the `SimplexRegressionAMM` package to mode
 We explore the advantages of parametric mean link functions (plogit1 and plogit2) compared to traditional fixed mean link functions, 
 and provide comprehensive model diagnostics.
 
-The impunity dataset contains information about various socioeconomic and political indicators across countries, with the response variable measuring levels of impunity (a bounded variable in the open interval (0,1)).
+The impunity dataset contains information about various socioeconomic and political indicators in 119 countries, with the response variable measuring levels of impunity (a bounded variable in the open interval (0,1)).
 
 ## Loading the Data
 ```{r setup}
