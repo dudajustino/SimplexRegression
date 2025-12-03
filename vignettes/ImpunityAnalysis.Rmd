@@ -36,11 +36,11 @@ The dataset includes 119 observations and nine explanatory variables reflecting 
 
 - Economic Freedom Index (2022)
 - Gini Index (2015)
-- GDP per capita (2018)
-- Human Development Index (2019)
 - Health Expenditure as % of GDP (2020)
-- Quality of Democracy Index (2020)
+- Human Development Index (2019)
+- GDP per capita (2018)
 - Press Freedom Index (2023)
+- Quality of Democracy Index (2020)
 - Dummy variable for Nordic countries
 
 ```{r data-structure}
