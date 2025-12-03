@@ -59,7 +59,7 @@
 #' sigma2 <- 0.5
 #' summary(mu)
 #' y <- rsimplex_opt(n, mu, sigma2)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2))
+#' data <- data.frame(y = y, x1 = x1, x2 = x2)
 #'
 #' # Fit model
 #' fit <- simplexreg(y ~ x1 + x2 | 1, data = data,
