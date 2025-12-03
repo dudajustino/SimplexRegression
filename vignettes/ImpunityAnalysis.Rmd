@@ -76,11 +76,11 @@ cat("Kurtosis: ", round(moments::kurtosis(data_imp$Impunity), 4), "\n")
 
 # Models with Parametric Mean Link Functions
 
-One of the main features of simplex regression with a parametric mean link function is its ability to employ link functions that adapt to the structure of the data. These functions incorporate an additional parameter, \eqn{\lambda}{lambda}, which is estimated from the data, providing greater flexibility compared to fixed mean link functions.
+One of the main features of simplex regression with a parametric mean link function is its ability to employ link functions that adapt to the structure of the data. These functions incorporate an additional parameter, \(\lambda\), which is estimated from the data, providing greater flexibility compared to fixed mean link functions.
 
 We estimated simplex regression models with parametric mean link functions `plogit1` and `plogit2`, incorporating all eight covariates, selected powers of regressors, and interaction terms.
 
-Predictor selection was guided by half-normal residual plots with simulated envelopes, pseudo-\eqn{R^2}{R^2}, and information criteria (AIC, SIC, HQIC).
+Predictor selection was guided by half-normal residual plots with simulated envelopes, pseudo-\(R^2\), and information criteria (AIC, SIC, HQIC).
 
 ## Model 1: plogit1 Parametric Mean Link Function
 
