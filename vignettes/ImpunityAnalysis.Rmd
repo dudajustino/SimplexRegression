@@ -262,7 +262,7 @@ The null hypothesis H₀: λ = 1 (which corresponds to the logit mean link) was 
 
 We now perform comprehensive diagnostics on the selected model (`simplex_par1`). We use quantile residuals, which should approximately follow a standard normal distribution under correct model specification.
 
-### Normality Test for Quantile Residuals
+## Normality Test for Quantile Residuals
 
 We test whether the quantile residuals follow a normal distribution:
 
@@ -353,11 +353,11 @@ cat("\nNumber of influential observations (response):",
 
 # Visualizing Mean Link Functions
 
-### Comparing Mean Link Functions: Inverse Links
+### Comparing Mean Link Functions 
 
-This plot shows how different link functions map linear predictors to the mean response:
+This plot shows how the link functions employed in the simplex and beta models map linear predictors to the mean response:
   
-```{r link-comparison, fig.cap="Comparison of inverse link functions"}
+```{r link-comparison, fig.cap="Plogit1 and probit link functions used in the simplex and beta regression models"}
 eta <- seq(from = -2, to = 5.5, length.out = 250)
 
 # Compute inverse links
