@@ -262,6 +262,14 @@ The null hypothesis H₀: λ = 1 (which corresponds to the logit mean link) was 
 
 We now perform comprehensive diagnostics on the selected model (`simplex_par1`). We use quantile residuals, which should approximately follow a standard normal distribution under correct model specification.
 
+### Normality Test for Quantile Residuals
+
+We test whether the quantile residuals follow a normal distribution:
+
+```{r normality-test}
+tseries::jarque.bera.test(residuals(simplex_par1, type = "quantile"))
+```
+
 ## Residual Plots
 
 ```{r residual-plots, fig.cap="Diagnostic plots for the selected model"}
@@ -285,14 +293,6 @@ plot(simplex_par1, which = 6, type = "quantile")
 
 # Cook's distance vs observation indices
 plot(simplex_par1, which = 7, type = "quantile")
-```
-
-### Normality Test for Quantile Residuals
-
-We test whether the quantile residuals follow a normal distribution:
-
-```{r normality-test}
-tseries::jarque.bera.test(residuals(simplex_par1, type = "quantile"))
 ```
 
 ## Local Influence Analysis
@@ -363,7 +363,6 @@ eta <- seq(from = -2, to = 5.5, length.out = 250)
 # Compute inverse links
 mu_plogit1 <- parametric_mean_link_inv(eta, simplex_par1$coefficients$lambda, "plogit1")
 mu_probit <- fixed_mean_link_inv(eta, "probit")
-mu_loglog <- fixed_mean_link_inv(eta, "loglog")
 
 # Plot
 matplot(eta, cbind(mu_plogit1, mu_probit), 
