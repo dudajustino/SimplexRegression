@@ -17,12 +17,13 @@ knitr::opts_chunk$set(
 ## Introduction
 
 This vignette demonstrates the use of the `SimplexRegressionAMM` package to model impunity data across countries. 
-We explore the advantages of parametric mean link functions (plogit1 and plogit2) compared to traditional fixed mean link functions, 
+We explore the advantages of parametric mean link functions (`plogit1`) compared to traditional fixed mean link functions, 
 and provide comprehensive model diagnostics.
 
-The impunity dataset contains information about various socioeconomic and political indicators in 119 countries, with the response variable measuring levels of impunity (a bounded variable in the open interval (0,1)).
+The impunity dataset contains information about various socioeconomic and political indicators for 119 countries, with the response variable measuring levels of impunity (a bounded variable in the open interval (0,1)).
 
 ## Loading the Data
+
 ```{r setup}
 library(SimplexRegressionAMM)
 data("impunity_dataset")
@@ -34,14 +35,14 @@ n <- nrow(data_imp)
 
 The dataset includes 119 observations and nine explanatory variables reflecting economic, institutional, and social aspects of each country:
 
-- Economic Freedom Index (2022)
-- Gini Index (2015)
-- Health Expenditure as % of GDP (2020)
-- Human Development Index (2019)
-- GDP per capita (2018)
-- Press Freedom Index (2023)
-- Quality of Democracy Index (2020)
-- Dummy variable for Nordic countries
+- Economic Freedom Index (2022);
+- Gini Index (2015);
+- Health Expenditure as % of GDP (2020);
+- Human Development Index (2019);
+- GDP per capita (2018);
+- Press Freedom Index (2023);
+- Quality of Democracy Index (2020);
+- Dummy variable for Nordic countries.
 
 ```{r data-structure}
 str(data_imp)
@@ -55,7 +56,7 @@ head(data_imp)
 
 ### Descriptive Statistics for the Response Variable
 
-The response variable `Impunity` is bounded in the open interval (0,1) and consists of Impunity Index scores for 119 countries in 2023, as described in Cribari-Neto and Santos (2024).  
+The response variable `Impunity` is bounded in the open interval (0,1) and consists of Impunity Index scores for 119 countries in 2023, as described in Santos and Cribari-Neto (2024).  
 
 The Impunity Index is defined as one minus the Rule of Law Index published by the World Justice Project (WJP). Higher values correspond to weaker rule of law and higher levels of impunity.  
 
@@ -74,64 +75,49 @@ cat("Skewness: ", round(moments::skewness(data_imp$Impunity), 4), "\n")
 cat("Kurtosis: ", round(moments::kurtosis(data_imp$Impunity), 4), "\n")
 ```
 
-# Models with Parametric Mean Link Functions
+## Simplex Models with Parametric Mean Link Functions
 
 One of the main features of simplex regression with a parametric mean link function is its ability to employ link functions that adapt to the structure of the data. These functions incorporate an additional parameter, \(\lambda\), which is estimated from the data, providing greater flexibility compared to fixed mean link functions.
 
 We estimated simplex regression models with parametric mean link functions `plogit1` and `plogit2`, incorporating all eight covariates, selected powers of regressors, and interaction terms.
 
-Predictor selection was guided by half-normal residual plots with simulated envelopes, pseudo-\(R^2\), and information criteria (AIC, SIC, HQIC).
+Predictor selection was guided by half-normal residual plots with simulated envelopes, pseudo-\(R^2\) Nagelkerke, and information criteria (AIC, SIC, HQIC).
 
-## Model 1: plogit1 Parametric Mean Link Function
+### Model 1: plogit1 Parametric Mean Link Function
 
 The first model uses the `plogit1` parametric mean link function and includes interactions between predictors:
   
 ```{r model-plogit1}
 simplex_par1 <- simplexreg(
-  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + 
-    I(Democracy*Press) + dnordic |
+  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic |
     EconomicFreedom + HealthSpending + Democracy,
-  data = data_imp,
-  link.mu = "plogit1", 
-  link.sigma2 = "log"
-)
-
+  data = data_imp, link.mu = "plogit1", link.sigma2 = "log")
 summary(simplex_par1)
 ```
 
-**Model interpretation:**
-- The mean structure includes transformed and interacted predictors;
-- The dispersion structure is modeled as a function of EconomicFreedom, HealthSpending, and Democracy;
-- The lambda parameter in plogit1 mean link function is estimated from the data.
+#### Half-Normal Plot with simulated envelopes for Model 1
 
-### Half-Normal Plot with simulated envelopes for Model 1
+We use weighted residual (Espinheira and Silva, 2020) for the half-normal plot with simulated envelopes.
 
-We use weighted residual (Espinheira and Silva, 2020) for Half-Normal plot with simulated envelopes.
-
-```{r diagnostic-par1, fig.cap="Half-normal plot with simulated envelope for Model 1"}
+```{r diagnostic-par1, fig.width=6, fig.height=4, fig.cap="Figure 1. Half-normal plot with simulated envelope for Model 1."}
 hnp.simplexreg(simplex_par1, type = "weighted", seed = 2008)
 ```
 
-## Model 2: plogit2 Parametric Mean Link Function
+### Model 2: plogit2 Parametric Mean Link Function
 
 The second model uses the `plogit2` parametric mean link function with a different dispersion structure:
   
 ```{r model-plogit2}
 simplex_par2 <- simplexreg(
-  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + 
-    I(Democracy*Press) + dnordic |
+  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic |
     I(Democracy*Press) + I(HealthSpending^1.6),
-  data = data_imp,
-  link.mu = "plogit2", 
-  link.sigma2 = "log"
-)
-
+  data = data_imp, link.mu = "plogit2", link.sigma2 = "log")
 summary(simplex_par2)
 ```
 
-### Half-Normal Plot with simulated envelopes for Model 2
+#### Half-Normal Plot with simulated envelopes for Model 2
 
-```{r diagnostic-par2, fig.cap="Half-normal plot with simulated envelope for Model 2"}
+```{r diagnostic-par2, fig.width=6, fig.height=4, fig.cap="Figure 2. Half-normal plot with simulated envelope for Model 2."}
 hnp.simplexreg(simplex_par2, type = "weighted", seed = 2008)
 ```
 
@@ -146,98 +132,72 @@ ss.simplexreg(simplex_par1, simplex_par2, kappa = 0.1)
 We can also examine penalized information criteria with `kappa = 0.1`:
   
 ```{r penalized-ic}
-penalized_ic(simplex_par1)
-penalized_ic(simplex_par2)
+penalized_ic(simplex_par1, kappa = 0.1)
+penalized_ic(simplex_par2, kappa = 0.1)
 ```
 
-# Models with Fixed Mean Link Functions
+## Models with Fixed Mean Link Functions
 
 For comparison, we also fit simplex regression models using traditional fixed mean link functions (logit, probit, log-log, complementary log-log, and cauchit).  
 
 These models help assess whether the flexibility provided by parametric mean link functions leads to better fit.
 
-## Model with log-log Mean Link Function
+### Model with log-log Mean Link Function
 
 ```{r model-loglog}
 simplex1 <- simplexreg(
-  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + 
-    I(Democracy*Press) + dnordic |
+  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic |
     EconomicFreedom + HealthSpending + Democracy, 
-  data = data_imp,  
-  link.mu = "loglog", 
-  link.sigma2 = "log"
-)
-
+  data = data_imp, link.mu = "loglog", link.sigma2 = "log")
 summary(simplex1)
 ```
 
-## Model with logit Mean Link Function
+### Model with logit Mean Link Function
 
 ```{r model-logit}
 simplex2 <- simplexreg(
-  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + 
-    I(Democracy*Press) + dnordic |
+  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic |
     EconomicFreedom + HealthSpending + Democracy, 
-  data = data_imp,  
-  link.mu = "logit", 
-  link.sigma2 = "log"
-)
-
+  data = data_imp, link.mu = "logit", link.sigma2 = "log")
 summary(simplex2)
 ```
 
-## Model with probit Mean Link Function
+### Model with probit Mean Link Function
 
 ```{r model-probit}
 simplex3 <- simplexreg(
-  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + 
-    I(Democracy*Press) + dnordic |
+  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic |
     EconomicFreedom + HealthSpending + Democracy,  
-  data = data_imp, 
-  link.mu = "probit", 
-  link.sigma2 = "log"
-)
-
+  data = data_imp, link.mu = "probit", link.sigma2 = "log")
 summary(simplex3)
 ```
 
-## Model with complementary log-log Mean Link Function
+### Model with complementary log-log Mean Link Function
 
 ```{r model-cloglog}
 simplex4 <- simplexreg(
-  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + 
-    I(Democracy*Press) + dnordic |
+  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic |
     HealthSpending + I(Democracy^0.4), 
-  data = data_imp, 
-  link.mu = "cloglog", 
-  link.sigma2 = "log"
-)
-
+  data = data_imp, link.mu = "cloglog", link.sigma2 = "log")
 summary(simplex4)
 ```
 
-## Model with cauchit Mean Link Function
+### Model with cauchit Mean Link Function
 
 ```{r model-cauchit}
 simplex5 <- simplexreg(
-  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + 
-    I(Democracy*Press) + dnordic |
+  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic |
     HealthSpending + I(Democracy^0.4), 
-  data = data_imp,  
-  link.mu = "cauchit", 
-  link.sigma2 = "log"
-)
-
+  data = data_imp, link.mu = "cauchit", link.sigma2 = "log")
 summary(simplex5)
 ```
 
-## Model Selection: Comparing All Models
+### Model Selection
 
 We now compare the model with parametric mean link function (`plogit1`) to models using fixed mean link functions. For this comparison, we use the original Scout Score (`kappa = 0`).
   
 ```{r model-selection-all}
-ss.simplexreg(simplex_par1, simplex1, simplex2, simplex3, simplex4, simplex5, 
-              kappa = 0)
+ss.simplexreg(simplex_par1, simplex1, simplex2, simplex3, simplex4, simplex5, kappa = 0)
 ```
 
 Direct comparison between the best parametric mean link function model and best fixed mean link model:
@@ -246,158 +206,200 @@ Direct comparison between the best parametric mean link function model and best 
 ss.simplexreg(simplex_par1, simplex1, kappa = 0)
 ```
 
-The results indicate that `simplex_par1` (with plogit1 parametric mean link function) provides the best fit.
+The results indicate that `simplex_par1` (simplex model with plogit1 parametric mean link function) provides the best fit.
 
-## Testing lambda = 1
+### Rao Score Test: Testing \(\lambda = 1\)
 
-We can test whether the estimated lambda parameter is significantly different from 1. If lambda equals 1, the plogit1 parametric mean link function reduces to the logit fixed mean link function.
-  
+We can test whether the estimated lambda parameter is significantly different from 1. If \(\lambda = 1\), the plogit1 parametric mean link function reduces to the logit fixed mean link function.
+
 ```{r test-lambda}
 scoretest.simplexreg(simplex2, link = "plogit1")
 ```
 
-The null hypothesis H₀: λ = 1 (which corresponds to the logit mean link) was rejected at the 1% significance level (p = 0.0011), confirming the relevance of using a parametric mean link function specification. 
+The null hypothesis \(H_0: \lambda = 1\) (which corresponds to the logit mean link) was rejected at the 1% significance level (p = 0.0011), confirming the relevance of using a parametric mean link function specification. 
 
-# Model Diagnostics
+## Model Diagnostics
 
 We now perform comprehensive diagnostics on the selected model (`simplex_par1`). We use quantile residuals, which should approximately follow a standard normal distribution under correct model specification.
 
-## Normality Test for Quantile Residuals
+### Normality Test for Quantile Residuals
 
-We test whether the quantile residuals follow a normal distribution:
+The quantile residuals from both models show no evidence of misspecification, as indicated by the Jarque-Bera normality test:
 
 ```{r normality-test}
 tseries::jarque.bera.test(residuals(simplex_par1, type = "quantile"))
 ```
 
-## Residual Plots
+### Residual Plots
 
-```{r residual-plots, fig.cap="Diagnostic plots for the selected model"}
-# Residuals vs observation indices
-plot(simplex_par1, which = 1, type = "quantile")
+```{r residual-plots, fig.width=7, fig.height=7, fig.cap="Figure 3. Residuals plots for Model 1."}
+par(mfrow = c(3, 2), mar = c(3.7, 3.7, 1, 1), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(2.5, 0.8, 0))
+plot(simplex_par1, which = 1:6, type = "quantile")
+```
 
-# Residuals vs fitted values
-plot(simplex_par1, which = 2, type = "quantile")
+### Cook's distances
 
-# Residuals vs predicted values
-plot(simplex_par1, which = 3, type = "quantile")
+The Cook’s distance plot indicates only one mildly influential observation (28: Denmark) with a value slightly above one.
 
-# Predicted vs fitted values
-plot(simplex_par1, which = 4, type = "quantile")
-
-# Q-Q plot
-plot(simplex_par1, which = 5, type = "quantile")
-
-# Worm plot
-plot(simplex_par1, which = 6, type = "quantile")
-
-# Cook's distance vs observation indices
+```{r cooks distances, fig.width=6, fig.height=4, fig.cap="Figure 4. Cook's distances plot for Model 1."}
 plot(simplex_par1, which = 7, type = "quantile")
 ```
 
-## Local Influence Analysis
+### Local Influence Analysis
 
-Local influence analysis helps identify observations that have disproportionate impact on parameter estimates. We consider two perturbation schemes:
+Local influence analysis helps identify observations that have disproportionate impact on parameter estimates. We consider two perturbation schemes: Case-Weight Perturbation Scheme and Response Perturbation Scheme.
 
-### Case-Weight Perturbation Scheme
+```{r influence-case-weight, fig.width=7, fig.height=4, fig.cap="Figure 5. Local influence (Case-weight and Response perturbation) for Model 1."}
+par(mfrow = c(1, 2), mar = c(3.7, 3.7, 1, 1), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(2.5, 0.8, 0))
 
-```{r influence-case-weight, fig.cap="Local influence: Case-weight perturbation"}
-influences_cw <- local.influence_simplexreg(simplex_par1, 
-                                            scheme = "case.weight")$Ci.beta
+influences_cw <- local.influence_simplexreg(simplex_par1, scheme = "case.weight")$Ci.beta
 names(influences_cw) <- 1:n
 
-plot(influences_cw, 
-     xlab = "Observation index", 
-     ylab = expression(C[i*";"*beta]),  
-     pch = 16, 
-     cex = 0.8)
+plot(influences_cw, xlab = "Observation index", ylab = expression(C[i*";"*beta]), pch = 16, cex = 0.8)
 abline(h = 2*mean(influences_cw), lty = 2, col = "red")
-
 # Identify influential observations
 influential_cw <- which(influences_cw > 2*mean(influences_cw))
-if(length(influential_cw) > 0) {
-  text(influential_cw, influences_cw[influential_cw], 
-       labels = influential_cw, 
-       pos = 3, cex = 0.7, col = "blue")
-}
+if(length(influential_cw) > 0) text(influential_cw, influences_cw[influential_cw], 
+                                    labels = influential_cw, pos = 2, cex = 0.7, col = "blue")
 
-cat("\nNumber of influential observations (case-weight):", 
-    sum(influences_cw > 2*mean(influences_cw)), "\n")
-```
-
-### Response Perturbation Scheme
-
-```{r influence-response, fig.cap="Local influence: Response perturbation"}
-influences_resp <- local.influence_simplexreg(simplex_par1, 
-                                              scheme = "response")$Ci.beta
+influences_resp <- local.influence_simplexreg(simplex_par1, scheme = "response")$Ci.beta
 names(influences_resp) <- 1:n
 
-plot(influences_resp, 
-     xlab = "Observation index", 
-     ylab = expression(C[i*";"*beta]),  
-     pch = 16, 
-     cex = 0.8)
+plot(influences_resp, xlab = "Observation index", ylab = expression(C[i*";"*beta]), pch = 16, cex = 0.8)
 abline(h = 2*mean(influences_resp), lty = 2, col = "red")
-
 # Identify influential observations
 influential_resp <- which(influences_resp > 2*mean(influences_resp))
-if(length(influential_resp) > 0) {
-  text(influential_resp, influences_resp[influential_resp], 
-       labels = influential_resp, 
-       pos = 3, cex = 0.7, col = "blue")
-}
+if(length(influential_resp) > 0) text(influential_resp, influences_resp[influential_resp], 
+                                      labels = influential_resp, pos = 4, cex = 0.7, col = "blue")
 
+cat("\nMean of values (case-weight):", mean(influences_cw), "\n")
+cat("\nNumber of influential observations (case-weight):", 
+    sum(influences_cw > 2*mean(influences_cw)), "\n")
+
+cat("\nMean of values (response):", mean(influences_resp), "\n")
 cat("\nNumber of influential observations (response):", 
     sum(influences_resp > 2*mean(influences_resp)), "\n")
 ```
 
-# Visualizing Mean Link Functions
+## Visualizing Mean Link Functions
 
 ### Comparing Mean Link Functions 
 
 This plot shows how the link functions employed in the simplex and beta models map linear predictors to the mean response:
   
-```{r link-comparison, fig.cap="Plogit1 and probit link functions used in the simplex and beta regression models"}
+```{r link-comparison, fig.width=5, fig.height=4, fig.cap="Figure 6. Plogit1 and probit link functions used in the simplex and beta regression models."}
 eta <- seq(from = -2, to = 5.5, length.out = 250)
-
-# Compute inverse links
 mu_plogit1 <- parametric_mean_link_inv(eta, simplex_par1$coefficients$lambda, "plogit1")
 mu_probit <- fixed_mean_link_inv(eta, "probit")
 
-# Plot
-matplot(eta, cbind(mu_plogit1, mu_probit), 
-        type = "l", 
-        lwd = 2, 
-        lty = c(1, 2), 
-        col = c("black", "blue"), 
-        ylab = expression(mu[i]), 
-        xlab = expression(eta[1*i]),
-        main = "Inverse Link Functions")
-
+matplot(eta, cbind(mu_plogit1, mu_probit), type = "l", lwd = 2, lty = c(1, 2), col = c("black", "blue"), 
+        ylab = expression(mu[i]), xlab = expression(eta[1*i]))
 legend("bottomright", 
-       legend = c(
-         bquote("plogit1 (" * lambda == .(round(simplex_par1$coefficients$lambda, 4)) * ")"), 
-         "probit"
-       ), 
-       lty = c(1, 2), 
-       cex = 0.7, 
-       col = c("black", "blue"),
-       lwd = 2, 
-       bty = "n")
+       legend = c(bquote("plogit1 (" * lambda == .(round(simplex_par1$coefficients$lambda, 4)) * ")"), 
+                  "probit"), lty = c(1, 2), cex = 0.7, col = c("black", "blue"),lwd = 2, bty = "n")
 ```
 
-# Conclusion
+## Model `simplex_par1` with dummy for Luxemburg
+
+Luxembourg appears as an influential case in the beta regression, which might reflect distinctive characteristics of that country. To investigate this, we added a dummy variable taking the value one for Luxembourg and zero for all other countries to the `simplex_par1` model. Interestingly, this variable is not statistically significant in the model (p-value: 0.8477).
+
+```{r model dummy Luxemburg}
+dummy <- rep(0, n); dummy[63] <- 1
+
+simplex_par1_dummy <- simplexreg(
+  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) + dnordic + dummy 
+  | EconomicFreedom + HealthSpending + Democracy,
+  data = data_imp, link.mu = "plogit1", link.sigma2 = "log"
+)
+summary(simplex_par1_dummy)
+```
+
+## Countries with the largest and smallest raw residuals
+
+List of five countries with the largest and smallest raw residuals (\(r_i^b = Y_i - \hat{\mu}_i\)). Countries with \(r_i^b < 0\) are classified as overperforming---exhibiting lower impunity than expected---whereas countries with \(r_i^b > 0\) are underperforming, with impunity levels exceeding those predicted by the model.
+
+```{r raw residuals}
+raw_residuals <- data_imp$Impunity - simplex_par1$fitted.values
+names1 <- data_imp[as.numeric(names(sort(raw_residuals, decreasing = TRUE)[1:5])), "Country"]
+y1 <- data_imp$Impunity[as.numeric(names(sort(raw_residuals, decreasing = TRUE)[1:5]))]
+pred1 <- round(simplex_par1$fitted.values[as.numeric(names(sort(raw_residuals, 
+                                                                decreasing = TRUE)[1:5]))], 4)
+res1 <- round(sort(raw_residuals, decreasing = TRUE)[1:5], 4)
+cat("\n### Countries with the highest raw residuals:\n\n")
+print(cbind(Country = names1, Obs = y1, Pred = pred1, Res = res1), quote = FALSE)
+
+names2 <- data_imp[as.numeric(names(sort(raw_residuals)[1:5])), "Country"]
+y2 <- data_imp$Impunity[as.numeric(names(sort(raw_residuals)[1:5]))]
+pred2 <- round(simplex_par1$fitted.values[as.numeric(names(sort(raw_residuals)[1:5]))], 4)
+res2 <- round(sort(raw_residuals)[1:5], 4)
+cat("\n### Countries with the lowest raw residuals:\n\n")
+print(cbind(Country = names2, Obs = y2, Pred = pred2, Res = res2), quote = FALSE)
+```
+
+## Nordic premium
+
+In Santos and Cribari-Neto (2023), the inclusion of a dummy variable for the Nordic countries in the beta regression model resulted in an estimated average reduction of approximately 19% in their predicted levels of impunity. In the simplex regression model with a plogit1 link function, the estimated reduction in average predicted impunity remains directionally consistent but is considerably smaller---around 9%. 
+
+```{r model-plogit1-no-dnordic}
+simplex_par1_no_dnordic <- simplexreg(
+  Impunity ~ EconomicFreedom + I(GDP^1.15) + I(HDI*HealthSpending) + I(Democracy*Press) |
+    EconomicFreedom + HealthSpending + Democracy,
+  data = data_imp, link.mu = "plogit1", link.sigma2 = "log")
+
+sum1 = sum(simplex_par1_no_dnordic$fitted.values[data_imp$dnordic==1])
+sum2 = sum(simplex_par1$fitted.values[data_imp$dnordic==1])
+
+cat("\nEstimated average reduction in the predicted levels of impunity of Nordic countries:", 
+    round((sum2 - sum1) / sum1 * 100, 2), "\n")
+
+```
+
+## Estimated simplex densities for models plogit1 and loglog
+
+The estimated simplex densities for Luxembourg, New Zealand, and Germany, show that the observed values align more closely with the central region of the predictive densities under the parametric link model.
+
+```{r estimated-simplex-densities, fig.width=7, fig.height=7, fig.cap="Figure 7. Estimated simplex densities for Luxembourg, New Zealand, and Germany, under the fitted simplex regression models with plogit1 and log-log links."}
+par(mfrow = c(3, 1), mar = c(3.7, 3.7, 2, 2), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(2.5, 0.8, 0))
+
+mu_par <- simplex_par1$mu.fv
+mu_ll <- simplex1$mu.fv
+sigma2_par <- simplex_par1$sigma2.fv
+sigma2_ll <- simplex1$sigma2.fv
+
+plot_density <- function(i, zmin, zmax, titulo = "") {
+  z.range <- seq(from = zmin, to = zmax, length = 200)
+  d_par1 <- dsimplex(z.range, mu_par[i], sigma2_par[i])
+  d_ll   <- dsimplex(z.range, mu_ll[i],  sigma2_ll[i])
+  
+  matplot(z.range, cbind(d_par1, d_ll), type = "l",
+    lty = c(1, 2), col = c("black", "gray60"),
+    lwd = 2, xlab = "y", ylab = "f(y)",
+    cex = 1.2, cex.lab = 1.6, cex.axis = 1.2)
+  
+  abline(v = data_imp$Impunity[i], lty = 3, lwd = 2, col = "black")
+  title(titulo, line = 0.3, cex.main = 1.4)
+  legend(x = 0.22, y = max(c(d_par1, d_ll)),
+    legend = c("plogit1", "log-log"), col = c("black", "gray60"),
+    lty = c(1, 2), lwd = 2, bty = "n", cex = 1)
+}
+
+plot_density(i = 63, zmin = 0.10, zmax = 0.25, titulo = "Luxembourg")
+plot_density(i = 80, zmin = 0.10, zmax = 0.27, titulo = "New Zealand")
+plot_density(i = 39, zmin = 0.10, zmax = 0.27, titulo = "Germany")
+```
+
+## Conclusion
 
 This analysis demonstrates several key features of the `SimplexRegressionAMM` package:
   
-1. **Parametric mean link functions** (plogit1, plogit2) provide flexibility by estimating the link parameter from the data
-2. **Model selection** using Scout Score effectively identifies the best-fitting model
+1. **Parametric mean link functions** (plogit1, plogit2) provide flexibility by estimating the link parameter from the data;
+2. **Model selection** using Scout Score, AIC, BIC and HQIC effectively identifies the best-fitting model
 3. **Comprehensive diagnostics** including residual analysis, influence measures, and specification tests help validate model adequacy
 4. The **selected model** (simplex_par1 with plogit1 parametric mean link function) shows good fit and appropriate residual behavior
 
-The parametric mean link function approach offers advantages over fixed mean link functions when the optimal transformation is unknown a priori, as demonstrated by the superior performance of `simplex_par1` in this application.
+The parametric mean link function approach offers advantages over fixed mean link functions when the optimal transformation is unknown a priori, as demonstrated by the superior performance of `simplex_par1` in this application. The `simplex_par1` model provides a slightly better fit, with associated inferences and predictions being less sensitive to atypical observations.
 
-# References
+## References
 
 F. Cribari-Neto, M. A. F. L. Santos, An empirical analysis of worldwide impunity, Humanities and Social Sciences Communications 11 (2024) 1285. https://doi.org/10.1057/s41599-024-03803-x
 
