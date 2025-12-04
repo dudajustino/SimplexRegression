@@ -81,7 +81,7 @@ One of the main features of simplex regression with a parametric mean link funct
 
 We estimate simplex regression models with parametric mean link functions `plogit1` and `plogit2`, incorporating all eight covariates, selected powers of regressors, and interaction terms.
 
-Predictor selection was guided by half-normal residual plots with simulated envelopes, pseudo-\(R^2\) Nagelkerke, and information criteria (AIC, SIC, HQIC).
+Predictor selection is guided by half-normal residual plots with simulated envelopes, pseudo-\(R^2\) Nagelkerke, and information criteria (AIC, SIC, HQIC).
 
 ### Model 1: plogit1 Parametric Mean Link Function
 
@@ -208,7 +208,7 @@ ss.simplexreg(simplex_par1, simplex1, kappa = 0)
 
 The results indicate that `simplex_par1` (simplex model with plogit1 parametric mean link function) provides the best fit.
 
-### Rao Score Test: Testing \(\lambda = 1\)
+### Rao's Score Test: Testing \(\lambda = 1\)
 
 We can test whether the estimated lambda parameter is significantly different from 1. If \(\lambda = 1\), the plogit1 parametric mean link function reduces to the logit fixed mean link function.
 
@@ -239,15 +239,15 @@ plot(simplex_par1, which = 1:6, type = "quantile")
 
 ### Cook's distances
 
-The Cook’s distance plot indicates only one mildly influential observation (28: Denmark) with a value slightly above one.
+The Cook’s distance index plot indicates only one mildly influential observation (28: Denmark) with a value slightly above one.
 
-```{r cooks distances, fig.width=6, fig.height=4, fig.cap="Figure 4. Cook's distances plot for Model 1."}
+```{r cooks distances, fig.width=6, fig.height=4, fig.cap="Figure 4. Cook's distances index plot for Model 1."}
 plot(simplex_par1, which = 7, type = "quantile")
 ```
 
 ### Local Influence Analysis
 
-Local influence analysis helps identify observations that have disproportionate impact on parameter estimates. We consider two perturbation schemes: Case-Weight Perturbation Scheme and Response Perturbation Scheme.
+Local influence analysis helps identify observations that have disproportionate impact on parameter estimates. We consider two perturbation schemes: Case-Weight Perturbation and Response Perturbation.
 
 ```{r influence-case-weight, fig.width=7, fig.height=4, fig.cap="Figure 5. Local influence (Case-weight and Response perturbation) for Model 1."}
 par(mfrow = c(1, 2), mar = c(3.7, 3.7, 1, 1), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(2.5, 0.8, 0))
