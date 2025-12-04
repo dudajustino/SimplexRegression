@@ -104,14 +104,14 @@ scoretest.simplexreg <- function(model, link.mu = c("plogit1", "plogit2")) {
 
   vcovlambda_inv <- Klambdalambda - sum(Klambdabeta * solve(Kbetabeta, Klambdabeta))
 
-  SC <- Ulambda^2 / vcovlambda_inv
+  S <- Ulambda^2 / vcovlambda_inv
   gl = 1
-  PVAL = pchisq(SC,gl,lower.tail= F)
+  PVAL = pchisq(S, gl, lower.tail= F)
 
   names(gl) = "df"
-  names(SC) = "SC"
+  names(S) = "S"
 
-  RVAL <- list(statistic = SC, parameter = gl, p.value = PVAL,
+  RVAL <- list(statistic = S, parameter = gl, p.value = PVAL,
                method = METHOD, data.name = DNAME)
   class(RVAL) <- "htest"
 
