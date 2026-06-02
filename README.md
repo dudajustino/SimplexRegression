@@ -1,10 +1,5 @@
----
-output: github_document
----
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
-
 
 # SimplexRegression
 
@@ -13,35 +8,45 @@ output: github_document
 
 ## Overview
 
-**SimplexRegression** provides a comprehensive framework for fitting, inference, and diagnostic analysis in simplex regression models for continuous responses restricted to the unit interval $(0, 1)$, such as rates, proportions, and indices.
+**SimplexRegression** provides a comprehensive framework for fitting,
+inference, and diagnostic analysis in simplex regression models for
+continuous responses restricted to the unit interval $(0, 1)$, such as
+rates, proportions, and indices.
 
-The simplex regression model is based on the simplex distribution (Barndorff-Nielsen and Jørgensen, 1991), indexed by a mean parameter $\mu \in (0,1)$ and a dispersion parameter $\sigma^2 > 0$. The package supports:
+The simplex regression model is based on the simplex distribution
+(Barndorff-Nielsen and Jørgensen, 1991), indexed by a mean parameter
+$\mu \in (0,1)$ and a dispersion parameter $\sigma^2 > 0$. The package
+supports:
 
-- **Fixed mean link functions**: `logit`, `probit`, `loglog`, `cloglog`, `cauchit`
-- **Parametric mean link functions**: `plogit1`, `plogit2` (with estimated shape parameter $\lambda$)
+- **Fixed mean link functions**: `logit`, `probit`, `loglog`, `cloglog`,
+  `cauchit`
+- **Parametric mean link functions**: `plogit1`, `plogit2` (with
+  estimated shape parameter $\lambda$)
 - **Dispersion link functions**: `log`, `sqrt`, `identity`
-- **Constant or variable dispersion** through a two-part formula `y ~ x | z`
+- **Constant or variable dispersion** through a two-part formula
+  `y ~ x | z`
 
-Parameter estimation is performed by maximum likelihood using a mixed algorithm combining BFGS quasi-Newton optimization with Fisher scoring.
+Parameter estimation is performed by maximum likelihood using a mixed
+algorithm combining BFGS quasi-Newton optimization with Fisher scoring.
 
 ## Installation
 
 Install the released version from CRAN:
 
-```r
+``` r
 install.packages("SimplexRegression")
 ```
 
 Or install the development version from GitHub:
 
-```r
+``` r
 # install.packages("remotes")
 remotes::install_github("YOUR_USERNAME/SimplexRegression")
 ```
 
 ## Quick Start
 
-```r
+``` r
 library(SimplexRegression)
 
 # Simulate data
@@ -62,7 +67,7 @@ summary(fit)
 
 ### Fitting
 
-```r
+``` r
 # Two-part formula: mean submodel | dispersion submodel
 fit <- simplexreg(y ~ x1 + x2 | z1 + z2, data = dat, link.mu = "logit")
 
@@ -75,7 +80,7 @@ fit <- simplexreg(y ~ x1 + x2 | 1, data = dat, link.mu = "plogit1")
 
 ### Model Selection
 
-```r
+``` r
 # Penalized Scout Score (for parametric links)
 penalized.ss(fit_p1, fit_p2, kappa = 0.1)
 
@@ -90,7 +95,7 @@ HQIC(fit1, fit2, fit3)
 
 ### Inference
 
-```r
+``` r
 # Likelihood ratio test (nested models)
 lmtest::lrtest(fit, update(fit, . ~ . | 1))
 
@@ -103,7 +108,7 @@ resettest(fit)
 
 ### Diagnostics
 
-```r
+``` r
 # Residuals (10 types available)
 residuals(fit, type = "quantile")   # default, approx. N(0,1)
 residuals(fit, type = "weighted")   # for halfnormal.plot
@@ -119,7 +124,7 @@ halfnormal.plot(fit, nsim = 100)
 
 ### Influence Analysis
 
-```r
+``` r
 # Local influence (case-weight or response perturbation)
 local.influence(fit, scheme = "case.weight", parameter = "theta",
                 type = "Ci", plot = TRUE, threshold = 0.5)
@@ -135,7 +140,7 @@ diag.distances(fit, data = dat, type = "W2", plot = TRUE)
 
 ### Predictive Performance
 
-```r
+``` r
 # PRESS statistic and P² (one or more models)
 press(fit)
 press(fit1, fit2, fit3)
@@ -143,7 +148,7 @@ press(fit1, fit2, fit3)
 
 ### Simplex Distribution Functions
 
-```r
+``` r
 dsimplex(0.5, mu = 0.3, sigma2 = 0.5)           # density
 psimplex(0.5, mu = 0.3, sigma2 = 0.5)           # CDF
 qsimplex(0.5, mu = 0.3, sigma2 = 0.5)           # quantile
@@ -153,33 +158,33 @@ variance.simplex(mu = 0.5, sigma2 = 0.3)        # variance
 
 ## S3 Methods
 
-| Method | Description |
-|--------|-------------|
-| `print` | Basic output with coefficient estimates |
-| `summary` | Full regression output with Wald tests and goodness-of-fit |
-| `coef` | Coefficients (full, mean, or dispersion) |
-| `vcov` | Variance-covariance matrix |
-| `logLik` | Maximized log-likelihood |
-| `fitted` | Fitted mean values |
-| `predict` | Predictions for new data (response, link, or dispersion) |
-| `residuals` | Residuals (10 types) |
-| `hatvalues` | Hat matrix diagonal elements |
-| `cooks.distance` | Approximate Cook's distances |
-| `gleverage` | Generalized leverage values |
-| `plot` | Diagnostic plots (8 types) |
-| `AIC`, `BIC`, `HQIC` | Information criteria |
-| `update` | Update model formula or arguments |
-| `simulate` | Simulate responses from the fitted model |
-| `lrtest` | Likelihood ratio test (via `lmtest`) |
-| `coeftest` | Partial Wald tests (via `lmtest`) |
-| `bread`, `estfun` | Sandwich covariance matrices (via `sandwich`) |
+| Method               | Description                                                |
+|----------------------|------------------------------------------------------------|
+| `print`              | Basic output with coefficient estimates                    |
+| `summary`            | Full regression output with Wald tests and goodness-of-fit |
+| `coef`               | Coefficients (full, mean, or dispersion)                   |
+| `vcov`               | Variance-covariance matrix                                 |
+| `logLik`             | Maximized log-likelihood                                   |
+| `fitted`             | Fitted mean values                                         |
+| `predict`            | Predictions for new data (response, link, or dispersion)   |
+| `residuals`          | Residuals (10 types)                                       |
+| `hatvalues`          | Hat matrix diagonal elements                               |
+| `cooks.distance`     | Approximate Cook’s distances                               |
+| `gleverage`          | Generalized leverage values                                |
+| `plot`               | Diagnostic plots (8 types)                                 |
+| `AIC`, `BIC`, `HQIC` | Information criteria                                       |
+| `update`             | Update model formula or arguments                          |
+| `simulate`           | Simulate responses from the fitted model                   |
+| `lrtest`             | Likelihood ratio test (via `lmtest`)                       |
+| `coeftest`           | Partial Wald tests (via `lmtest`)                          |
+| `bread`, `estfun`    | Sandwich covariance matrices (via `sandwich`)              |
 
 ## Vignette
 
-A detailed vignette illustrating the package through the analysis of monthly
-relative humidity data from Brasília is available:
+A detailed vignette illustrating the package through the analysis of
+monthly relative humidity data from Brasília is available:
 
-```r
+``` r
 vignette("relative-humidity", package = "SimplexRegression")
 ```
 
@@ -187,20 +192,27 @@ vignette("relative-humidity", package = "SimplexRegression")
 
 If you use **SimplexRegression** in your research, please cite:
 
-> Justino, M. E. C. and Cribari-Neto, F. (2026).
-> Simplex regression with a flexible logit link: Inference and application
-> to cross-country impunity data.
-> *Applied Mathematical Modelling*, **154**, 116713.
-> doi: [10.1016/j.apm.2025.116713](https://doi.org/10.1016/j.apm.2025.116713)
+> Justino, M. E. C. and Cribari-Neto, F. (2026). Simplex regression with
+> a flexible logit link: Inference and application to cross-country
+> impunity data. *Applied Mathematical Modelling*, **154**, 116713. doi:
+> [10.1016/j.apm.2025.116713](https://doi.org/10.1016/j.apm.2025.116713)
 
-```r
+``` r
 citation("SimplexRegression")
 ```
 
 ## References
 
-- Barndorff-Nielsen, O. E. and Jørgensen, B. (1991). Some parametric models on the simplex. *Journal of Multivariate Analysis*, **39**(1), 106--116.
-- Espinheira, P. L. and Silva, A. O. (2020). Residual and influence analysis to a general class of simplex regression. *TEST*, **29**, 523--552.
-- Cribari-Neto, F., Vasconcellos, K. L. P. and Santana e Silva, J. J. (2025). New strategies for detecting atypical observations based on the information matrix equality. *Journal of Applied Statistics*, **52**, 2873--2893.
-- Justino, M. E. C. and Cribari-Neto, F. (2026). Simplex regression with a flexible logit link. *Applied Mathematical Modelling*, **154**, 116713.
-README_EOF
+- Barndorff-Nielsen, O. E. and Jørgensen, B. (1991). Some parametric
+  models on the simplex. *Journal of Multivariate Analysis*, **39**(1),
+  106–116.
+- Espinheira, P. L. and Silva, A. O. (2020). Residual and influence
+  analysis to a general class of simplex regression. *TEST*, **29**,
+  523–552.
+- Cribari-Neto, F., Vasconcellos, K. L. P. and Santana e Silva, J. J.
+  (2025). New strategies for detecting atypical observations based on
+  the information matrix equality. *Journal of Applied Statistics*,
+  **52**, 2873–2893.
+- Justino, M. E. C. and Cribari-Neto, F. (2026). Simplex regression with
+  a flexible logit link. *Applied Mathematical Modelling*,
+  **154**, 116713. README_EOF
