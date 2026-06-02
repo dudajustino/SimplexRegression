@@ -39,3 +39,5 @@ Author: Maria Eduarda da Cruz Justino [aut, cre] (ORCID:
 Maintainer: Maria Eduarda da Cruz Justino <eueduardacruz@gmail.com>
 Config/roxygen2/version: 8.0.0
 RoxygenNote: 7.3.3
+URL: https://github.com/dudajustino/SimplexRegression
+BugReports: https://github.com/dudajustino/SimplexRegression/issues
