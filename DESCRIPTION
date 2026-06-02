@@ -1,0 +1,41 @@
+Package: SimplexRegression
+Type: Package
+Title: Simplex Regression Models with Parametric or Fixed Mean Link Functions
+Version: 0.1.0
+Authors@R: c(
+  person(given = "Maria Eduarda", 
+         family = "da Cruz Justino",
+         email = "eueduardacruz@gmail.com",
+         role = c("aut", "cre"),
+         comment = c(ORCID = "0000-0001-9501-2642")),
+  person(given = "Francisco",
+         family = "Cribari-Neto",
+         email = "francisco.cribari@ufpe.br",
+         role = c("ctb", "ths"),
+         comment = c(ORCID = "0000-0002-5909-6698", "Theoretical foundations"))
+  )
+Description: Provides functions for fitting and analyzing simplex regression models 
+    with either fixed or parametric mean link functions. The package implements the simplex 
+    probability density function, cumulative distribution function, quantile function, 
+    random number generation, and variance evaluation. It also offers several fixed and 
+    parametric link functions for the mean submodel, tools for residual analysis and 
+    diagnostic plotting, hypothesis testing procedures, and influence measures such as
+    Cook’s distance and leverage (hat values). In addition, the package includes the 
+    Scout Score (SS) criterion for model selection, enabling comprehensive inference 
+    and diagnostic analysis within the simplex regression framework.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Language: en-US
+Imports: expint, Formula, gamlss, graphics, lmtest, matrixcalc, Matrix, sandwich, stats, pracma
+Suggests: knitr, rmarkdown, moments, tseries
+VignetteBuilder: knitr
+Depends: R (>= 3.5)
+LazyData: true
+LazyDataCompression: xz
+Author: Maria Eduarda da Cruz Justino [aut, cre] (ORCID:
+    <https://orcid.org/0000-0001-9501-2642>),
+  Francisco Cribari-Neto [ctb, ths] (ORCID:
+    <https://orcid.org/0000-0002-5909-6698>, Theoretical foundations)
+Maintainer: Maria Eduarda da Cruz Justino <eueduardacruz@gmail.com>
+Config/roxygen2/version: 8.0.0
+RoxygenNote: 7.3.3

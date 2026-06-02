@@ -1,0 +1,691 @@
+---
+title: "Modeling Relative Air Humidity with Simplex Regression"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{relative-humidity}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width  = 7,
+  fig.height = 4.5,
+  fig.align  = "center",
+  message    = FALSE,
+  warning    = FALSE
+)
+options(width = 70, prompt = "R> ", continue = "+  ", digits = 5)
+```
+
+# Introduction
+
+## The simplex distribution
+
+Regression models for continuous responses restricted to the unit interval
+$(0, 1)$ play a central role in empirical research across economics,
+biostatistics, political science, and environmental studies. Typical examples
+include rates, proportions, indices, and concentration measures. The
+**simplex regression model** provides a flexible and theoretically appealing
+framework for such data. It is based on the simplex distribution, introduced
+by Barndorff-Nielsen and Jørgensen (1991), which is indexed by a mean
+parameter $\mu \in (0, 1)$ and a dispersion parameter $\sigma^2 > 0$.
+
+A random variable $Y$ follows a simplex distribution,
+$Y \sim S^-(\mu, \sigma^2)$, if its density is
+
+$$f(y; \mu, \sigma^2) = \left\{2\pi\sigma^2[y(1-y)]^3\right\}^{-1/2}
+\exp\!\left(-\frac{d(y;\mu)}{2\sigma^2}\right), \quad y \in (0,1),$$
+
+where $d(y;\mu) = (y - \mu)^2 / [y(1-y)\mu^2(1-\mu)^2]$ is the unit
+deviance. The mean and variance are $\mathrm{E}(Y) = \mu$ and
+$\mathrm{Var}(Y) < \mu(1-\mu)$, with variance function
+$\mathrm{V}(\mu) = \mu^3(1-\mu)^3$.
+
+The simplex distribution can assume a wide variety of shapes — symmetric,
+left- or right-skewed, J-shaped, U-shaped, and even bimodal — making it
+particularly flexible for modeling bounded responses. Unlike the beta
+distribution, which is indexed by a precision parameter, the simplex
+distribution is indexed by a dispersion parameter $\sigma^2$: smaller values
+correspond to higher concentration around the mean, whereas larger values
+indicate greater variability.
+
+## The simplex regression model
+
+The simplex regression model with variable dispersion relates the mean and
+dispersion to covariates through link functions:
+
+$$g(\mu_i) = \mathbf{x}_i^\top \boldsymbol{\beta} = \eta_{1i}
+\quad \text{and} \quad
+h(\sigma^2_i) = \mathbf{z}_i^\top \boldsymbol{\gamma} = \eta_{2i},$$
+
+where $\boldsymbol{\beta}$ and $\boldsymbol{\gamma}$ are unknown parameter
+vectors. For models with a **parametric mean link**, an additional shape
+parameter $\lambda > 0$ is estimated jointly with $\boldsymbol{\beta}$ and
+$\boldsymbol{\gamma}$:
+
+$$g(\mu_i, \lambda) = \mathbf{x}_i^\top \boldsymbol{\beta}.$$
+
+The `SimplexRegression` package supports five fixed link functions for the
+mean submodel — `"logit"`, `"probit"`, `"loglog"`, `"cloglog"`,
+`"cauchit"` — and two parametric links, `"plogit1"` and `"plogit2"`,
+defined as
+
+$$\text{plogit1:}\; g(\mu_i,\lambda) = \log\!\left[(1-\mu_i)^{-\lambda}-1\right],
+\qquad
+\text{plogit2:}\; g(\mu_i,\lambda) = \log\!\left(\frac{\mu_i^\lambda}{1-\mu_i^\lambda}\right).$$
+
+Both reduce to the standard logit when $\lambda = 1$. For the dispersion
+submodel, the links `"log"`, `"sqrt"`, and `"identity"` are available.
+All parameters are estimated by maximum likelihood using a mixed algorithm
+that combines the BFGS quasi-Newton method with Fisher scoring steps.
+
+## Advantages over beta regression
+
+Compared to beta regression, simplex regression has several distinctive
+advantages:
+
+- It can represent **bimodal densities**, which the beta distribution
+  cannot;
+- Maximum likelihood estimators for the mean and dispersion parameters are
+  **asymptotically orthogonal**, simplifying inference and improving
+  numerical stability;
+- Likelihood-based inferences are typically **less sensitive to atypical
+  observations**;
+- Its higher-order variance function $\mu^3(1-\mu)^3$ allows **more
+  flexible variance patterns** than the quadratic variance function of
+  the beta distribution.
+
+## This vignette
+
+This vignette illustrates the main functionalities of the `SimplexRegression`
+package through the analysis of monthly average relative humidity data
+recorded in Brasília, Brazil ($n = 312$ observations). The analysis covers:
+
+- data preparation and exploratory summary;
+- fitting simplex regression models with **parametric** and **fixed** mean
+  link functions;
+- link function selection via the **penalized Scout Score** (`penalized.ss`)
+  and **penalized information criteria** (`penalized.ic`);
+- **likelihood ratio test** for nested models (`lrtest`);
+- score test for $H_0\!: \lambda = 1$ (`scoretest`);
+- specification testing with the **RESET test** (`resettest`);
+- fitted values, residuals, and predictive performance (`press`);
+- prediction and simulation;
+- influence measures: hat values, Cook's distance, generalized leverage;
+- diagnostic plots (`plot`, `halfnormal.plot`);
+- **local influence** and **diagnostic distance** measures
+  (`local.influence`, `diag.im`, `diag.distances`).
+
+# The Data
+
+Relative air humidity (RH) is defined as the ratio of the partial pressure
+of water vapor in the air to the saturation vapor pressure at the same
+temperature. In Brasília, low RH levels during dry months are associated with
+adverse health outcomes (asthma, nosebleeds, dehydration), increased
+forest-fire risk, and pressure on water resources. The dataset contains
+monthly averages from January 2000 to December 2025, obtained from the
+National Institute of Meteorology (INMET).
+
+```{r setup}
+library(SimplexRegression)
+data(RelativeHumidity, package = "SimplexRegression")
+head(RelativeHumidity, 5)
+```
+
+| Variable | Description |
+|----------|-------------|
+| `Date`   | Observation date (end of month) |
+| `RH`     | Monthly average relative humidity, rescaled to $(0,1)$ |
+| `Ins`    | Total insolation (hours), with two missing values |
+| `Ins2`   | Total insolation with imputed missing values |
+| `Pre`    | Total precipitation (mm), with two missing values |
+| `Pre2`   | Total precipitation with imputed missing values |
+| `Neb`    | Average cloudiness (tenths) |
+| `AP`     | Average atmospheric pressure (hPa) |
+| `MT`     | Average maximum temperature (°C) |
+| `WS`     | Average wind speed (m/s) |
+| `Dir`    | Predominant wind direction (degrees) |
+
+## Data preparation
+
+To capture the 12-month seasonal cycle we add harmonic regressors
+$s_i = \sin(2\pi i/12)$ and $c_i = \cos(2\pi i/12)$, and a rainy-season
+dummy equal to 1 for October, November, and December (the rainy season in
+Brasília) and 0 otherwise.
+
+```{r data-prep}
+rh       <- RelativeHumidity
+rh$hs    <- sin(2 * pi * seq_len(nrow(rh)) / 12)
+rh$hc    <- cos(2 * pi * seq_len(nrow(rh)) / 12)
+rh$dummy <- as.integer(as.integer(format(rh$Date, "%m")) %in% 10:12)
+```
+
+## Descriptive summary
+
+```{r summary-rh}
+summary(rh$RH)
+cat(sprintf(
+  "Std. dev.: %.4f  |  Skewness: %.4f\n",
+  sd(rh$RH),
+  mean(((rh$RH - mean(rh$RH)) / sd(rh$RH))^3)
+))
+```
+
+The response ranges from 0.301 to 0.851, with mean 0.635 and moderate left
+skewness ($-0.47$), consistent with a higher concentration of RH values
+above the mean during the wetter months. These features support the use of a
+unit-interval distribution such as the simplex.
+
+# Model Formula
+
+All models fitted in this vignette share the same formula structure. The
+two-part formula `y ~ x | z` specifies the mean submodel (left of `|`) and
+the dispersion submodel (right of `|`) simultaneously. The mean submodel
+includes insolation (`Ins2`), maximum temperature (`MT`), wind speed (`WS`),
+harmonic terms (`hs`, `hc`) to capture seasonality, a rainy-season dummy,
+and its interaction with wind speed. The dispersion submodel contains only
+precipitation (`Pre2`), allowing the variability of RH to depend on rainfall.
+
+```{r formula}
+formula <- RH ~ Ins2 + MT + WS + hs + hc + dummy + I(dummy * WS) | Pre2
+```
+
+# Parametric Mean Link Functions
+
+## Fitting and model selection
+
+We first fit models with the two parametric mean links available in the
+package, `plogit1` and `plogit2`. These links include a shape parameter
+$\lambda$ estimated jointly with the regression coefficients. When $\lambda = 1$,
+both reduce to the standard logit link; values $\lambda \neq 1$ introduce
+asymmetry in the link, adding flexibility to capture non-standard
+relationships between the mean response and the linear predictor.
+
+```{r models-plogit}
+fit_p1 <- simplexreg(formula, data = rh, link.mu = "plogit1")
+fit_p2 <- simplexreg(formula, data = rh, link.mu = "plogit2")
+```
+
+## Penalized Scout Score and information criteria
+
+When comparing models that all use a parametric link, the **penalized Scout
+Score** (`penalized.ss`) and **penalized information criteria**
+(`penalized.ic`) are recommended. These functions incorporate an additional
+penalty controlled by `kappa` (default `kappa = 0.1`) that accounts for the
+complexity introduced by $\lambda$ relative to its deviation from the
+standard logit. The model with the highest Scout Score or lowest penalized
+criterion is selected. 
+
+```{r penalized-ss-param}
+penalized.ss(fit_p1, fit_p2, kappa = 0.1)
+```
+
+```{r penalized-ic}
+penalized.ic(fit_p1, fit_p2, kappa = 0.1)
+```
+
+All penalized criteria unanimously select the `plogit1` link. The Scout
+Score of `fit_p1` is substantially higher than that of `fit_p2`, and all
+three penalized information criteria are lower for `fit_p1`.
+
+# Fixed Mean Link Functions
+
+## Fitting
+
+We also fit models with all five fixed mean links supported by the package.
+Fixed links do not include an additional parameter and are therefore always
+comparable using standard (unpenalized) criteria.
+
+```{r models-fixed}
+fit_loglog  <- simplexreg(formula, data = rh, link.mu = "loglog")
+fit_logit   <- simplexreg(formula, data = rh, link.mu = "logit")
+fit_probit  <- simplexreg(formula, data = rh, link.mu = "probit")
+fit_cauchit <- simplexreg(formula, data = rh, link.mu = "cauchit")
+fit_cloglog <- simplexreg(formula, data = rh, link.mu = "cloglog")
+```
+
+## Comparing all candidates
+
+When comparing models with both fixed and parametric links simultaneously,
+the **unpenalized** version (`kappa = 0`) must be used, since the penalty
+for $\lambda$ is only meaningful when all candidates use a parametric link.
+
+```{r penalized-ss-all}
+penalized.ss(
+  fit_loglog, fit_logit, fit_probit,
+  fit_cauchit, fit_cloglog, fit_p1,
+  kappa = 0
+)
+```
+
+The log-log link achieves the highest Scout Score and is selected as the
+best-fitting specification. We proceed with `fit_loglog` for all remaining
+analyses.
+
+# Model Summary
+
+The `summary` method provides a standard regression output: estimated
+coefficients for the mean and dispersion submodels, standard errors, Wald
+$z$-statistics and $p$-values, the maximized log-likelihood, information
+criteria (AIC, BIC, HQIC), pseudo-$R^2$ measures, and details on the
+numerical optimization procedure.
+
+```{r summary-fit}
+summary(fit_loglog)
+```
+
+All regression coefficients are statistically significant at the 5% level.
+The harmonic terms (`hs`, `hc`) and the rainy-season dummy capture the
+strong seasonal pattern in RH, while insolation (`Ins2`), maximum temperature
+(`MT`), and wind speed (`WS`) explain the within-season variation. The
+Nagelkerke and Ferrari–Cribari-Neto pseudo-$R^2$ values both exceed 0.95,
+indicating an excellent fit. The model converged in 101 BFGS iterations
+followed by 7 Fisher scoring steps.
+
+# Standard Information Criteria
+
+The standard (unpenalized) AIC, BIC, and HQIC are accessible via the usual
+S3 generics and compare multiple models simultaneously. Lower values
+indicate a better trade-off between fit and complexity.
+
+```{r aic-bic}
+AIC(fit_loglog, fit_logit, fit_probit, fit_cauchit, fit_cloglog, fit_p1)
+BIC(fit_loglog, fit_logit, fit_probit, fit_cauchit, fit_cloglog, fit_p1)
+HQIC(fit_loglog, fit_logit, fit_probit, fit_cauchit, fit_cloglog, fit_p1)
+```
+
+The log-log model consistently achieves the lowest values across all three
+criteria, confirming the Scout Score selection.
+
+# Extracting Model Components
+
+## Coefficients and covariance matrix
+
+The `coef` method extracts estimated coefficients for the full model or for
+each submodel separately, controlled by the `model` argument
+(`"full"`, `"mean"`, or `"dispersion"`). The `vcov` method returns the
+corresponding variance-covariance matrix.
+
+```{r coef-vcov}
+coef(fit_loglog)                          # full coefficient vector
+coef(fit_loglog, model = "mean")          # mean submodel only
+coef(fit_loglog, model = "dispersion")    # dispersion submodel only
+round(vcov(fit_loglog, model = "mean"), 6)  # vcov of mean submodel
+```
+
+## Log-likelihood
+
+The `logLik` method returns the maximized log-likelihood together with the
+number of estimated parameters (`df`) and the number of observations. This
+is compatible with `AIC()` and `BIC()` from the `stats` package.
+
+```{r loglik}
+logLik(fit_loglog)
+```
+
+# Hypothesis Tests
+
+## Likelihood ratio test for nested models
+
+The `lrtest` method from the `lmtest` package performs likelihood ratio tests
+between nested simplex regression models. A natural application is testing
+whether the dispersion is constant against a model with covariate-dependent
+dispersion. The restricted model (constant dispersion) is obtained via
+`update` by replacing the dispersion submodel with an intercept only
+(`| 1`).
+
+```{r lrtest}
+fit_loglog_null <- update(fit_loglog, . ~ . | 1)
+lmtest::lrtest(fit_loglog, fit_loglog_null)
+```
+
+The very small $p$-value ($< 0.001$) provides strong evidence against
+constant dispersion, confirming that RH variability is significantly
+associated with precipitation (`Pre2`). The model with variable dispersion
+is therefore preferred.
+
+## Score test for $H_0\!: \lambda = 1$
+
+The `scoretest` function implements Rao's score test for the hypothesis that
+the standard logit link is adequate, i.e., $H_0\!: \lambda = 1$. The test
+requires a model fitted under $H_0$ (with the logit link) and tests against
+either `"plogit1"` or `"plogit2"` as the alternative. Rejection of $H_0$
+suggests that a parametric link provides a better fit than the standard
+logit.
+
+```{r scoretest}
+fit_logit_h0 <- simplexreg(formula, data = rh, link.mu = "logit")
+scoretest(fit_logit_h0, link.mu = "plogit1")
+scoretest(fit_logit_h0, link.mu = "plogit2")
+```
+
+## RESET test for functional form
+
+The `resettest` function implements Ramsey's RESET test, which augments the
+original model with the squared fitted linear predictor as an additional
+covariate and tests its significance. By default (`dispersion = TRUE`), the
+squared predictor is added to both the mean and dispersion submodels.
+Setting `dispersion = FALSE` restricts the augmentation to the mean submodel
+only. Failure to reject $H_0$ supports the adequacy of the assumed
+functional form.
+
+```{r resettest}
+resettest(fit_loglog)                      # both submodels augmented
+resettest(fit_loglog, dispersion = FALSE)  # mean submodel only
+```
+
+The large $p$-values in both cases ($0.817$ and $0.929$) provide no
+evidence of functional form misspecification in either submodel.
+
+# Fitted Values, Residuals, and Predictive Performance
+
+## Fitted values and residuals
+
+The `fitted` method returns fitted mean values $\hat{\mu}_i$. The
+`residuals` method supports ten residual types. Quantile residuals
+(default) have an approximately standard normal distribution under correct
+model specification and are recommended for general diagnostics. Weighted
+residuals are particularly useful for half-normal plots.
+
+```{r fitted-resid}
+head(fitted(fit_loglog))
+head(residuals(fit_loglog, type = "quantile"))  # approx. N(0,1)
+head(residuals(fit_loglog, type = "pearson"))
+head(residuals(fit_loglog, type = "weighted"))  # for halfnormal.plot
+```
+
+## Predictive performance: PRESS and $P^2$
+
+The `press` function computes the PRESS (Predicted Residual Error Sum of
+Squares) statistic and the associated cross-validation measures $P^2$ and
+adjusted $P^2_c$. The $P^2$ statistic is a cross-validation analog of the
+coefficient of determination, computed from the hat matrix diagonal without
+refitting the model $n$ times. Values close to 1 indicate strong predictive
+accuracy. The function accepts multiple models simultaneously, enabling
+direct comparison of predictive performance across competing specifications.
+
+```{r press}
+press(fit_loglog)                            # single model
+press(fit_loglog, fit_logit, fit_probit)     # comparing models
+```
+
+The log-log model achieves the highest $P^2$ and $P^2_c$ values, confirming
+its superior predictive performance. The PRESS statistic reflects the total
+cumulative squared prediction error across all leave-one-out fits.
+
+# Prediction and Simulation
+
+## Prediction
+
+The `predict` method computes predicted values for new or original data. The
+`type` argument controls the output: `"response"` returns fitted means
+$\hat{\mu}_i$; `"link"` returns the linear predictors $\hat{\eta}_{1i}$ and
+$\hat{\eta}_{2i}$; `"dispersion"` returns fitted dispersion values
+$\hat{\sigma}^2_i$.
+
+```{r predict}
+head(predict(fit_loglog, type = "response"))        # fitted means
+head(predict(fit_loglog, type = "link")$mean)       # mean linear predictor
+head(predict(fit_loglog, type = "link")$dispersion) # dispersion predictor
+head(predict(fit_loglog, type = "dispersion"))      # fitted sigma^2
+
+# Out-of-sample prediction
+new_obs <- rh[1:3, ]
+predict(fit_loglog, newdata = new_obs, type = "response")
+```
+
+## Simulation
+
+The `simulate` method generates response vectors from the fitted simplex
+distribution using the estimated $\hat{\mu}_i$ and $\hat{\sigma}^2_i$. The
+`nsim` argument controls the number of replicates and `seed` ensures
+reproducibility. The result is a data frame with `nsim` columns.
+
+```{r simulate}
+set.seed(2026)
+sims <- simulate(fit_loglog, nsim = 3)
+head(sims)
+```
+
+# Influence Measures
+
+## Hat values and Cook's distance
+
+The `hatvalues` method returns the diagonal elements $h_{ii}$ of the hat
+matrix, measuring the leverage of each observation on the fitted values.
+Observations with $h_{ii}$ much larger than the average $r/n$ (where $r$
+is the number of estimated parameters) deserve closer inspection. The
+`cooks.distance` method computes approximate Cook's distances, which combine
+leverage and residual size to measure overall influence on the parameter
+estimates. The `type` argument selects the residual type used
+(`"pearson"` or `"weighted"`).
+
+```{r influence}
+hii  <- hatvalues(fit_loglog)
+cook <- cooks.distance(fit_loglog, type = "pearson")
+cat(sprintf("Leverages  — max: %.4f  mean: %.4f\n", max(hii),  mean(hii)))
+cat(sprintf("Cook's D   — max: %.4f\n", max(cook)))
+```
+
+No observation has a disproportionately large leverage or Cook's distance,
+suggesting no single point dominates the fit.
+
+## Generalized leverage
+
+The `gleverage` function computes the generalized leverage values, which
+extend the classical hat values to account for both the mean and dispersion
+submodels. High generalized leverage indicates observations that may exert
+disproportionate influence on the fitted values across the entire model.
+
+```{r gleverage}
+gl <- gleverage(fit_loglog)
+cat(sprintf("Generalized leverage — max: %.4f  mean: %.4f\n",
+            max(gl), mean(gl)))
+```
+
+# Diagnostic Plots
+
+## Residual and fit plots
+
+The `plot` method produces up to eight diagnostic plots selected via `which`:
+(1) residuals vs. observation index; (2) residuals vs. fitted values;
+(3) residuals vs. linear predictor; (4) observed vs. fitted values;
+(5) normal Q-Q plot; (6) worm plot; (7) Cook's distances; (8) generalized
+leverages. The default residual type is `"quantile"`. For plots 7 and 8,
+`threshold` highlights influential observations and `label.pos` controls
+label placement (1 = below, 2 = left, 3 = above, 4 = right).
+
+```{r plots-1-6, fig.height = 8, fig.cap = "Diagnostic plots (1–6) for the fitted simplex regression model with log-log link."}
+par(mfrow = c(3, 2))
+plot(fit_loglog, which = 1:6, reset.par = FALSE)
+```
+
+```{r plot-cook, fig.height = 4, fig.cap = "Cook's distances. Observations exceeding the threshold of 0.15 are labeled."}
+plot(fit_loglog, which = 7, threshold = 0.15, label.pos = 4)
+```
+
+```{r plot-glev, fig.height = 4, fig.cap = "Generalized leverage values. Observations exceeding 0.08 are labeled."}
+plot(fit_loglog, which = 8, threshold = 0.08, label.pos = 3)
+```
+
+The quantile residuals are approximately standard normal, with no systematic
+patterns across fitted values or the linear predictor. Cook's distances and
+generalized leverages are uniformly small, with no evidence of unduly
+influential observations.
+
+## Local influence
+
+Local influence analysis quantifies how small perturbations to the model
+assumptions affect the parameter estimates. Two perturbation schemes are
+supported: `"case.weight"` perturbs observation weights and `"response"`
+perturbs the response values. The `parameter` argument selects the
+parameter block of interest — `"theta"` (all parameters), `"beta"` (mean
+submodel), or `"gamma"` (dispersion submodel). The `type` argument controls
+the influence measure: `"Ci"` for the total local influence index $C_i$,
+or `"dmax"` for the direction of maximum curvature. Observations exceeding
+`threshold` are labeled in the index plot.
+
+```{r local-influence-cw, fig.height = 4.5, fig.cap = "Total local influence $C_i$ under case-weight perturbation for all parameters."}
+local.influence(
+  fit_loglog,
+  scheme    = "case.weight",
+  parameter = "theta",
+  type      = "Ci",
+  plot      = TRUE,
+  threshold = 0.5,
+  label.pos = c(3, 4, 3, 2, 2)
+)
+```
+
+```{r local-influence-resp, fig.height = 4.5, fig.cap = "Total local influence $C_i$ under response perturbation for all parameters."}
+local.influence(
+  fit_loglog,
+  scheme    = "response",
+  parameter = "theta",
+  type      = "Ci",
+  plot      = TRUE,
+  threshold = 0.4,
+  label.pos = 2
+)
+```
+
+A small set of observations is identified as locally influential under both
+perturbation schemes, but none produces an extreme influence value.
+
+## Information matrix-based measures (`diag.im`)
+
+The `diag.im` function computes leave-one-out influence measures $s_{3,i}$
+and $s_{5,i}$, proposed by Cribari-Neto, Vasconcellos and Santana e Silva
+(2025). For each observation $i$, the model is refit without observation $i$
+and the deviation from the full-data estimates is quantified through
+information matrix comparisons. The `type` argument selects which
+measure(s) to compute (`"s3"`, `"s5"`, or both). Detection thresholds are
+controlled by `interval`: `"I1"` for moderate detection and `"I2"` for
+stricter detection. The `verbose` argument controls whether progress
+messages are printed during the leave-one-out refitting.
+
+```{r diag-im-s3, fig.height = 5, fig.cap = "Index plot of the $s_{3,i}$ measure with detection threshold I2."}
+diag.im(
+  fit_loglog,
+  data      = rh,
+  type      = "s3",
+  interval  = "I2",
+  parameter = "theta",
+  verbose   = FALSE,
+  plot      = TRUE,
+  label.pos = c(1, 4, 3, 3, 3, 2, 3)
+)
+```
+
+```{r diag-im-s5, fig.height = 5, fig.cap = "Index plot of the $s_{5,i}$ measure with detection threshold I2."}
+diag.im(
+  fit_loglog,
+  data      = rh,
+  type      = "s5",
+  interval  = "I2",
+  parameter = "theta",
+  verbose   = FALSE,
+  plot      = TRUE,
+  label.pos = c(3, 1, 1, 2, 1, 1, 1)
+)
+```
+
+## Distance-based measures (`diag.distances`)
+
+The `diag.distances` function computes leave-one-out influence diagnostics
+based on distributional distances between the full-data and leave-one-out
+fitted simplex distributions. Three distances are available via `type`:
+Hellinger (`"H"`), Wasserstein with $p_W = 1$ (`"W1"`), and Wasserstein
+with $p_W = 2$ (`"W2"`). Influential observations are flagged using an
+ad hoc threshold based on an asymmetric IQR rule. The `verbose` argument
+controls progress reporting.
+
+```{r diag-dist-H, fig.height = 5, fig.cap = "Hellinger distance between full-data and leave-one-out fitted simplex distributions."}
+diag.distances(
+  fit_loglog,
+  data      = rh,
+  type      = "H",
+  plot      = TRUE,
+  verbose   = FALSE,
+  label.pos = c(3, 3, 4, 4, 3, 2, 3, 3, 3)
+)
+```
+
+## Half-normal plot with simulated envelope
+
+The `halfnormal.plot` function produces a half-normal plot of the absolute
+residuals together with a simulated envelope based on `nsim` Monte Carlo
+replications of the fitted model (default `nsim = 100`). Points outside the
+envelope may indicate model inadequacy. The `type` argument selects the
+residual type (default `"weighted"`) and `seed` ensures reproducibility.
+
+```{r halfnormal, fig.height = 5, fig.cap = "Half-normal plot of absolute weighted residuals with 95% simulated envelope (100 replications)."}
+halfnormal.plot(fit_loglog, nsim = 100, type = "weighted", seed = 2026)
+```
+
+All diagnostic plots reveal no evidence against the adequacy of the fitted
+model. Quantile residuals are approximately standard normal, no observation
+has disproportionate influence, and nearly all points in the half-normal
+plot fall within the simulated envelope.
+
+# Fitted vs. Observed: Time Series
+
+```{r timeseries, fig.height = 4, fig.cap = "Observed (solid black) and fitted (dashed red) monthly relative humidity in Brasília, January 2000 to December 2025."}
+plot(rh$Date, rh$RH,
+     type = "l", col = "black", lwd = 1.2,
+     xlab = "Date", ylab = "Relative humidity",
+     main = "Observed vs Fitted RH — Brasília (2000–2025)")
+lines(rh$Date, fitted(fit_loglog), col = "red", lwd = 1.5, lty = 2)
+legend("bottomleft",
+       legend = c("Observed", "Fitted"),
+       col    = c("black", "red"),
+       lty    = c(1, 2), lwd = c(1.2, 1.5),
+       bty    = "n", cex = 0.85)
+```
+
+The simplex regression model with log-log link accurately captures the
+strong seasonal pattern in relative humidity, with fitted values tracking
+the observed series closely throughout the entire 26-year period.
+
+# Summary
+
+This vignette demonstrated the main functionalities of the
+`SimplexRegression` package through the analysis of monthly relative
+humidity data from Brasília. The selected simplex regression model uses the
+log-log mean link with variable dispersion driven by precipitation. It
+achieved excellent goodness of fit (pseudo-$R^2 > 0.95$) and strong
+cross-validated predictive performance ($P^2 > 0.95$), with no evidence of
+misspecification from the RESET test or departures from model assumptions
+in the diagnostic plots.
+
+The package provides a comprehensive and self-consistent workflow — from
+data preparation and model fitting to inference, model selection,
+diagnostics, and influence analysis — following the standard conventions
+of formula-based regression modeling in R.
+
+# References
+
+- Barndorff-Nielsen, O. E. and Jørgensen, B. (1991). Some parametric models
+  on the simplex. *Journal of Multivariate Analysis*, **39**(1), 106--116.
+- Cribari-Neto, F., Vasconcellos, K. L. P. and Santana e Silva, J. J.
+  (2025). New strategies for detecting atypical observations based on the
+  information matrix equality. *Journal of Applied Statistics*, **52**,
+  2873--2893.
+- Espinheira, P. L. and Silva, A. O. (2020). Residual and influence
+  analysis to a general class of simplex regression. *TEST*, **29**,
+  523--552.
+- Justino, M. E. C. and Cribari-Neto, F. (2026). Simplex regression with a
+  flexible logit link: Inference and application to cross-country impunity
+  data. *Applied Mathematical Modelling*, **154**, 116713.
+
+# Session Info
+
+```{r session}
+sessionInfo()
+```
