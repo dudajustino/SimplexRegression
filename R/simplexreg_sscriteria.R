@@ -129,7 +129,7 @@ penalized.ss <- function(..., kappa = 0.1, verbose = TRUE) {
   if (is.null(model_names)) {
     model_names <- sapply(as.list(substitute(list(...)))[-1], deparse)
   }
-  
+
   y <- models[[1]]$y
   n <- models[[1]]$nobs
 
@@ -160,7 +160,7 @@ penalized.ss <- function(..., kappa = 0.1, verbose = TRUE) {
   # Detect if user explicitly provided kappa
   call <- match.call()
   user_kappa <- "kappa" %in% names(call)
-  
+
   # Adjust kappa intelligently
   if (!all_parametric) {
     if (user_kappa && kappa > 0) {
@@ -213,7 +213,7 @@ penalized.ss <- function(..., kappa = 0.1, verbose = TRUE) {
   }
 
   result <- data.frame(
-    df = r_list,  
+    df = r_list,
     SS = SS_values,
     row.names = model_names
   )

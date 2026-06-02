@@ -46,7 +46,7 @@
 #' \emph{Biometrics}, \bold{56}(2), 496--502.
 #' \doi{10.1111/j.0006-341X.2000.00496.x}
 #'
-#' @importFrom expint gammainc
+#' @importFrom stats pgamma
 #'
 #' @export
 variance.simplex <- function(mu, sigma2) {
@@ -58,13 +58,13 @@ variance.simplex <- function(mu, sigma2) {
 
   term1 <- mu * (1 - mu)
   a <- 1/(2*sigma2*term1^2)
-  
+
   # Compute adjustment term with numerical stability
   # For large a (> 700), use asymptotic approximation to avoid overflow
-  term2 <- ifelse(a <= 700, 
-                  1/sqrt(2*sigma2) * exp(a) * gammainc(0.5, a),
+  term2 <- ifelse(a <= 700,
+                  1/sqrt(2*sigma2) * exp(a) * sqrt(pi) * pgamma(a, 0.5, lower.tail = FALSE),
                   1/sqrt(2*sigma2) * sqrt(1 / a))
-  
+
   tol <- 1e-10
   simplex_variance <- ifelse(term2 < term1 - tol,
                             term1 - term2,

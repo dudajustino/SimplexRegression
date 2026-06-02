@@ -15,7 +15,7 @@
 #' parametric or fixed mean link function.
 #'
 #' @param x An object of class \code{simplexregression}.
-#' @param which Numeric vector indicating which plots to display (\code{1:8}).
+#' @param which Numeric vector indicating which plots to display (\code{1:7}).
 #' @param type Character string specifying the residual type (default: \code{"quantile"}).
 #' See \code{\link{residuals.simplexregression}} for available options.
 #' @param ask Logical; if \code{TRUE}, the user is asked before each plot.
@@ -30,8 +30,8 @@
 #' Default is \code{3} (above). See \code{\link[graphics]{text}} for details.
 #' @param plot.type Controls the plot symbol/type for scatter plots and index plots.
 #' If \code{NULL} (default), uses \code{pch = 1} (open circles) for residual plots
-#' (which = 1--6) and \code{type = "h"} (vertical lines) for Cook's distance and
-#' generalized leverage plots (which = 7--8). Otherwise, the value is passed
+#' (which = 1--5) and \code{type = "h"} (vertical lines) for Cook's distance and
+#' generalized leverage plots (which = 6--7). Otherwise, the value is passed
 #' directly to \code{pch} (for scatter plots) or \code{type} (for index plots).
 #' @param ... Additional graphical parameters.
 #'
@@ -52,12 +52,10 @@
 #'   \item Normal Q–Q plot (\code{which = 5}): Evaluates residual normality (especially
 #'   useful for quantile residuals);
 #'
-#'   \item Worm plot (\code{which = 6}): Implemented via \code{gamlss::wp};
-#'
-#'   \item Cook’s distance vs indices of observations (\code{which = 7}): Identifies
+#'   \item Cook’s distance vs indices of observations (\code{which = 6}): Identifies
 #'   influential observations;
 #'
-#'   \item Generalized leverage vs indices of observations (\code{which = 8}): Identifies
+#'   \item Generalized leverage vs indices of observations (\code{which = 7}): Identifies
 #'   influential observations.
 #' }
 #'
@@ -75,45 +73,42 @@
 #'
 #' # Display all diagnostic plots
 #' par(mfrow = c(3, 2))
-#' plot(fit, which = 1:8)
+#' plot(fit, which = 1:7)
 #'
 #' @importFrom stats qqnorm qqline residuals cooks.distance
-#' @importFrom graphics par abline text
-#' @importFrom gamlss wp
-#' @importFrom grDevices dev.interactive
+#' @importFrom graphics par abline text lines
+#' @importFrom utils modifyList
 #'
 #' @seealso \code{\link{residuals.simplexregression}},
 #' \code{\link{cooks.distance.simplexregression}},
 #' \code{\link{halfnormal.plot}}.
 #'
-#' @importFrom graphics lines
-#' @importFrom utils modifyList
 #' @export
-plot.simplexregression <- function(x, which = 1:8,
+plot.simplexregression <- function(x, which = 1:7,
                                    type = c("quantile", "pearson",
                                             "deviance", "standardized",
                                             "weighted", "variance",
                                             "biasvariance", "score",
                                             "dualscore", "response"),
-                                   ask = prod(par("mfcol")) < length(which) && dev.interactive(),
+                                   ask = prod(par("mfcol")) < length(which) && interactive(),
                                    reset.par = TRUE, threshold = NULL,
                                    label.pos = 3, plot.type = NULL, ...) {
 
-  if (!is.numeric(which) || any(which < 1) || any(which > 8))
-    stop("`which' must be in 1:8")
+  if (!is.numeric(which) || any(which < 1) || any(which > 7))
+    stop("`which' must be in 1:7")
 
   type <- match.arg(type)
 
   resid <- residuals(x, type = type)
 
   n <- length(resid)
-  show <- rep(FALSE, 8)
+  show <- rep(FALSE, 7)
   show[which] <- TRUE
   one.fig <- prod(par("mfcol")) == 1
 
   # Automatic plot.type defaults
-  pt_scatter <- if (is.null(plot.type)) 1    else plot.type   # pch for plots 1-6
-  pt_index   <- if (is.null(plot.type)) "h"  else plot.type   # type for plots 7-8
+  pt_scatter <- if (is.null(plot.type)) 1    else plot.type   # pch for plots 1-5
+  pt_index   <- if (is.null(plot.type)) "h"  else plot.type   # type for plots 6-7
 
   # Configure ask mode
   op <- par(no.readonly = TRUE)
@@ -123,11 +118,11 @@ plot.simplexregression <- function(x, which = 1:8,
 
   # Helper to merge defaults with user ...
   plot_args <- function(..., defaults) modifyList(defaults, list(...))
-  
+
   scatter_defaults <- list(pch = pt_scatter, cex = 1, cex.axis = 0.8, cex.lab = 1.2)
   index_defaults   <- list(type = pt_index,  cex = 1, cex.axis = 0.8, cex.lab = 1.2)
   user_args <- list(...)
-  
+
   # 1. Residuals vs indices
   if (show[1]) {
     args <- modifyList(c(list(x = 1:n, y = resid,
@@ -136,7 +131,7 @@ plot.simplexregression <- function(x, which = 1:8,
     do.call(plot, args)
     abline(h = c(-3, -2, 0, 2, 3), lty = 2, col = "gray60")
   }
-  
+
   # 2. Residuals vs fitted values
   if (show[2]) {
     args <- modifyList(c(list(x = x$fitted.values, y = resid,
@@ -154,7 +149,7 @@ plot.simplexregression <- function(x, which = 1:8,
     do.call(plot, args)
     abline(h = c(-3, -2, 0, 2, 3), lty = 2, col = "gray60")
   }
-  
+
   # 4. Observed vs fitted
   if (show[4]) {
     args <- modifyList(c(list(x = x$y, y = x$fitted.values,
@@ -175,15 +170,8 @@ plot.simplexregression <- function(x, which = 1:8,
     qqline(resid, col = "gray60")
   }
 
-  # 6. Worm plot
-  if(show[6]) {
-    old_par <- par(cex.axis = 0.8)
-    gamlss::wp(resid = resid, main = "Worm plot", cex = 1, cex.lab = 1.2, pch = 1)
-    par(old_par)
-  }
-
-  # 7. Cook's distance
-  if (show[7]) {
+  # 6. Cook's distance
+  if (show[6]) {
     cook <- cooks.distance(x, type = "pearson")
     args <- modifyList(c(list(x = cook,
                               xlab = "Observation index", ylab = "Cook's distance",
@@ -197,8 +185,8 @@ plot.simplexregression <- function(x, which = 1:8,
     }
   }
 
-  # 8. Generalized leverage
-  if (show[8]) {
+  # 7. Generalized leverage
+  if (show[7]) {
     glev <- gleverage(x)
     args <- modifyList(c(list(x = glev,
                               xlab = "Observation index", ylab = "Generalized leverage",
@@ -245,7 +233,7 @@ plot.simplexregression <- function(x, which = 1:8,
 #'
 #' @examples
 #' # Simulate data (quick)
-#' n <- 50  
+#' n <- 50
 #' x1 <- runif(n, 0, 1)
 #' x2 <- runif(n, 0, 1)
 #' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
@@ -261,13 +249,12 @@ plot.simplexregression <- function(x, which = 1:8,
 #' }
 #'
 #' @importFrom stats qnorm quantile median residuals
-#' @importFrom graphics matplot points legend
+#' @importFrom graphics matplot points legend lines
+#' @importFrom utils modifyList
 #'
 #' @seealso \code{\link{residuals.simplexregression}},
 #' \code{\link{plot.simplexregression}}.
 #'
-#' @importFrom graphics lines
-#' @importFrom utils modifyList
 #' @export
 halfnormal.plot <- function (model, type = c("weighted", "quantile",
                                              "pearson", "deviance",
@@ -285,10 +272,10 @@ halfnormal.plot <- function (model, type = c("weighted", "quantile",
 
   n <- model$nobs
   alpha <- (1 - level)/2
-  
+
   # Original residuals
   td <- residuals(model, type)
-  
+
   X <- model$mu.x
   Z <- model$sigma2.x
   mu <- as.vector(model$mu.fv)
@@ -302,16 +289,16 @@ halfnormal.plot <- function (model, type = c("weighted", "quantile",
   ctrl <- model$control
   ctrl$hessian <- FALSE
   ctrl$fsmaxit <- 0  # skip Fisher scoring in simulations for speed
-  
+
   max_tries <- nsim * 5
   tries <- 0
-  
+
   i <- 1
   while (i <= nsim) {
     tries <- tries + 1
     if (tries > max_tries)
       stop("Could not obtain ", nsim, " converged fits after ", max_tries, " attempts.")
-    
+
     ysim <- rsimplex(n, mu, sigma2)
 
     fit <- suppressWarnings(
@@ -357,9 +344,9 @@ halfnormal.plot <- function (model, type = c("weighted", "quantile",
          cex = 1, cex.axis = 0.8, cex.lab = 1.2),
     list(...)
   )
-  
+
   do.call(matplot, c(list(xx, yy), plot_args))
-  
+
   res.sorted.abs <- sort(abs(td))
 
   # arguments valid for points() only
@@ -369,15 +356,15 @@ halfnormal.plot <- function (model, type = c("weighted", "quantile",
     list(...)[names(list(...)) %in% points_valid]
   )
   do.call(points, c(list(qq, res.sorted.abs), point_args))
-  
+
   lines(qq, e0, lty = 2, col = "black")
-  
+
   outside_bands <- (res.sorted.abs < e1) | (res.sorted.abs > e2)
   cOut <- sum(outside_bands)
   prop95 <- round(cOut /n*100, 2)
-  
+
   legend("topleft",
          legend = c(paste("Points outside:", cOut, "(", prop95, "%)"),
-                    paste("Total points:", n)), 
+                    paste("Total points:", n)),
          bty="n", cex = 0.8)
 }

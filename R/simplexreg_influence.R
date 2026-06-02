@@ -313,7 +313,7 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
 
   op <- par(no.readonly = TRUE)
   on.exit(par(op))
-  
+
   if (plot) {
     measure_name <- paste0(type, ".", parameter)
     values <- result[[measure_name]]
@@ -335,9 +335,9 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
            ylim     = c(0, max(values, na.rm = TRUE) * 1.05)),
       list(...)
     )
-    
+
     do.call(graphics::plot, c(list(values), plot_args))
-    
+
     if (!is.null(threshold)) {
       outliers <- which(values > threshold)
       if (length(outliers) > 0)
@@ -612,7 +612,7 @@ gleverage.simplexregression <- function(model){
 #' # Produce index plots directly
 #' diag.im(fit, data = dat, type = "s3", interval = "I2", parameter = "theta", plot = TRUE)
 #' }
-#' 
+#'
 #' @references
 #' Cribari-Neto, F.; Vasconcellos, K. L. P.; Santana e Silva, J. J. (2025).
 #' New strategies for detecting atypical observations based on the information
@@ -623,7 +623,6 @@ gleverage.simplexregression <- function(model){
 #' \code{\link{cooks.distance.simplexregression}}.
 #'
 #' @importFrom stats quantile
-#' @importFrom matrixcalc vech
 #' @importFrom Matrix nearPD
 #' @export
 diag.im <- function(model, data, type = c("s3", "s5"), interval  = c("I1", "I2"),
@@ -786,20 +785,20 @@ diag.im <- function(model, data, type = c("s3", "s5"), interval  = c("I1", "I2")
   # ------------------------------------------------------------------
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
-  
+
   if (plot) {
     n_plots <- length(type)
     if (n_plots == 2L) par(mfrow = c(1L, 2L))
-    
+
     pt <- if (is.null(plot.type)) (if (n > 150L) "p" else "h") else plot.type
-    
+
     make_ylim <- function(vals, lims) {
       rng <- diff(range(vals, lims, na.rm = TRUE))
       pad <- rng * 0.08
       c(min(vals, lims, na.rm = TRUE) - pad * 0.4,
         max(vals, lims, na.rm = TRUE) + pad)
     }
-    
+
     label_obs <- function(vals, lims, lpos) {
       idx <- which(vals < lims[1] | vals > lims[2])
       for (k in seq_along(idx)) {
@@ -809,7 +808,7 @@ diag.im <- function(model, data, type = c("s3", "s5"), interval  = c("I1", "I2")
              cex = 0.8, col = "red", offset = 0.3)
       }
     }
-    
+
     make_plot <- function(vals, lims, ylab_expr) {
       par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(2, 0.6, 0))
       plot_args <- modifyList(
@@ -822,12 +821,12 @@ diag.im <- function(model, data, type = c("s3", "s5"), interval  = c("I1", "I2")
       graphics::abline(h = lims, lty = 2, col = "gray60")
       label_obs(vals, lims, label.pos)
     }
-    
+
     if ("s3" %in% type)
       make_plot(result$s3_i, result$limits_s3, expression(s[3 * i]))
     if ("s5" %in% type)
       make_plot(result$s5_i, result$limits_s5, expression(s[5 * i]))
-    
+
     invisible(result)
   } else {
     result
@@ -974,7 +973,7 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
   Pn_inv <- solve(Pn)
 
   C3n <- Pn_inv %*% Bn %*% t(Pn_inv) - diag(1, nrow = r, ncol = r)
-  v_m3 <- norm(matrixcalc::vech(C3n), type = "2")
+  v_m3 <- norm(C3n[lower.tri(C3n, diag = TRUE)], type = "2")
 
   return(list(v_m3 = v_m3, An_neg =  An_neg, Bn =  Bn))
 }
@@ -1050,7 +1049,7 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
 
   if (!inherits(model, "simplexregression"))
     stop("'model' must be an object of class 'simplexregression'")
-  
+
   # ---- Normalise 'type' (accept integer shortcuts) -------------------------
   if (is.numeric(type)) {
     type <- switch(as.character(as.integer(type)),
@@ -1148,20 +1147,20 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
   # ---- Plot ----------------------------------------------------------------
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
-  
+
   if (plot) {
     ylab_expr <- switch(type,
                         W1 = "Wasserstein (p_W = 1) distance",
                         W2 = "Wasserstein (p_W = 2) distance",
                         H  = "Hellinger distance"
     )
-    
+
     pt <- if (is.null(plot.type)) {
       if (n > 150) "p" else "h"
     } else {
       plot.type
     }
-    
+
     y_max <- if (nrow(outliers) > 0) {
       max(distances, na.rm = TRUE) * 1.12
     } else {
@@ -1169,7 +1168,7 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
     }
 
     par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(2, 0.6, 0))
-    
+
     plot_args <- modifyList(
       list(type = pt, pch = 1, xlab = "Observation index", ylab = ylab_expr,
            cex = 1, cex.lab = 1.2, cex.axis = 0.8,
@@ -1178,12 +1177,12 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
     )
     do.call(graphics::plot, c(list(distances), plot_args))
     graphics::abline(h = thr, lty = 2, col = "gray60", lwd = 1.5)
-    
+
     if (nrow(outliers) > 0L)
       text(outliers$Obs, outliers$distance,
            labels = outliers$Obs, pos = label.pos,
            cex = 0.8, col = "red", offset = 0.3)
-    
+
     invisible(result)
   } else {
     result

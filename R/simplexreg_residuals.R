@@ -95,7 +95,6 @@
 #' res_weighted <- residuals(fit, type = "weighted")
 #'
 #' @importFrom stats pnorm qnorm
-#' @importFrom expint gammainc
 #'
 #' @references
 #'
@@ -135,7 +134,7 @@ residuals.simplexregression <- function(object, type = c("quantile", "pearson",
   if (type == "quantile") {
     return(object$residuals)
   }
-  
+
   y <- as.vector(object$y)
   mu <- as.vector(object$mu.fv)
   sigma2 <- as.vector(object$sigma2.fv)

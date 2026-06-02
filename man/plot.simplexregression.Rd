@@ -6,10 +6,10 @@
 \usage{
 \method{plot}{simplexregression}(
   x,
-  which = 1:8,
+  which = 1:7,
   type = c("quantile", "pearson", "deviance", "standardized", "weighted", "variance",
     "biasvariance", "score", "dualscore", "response"),
-  ask = prod(par("mfcol")) < length(which) && dev.interactive(),
+  ask = prod(par("mfcol")) < length(which) && interactive(),
   reset.par = TRUE,
   threshold = NULL,
   label.pos = 3,
@@ -20,7 +20,7 @@
 \arguments{
 \item{x}{An object of class \code{simplexregression}.}
 
-\item{which}{Numeric vector indicating which plots to display (\code{1:8}).}
+\item{which}{Numeric vector indicating which plots to display (\code{1:7}).}
 
 \item{type}{Character string specifying the residual type (default: \code{"quantile"}).
 See \code{\link{residuals.simplexregression}} for available options.}
@@ -41,8 +41,8 @@ Default is \code{3} (above). See \code{\link[graphics]{text}} for details.}
 
 \item{plot.type}{Controls the plot symbol/type for scatter plots and index plots.
 If \code{NULL} (default), uses \code{pch = 1} (open circles) for residual plots
-(which = 1--6) and \code{type = "h"} (vertical lines) for Cook's distance and
-generalized leverage plots (which = 7--8). Otherwise, the value is passed
+(which = 1--5) and \code{type = "h"} (vertical lines) for Cook's distance and
+generalized leverage plots (which = 6--7). Otherwise, the value is passed
 directly to \code{pch} (for scatter plots) or \code{type} (for index plots).}
 
 \item{...}{Additional graphical parameters.}
@@ -68,12 +68,10 @@ Eight diagnostic plots are available:
   \item Normal Q–Q plot (\code{which = 5}): Evaluates residual normality (especially
   useful for quantile residuals);
 
-  \item Worm plot (\code{which = 6}): Implemented via \code{gamlss::wp};
-
-  \item Cook’s distance vs indices of observations (\code{which = 7}): Identifies
+  \item Cook’s distance vs indices of observations (\code{which = 6}): Identifies
   influential observations;
 
-  \item Generalized leverage vs indices of observations (\code{which = 8}): Identifies
+  \item Generalized leverage vs indices of observations (\code{which = 7}): Identifies
   influential observations.
 }
 }
@@ -91,7 +89,7 @@ fit <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit2")
 
 # Display all diagnostic plots
 par(mfrow = c(3, 2))
-plot(fit, which = 1:8)
+plot(fit, which = 1:7)
 
 }
 \seealso{

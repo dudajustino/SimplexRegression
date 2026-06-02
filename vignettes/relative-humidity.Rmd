@@ -496,22 +496,22 @@ cat(sprintf("Generalized leverage — max: %.4f  mean: %.4f\n",
 The `plot` method produces up to eight diagnostic plots selected via `which`:
 (1) residuals vs. observation index; (2) residuals vs. fitted values;
 (3) residuals vs. linear predictor; (4) observed vs. fitted values;
-(5) normal Q-Q plot; (6) worm plot; (7) Cook's distances; (8) generalized
-leverages. The default residual type is `"quantile"`. For plots 7 and 8,
+(5) normal Q-Q plot; (6) Cook's distances; (7) generalized
+leverages. The default residual type is `"quantile"`. For plots 6 and 7,
 `threshold` highlights influential observations and `label.pos` controls
 label placement (1 = below, 2 = left, 3 = above, 4 = right).
 
-```{r plots-1-6, fig.height = 8, fig.cap = "Diagnostic plots (1–6) for the fitted simplex regression model with log-log link."}
+```{r plots-1-5, fig.height = 8, fig.cap = "Diagnostic plots (1–6) for the fitted simplex regression model with log-log link."}
 par(mfrow = c(3, 2))
-plot(fit_loglog, which = 1:6, reset.par = FALSE)
+plot(fit_loglog, which = 1:5, reset.par = FALSE)
 ```
 
 ```{r plot-cook, fig.height = 4, fig.cap = "Cook's distances. Observations exceeding the threshold of 0.15 are labeled."}
-plot(fit_loglog, which = 7, threshold = 0.15, label.pos = 4)
+plot(fit_loglog, which = 6, threshold = 0.15, label.pos = 4)
 ```
 
 ```{r plot-glev, fig.height = 4, fig.cap = "Generalized leverage values. Observations exceeding 0.08 are labeled."}
-plot(fit_loglog, which = 8, threshold = 0.08, label.pos = 3)
+plot(fit_loglog, which = 7, threshold = 0.08, label.pos = 3)
 ```
 
 The quantile residuals are approximately standard normal, with no systematic

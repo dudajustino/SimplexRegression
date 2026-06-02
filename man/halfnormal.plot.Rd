@@ -46,7 +46,7 @@ Points outside the envelope may indicate model inadequacy.
 }
 \examples{
 # Simulate data (quick)
-n <- 50  
+n <- 50
 x1 <- runif(n, 0, 1)
 x2 <- runif(n, 0, 1)
 mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
