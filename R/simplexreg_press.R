@@ -5,7 +5,7 @@
 # Description: PRESS-Based P2 Statistics for Simplex Regression                #
 ################################################################################
 
-#' @title PRESS-Based \eqn{P^2} Statistics for Simplex Regression 
+#' @title PRESS-Based \eqn{P^2} Statistics for Simplex Regression
 #' @description Computes the PRESS (Predicted Residual Error Sum of Squares)
 #' statistic and the associated \eqn{P^2} and adjusted \eqn{P^2} measures for simplex
 #' regression models with parametric or fixed mean link function.
@@ -20,18 +20,18 @@
 #' where \eqn{r_i} denotes the residual for observation \eqn{i} and
 #' \eqn{h_{ii}} is the \eqn{i}-th diagonal element of the hat matrix.
 #'
-#' The \eqn{P^2} statistic is a cross-validation analog of R², defined 
+#' The \eqn{P^2} statistic is a cross-validation analog of \eqn{R^2}, defined
 #' for the simplex regression mode as:
 #' \deqn{P^2 = 1 - \frac{\text{PRESS}}{\left(\frac{n}{n-r}\right)^2 \text{SST}},}
 #' where \eqn{\text{SST} = \sum_{i=1}^{n}(\hat{y}_i - \bar{\hat{y}})^2} and
 #' \eqn{r} is the number of estimated parameters.
 #'
-#' The adjusted P² is given by:
+#' The adjusted \eqn{P^2} is given by:
 #' \deqn{P^2_c = 1 - (1 - P^2)\frac{n-1}{n-r}.}
 #'
 #' The \code{type} argument controls which residuals \eqn{r_i} are used in
-#' the PRESS computation. 
-#' 
+#' the PRESS computation.
+#'
 #' @return When a single model is provided, a named numeric vector with components
 #' \code{P2}, \code{P2_c}, and \code{PRESS}. When multiple models are provided,
 #' a data frame with one row per model and columns \code{P2}, \code{P2_c}, and
@@ -39,22 +39,28 @@
 #'
 #' @references
 #' Espinheira, P. L., Silva, A. O. (2026). Prediction in the nonlinear simplex model.
-#' \emph{International Journal of Data Science and Analytics}, \bold{22}, 161. 
+#' \emph{International Journal of Data Science and Analytics}, \bold{22}, 161.
 #' \doi{10.1007/s41060-026-01114-9}
-#' 
+#'
 #' Espinheira, P. L., Silva, A. O. (2020). Residual and influence analysis to a
 #' general class of simplex regression. \emph{TEST}, \bold{29}, 523–-552.
 #' \doi{10.1007/s11749-019-00665-3}
 #'
 #' @examples
-#' n  <- 100
-#' x1 <- runif(n); x2 <- runif(n)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-#' y  <- rsimplex(n, mu, 0.5)
-#' dat <- data.frame(y = y, x1 = x1, x2 = x2)
+#' # Simulate data
+#' set.seed(2026)
+#' n <- 100
+#' x1 <- runif(n, 0, 1)
+#' x2 <- runif(n, 0, 1)
+#' z1 <- runif(n, 0, 1)
+#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 #'
-#' fit1 <- simplexreg(y ~ x1 + x2 | 1, data = dat, link.mu = "plogit2")
-#' fit2 <- simplexreg(y ~ x1 + x2 | 1, data = dat, link.mu = "logit")
+#' # Fit model with parametric mean link functions
+#' fit1 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
+#' fit2 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "logit")
 #'
 #' # Single model
 #' press(fit1)
@@ -68,7 +74,7 @@
 #' @seealso \code{\link{simplexreg}}, \code{\link{residuals.simplexregression}}.
 #' @export
 press <- function(..., type = c("standardized", "biasvariance")) {
-  
+
   models <- list(...)
   M <- length(models)
 
@@ -78,25 +84,25 @@ press <- function(..., type = c("standardized", "biasvariance")) {
   }
 
   type <- match.arg(type)
-  
+
   # Get model names (supports named arguments)
   model_names <- names(models)
   if (is.null(model_names)) {
     model_names <- vapply(as.list(substitute(list(...)))[-1L], deparse, character(1))
   }
-  
+
   p2_values <- p2_c_values <- press_values <- numeric(M)
-  
+
   for (i in seq_len(M)) {
     model <- models[[i]]
     parametric <- !is.na(model$coefficients$lambda)
-    
+
     res    <- residuals(model, type)
     n      <- model$nobs
     p      <- ncol(model$mu.x)
     q      <- ncol(model$sigma2.x)
     r      <- if (parametric) p + q + 1 else p + q
-    
+
     eta1   <- model$mu.lp
     y      <- as.vector(model$y)
     mu     <- as.vector(model$mu.fv)
@@ -106,27 +112,27 @@ press <- function(..., type = c("standardized", "biasvariance")) {
     muonemu  <- mu * (1 - mu)
     yoneminy <- y * (1 - y)
     dev      <- (diff / muonemu)^2 / yoneminy
-    
+
     if (parametric) {
       Dlink <- parametric_mean_link_inv_deriv1(eta1, model$lambda.fv, model$mu.link)
     } else {
       Dlink <- fixed_mean_link_inv_deriv1(eta1, model$mu.link)
     }
-    
+
     Wi    <- (3 * sigma2 / muonemu) + (1 / (muonemu^3))
     Ui    <- (dev / muonemu) + (1 / (muonemu^3))
     ychap <- sqrt((1 / sigma2) * Wi * Dlink^2) * (eta1 + (Ui * diff) / (Dlink * Wi))
-    
+
     hii <- hatvalues(model)
     press_values[i] <- sum((res / (1 - hii))^2)
-    
+
     ychap_mean      <- mean(ychap)
     sst             <- sum((ychap - ychap_mean)^2)
     n_factor        <- (n / (n - r))^2
     p2_values[i]    <- 1 - (press_values[i] / (n_factor * sst))
     p2_c_values[i]  <- 1 - (1 - p2_values[i]) * ((n - 1) / (n - r))
   }
-  
+
   if (M == 1) {
     return(c(P2 = p2_values, P2_c = p2_c_values, PRESS = press_values))
   } else {

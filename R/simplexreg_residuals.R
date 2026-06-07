@@ -79,15 +79,18 @@
 #'
 #' @examples
 #' # Simulate data
+#' set.seed(2026)
 #' n <- 100
 #' x1 <- runif(n, 0, 1)
 #' x2 <- runif(n, 0, 1)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-#' y <- rsimplex(n, mu, 0.5)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2)
+#' z1 <- runif(n, 0, 1)
+#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 #'
 #' # Fit model with parametric mean link functions
-#' fit <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit2")
+#' fit <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
 #'
 #' # Compute different types of residuals
 #' res_quantile <- residuals(fit, type = "quantile")
@@ -127,6 +130,10 @@ residuals.simplexregression <- function(object, type = c("quantile", "pearson",
                                                      "weighted", "variance",
                                                      "biasvariance", "score",
                                                      "dualscore", "response"), ...) {
+
+  if (!inherits(object, "simplexregression")) {
+    stop("'object' must be an object of class 'simplexregression'")
+  }
 
   type <- match.arg(type)
 

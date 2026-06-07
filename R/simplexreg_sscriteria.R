@@ -88,18 +88,21 @@
 #'
 #' @examples
 #' # Simulate data
+#' set.seed(2026)
 #' n <- 100
 #' x1 <- runif(n, 0, 1)
 #' x2 <- runif(n, 0, 1)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-#' y <- rsimplex(n, mu, 0.5)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2)
+#' z1 <- runif(n, 0, 1)
+#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 #'
 #' # Fit models
-#' fit1 <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit1")
-#' fit2 <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit2")
-#' fit3 <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "logit")
-#' fit4 <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "probit")
+#' fit1 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
+#' fit2 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit2")
+#' fit3 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "logit")
+#' fit4 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "probit")
 #'
 #' # Compare models with verbose output
 #' result <- penalized.ss(fit1, fit2, kappa = 0.1)

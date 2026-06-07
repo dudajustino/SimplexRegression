@@ -52,20 +52,22 @@
 #'
 #' @examples
 #' # Simulate data
+#' set.seed(2026)
 #' n <- 100
 #' x1 <- runif(n, 0, 1)
 #' x2 <- runif(n, 0, 1)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-#' y <- rsimplex(n, mu, 0.5)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2)
+#' z1 <- runif(n, 0, 1)
+#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 #'
 #' # Fit two models with parametric mean link functions
-#' fit1 <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit1")
-#' fit2 <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit2")
+#' fit1 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
+#' fit2 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit2")
 #'
 #' # Compute penalized criteria
-#' penalized.ic(fit1)
-#' penalized.ic(fit2)
+#' penalized.ic(fit1, fit2)
 #'
 #' @references
 #' Justino, M. E. C. and Cribari-Neto, F. (2026).
@@ -101,7 +103,7 @@ penalized.ic <- function(..., kappa = 0.1, verbose = TRUE) {
 
   call <- match.call()
   user_specified_kappa <- "kappa" %in% names(call)
-  
+
   # Prevent misuse of kappa
   if (!all(has_lambda)) {
     if (user_specified_kappa && kappa > 0) {
@@ -120,7 +122,7 @@ penalized.ic <- function(..., kappa = 0.1, verbose = TRUE) {
   if (is.null(model_names)) {
     model_names <- vapply(as.list(substitute(list(...)))[-1L], deparse, character(1))
   }
-  
+
   # Initialize storage
   df_values <- aic_values <- bic_values <- hqic_values <- numeric(M)
 
@@ -158,7 +160,7 @@ penalized.ic <- function(..., kappa = 0.1, verbose = TRUE) {
   if (kappa == 0) {
     names(result)[-1] <- c("AIC", "BIC", "HQIC")
   }
-  
+
   # Print message
   if (verbose) {
     cat("\n")
@@ -167,7 +169,7 @@ penalized.ic <- function(..., kappa = 0.1, verbose = TRUE) {
     } else {
       cat(sprintf("Penalized information criteria values (kappa = %.3f):\n", kappa))
     }
-    
+
     print(result)
     return(invisible(result))
   } else {

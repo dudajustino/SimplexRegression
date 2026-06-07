@@ -11,6 +11,9 @@
 #' the \pkg{imputeTS} package, with the imputed versions stored as \code{Ins2}
 #' and \code{Pre2}.
 #'
+#' @docType data
+#' @usage data(RelativeHumidity)
+#'
 #' @format A data frame with 312 observations and 11 variables:
 #' \describe{
 #'   \item{Date}{Observation date (YYYY-MM-DD)}
@@ -29,4 +32,23 @@
 #'   \item{Dir}{Monthly predominant wind direction (in degrees)}
 #' }
 #' @source Brazilian meteorological station
+#'
+#' @keywords datasets
+#'
+#' @examples
+#' # Load the dataset
+#' data(RelativeHumidity)
+#'
+#' # View first rows
+#' head(RelativeHumidity)
+#'
+#' # Check structure
+#' str(RelativeHumidity)
+#'
+#' @examples
+#' data(RelativeHumidity)
+#'
+#' plot(RelativeHumidity$Ins, type = "l", col = "red",
+#'      ylab = "Insolation", main = "Missing values visible as gaps")
+#' points(RelativeHumidity$Ins2, type = "l", col = "blue")
 "RelativeHumidity"

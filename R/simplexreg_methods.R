@@ -49,15 +49,18 @@ is_parametric <- function(object) {
 #'
 #' @examples
 #' # Simulate data
+#' set.seed(2026)
 #' n <- 100
 #' x1 <- runif(n, 0, 1)
 #' x2 <- runif(n, 0, 1)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-#' y <- rsimplex(n, mu, 0.5)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2)
+#' z1 <- runif(n, 0, 1)
+#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 #'
 #' # Fit model with parametric mean link functions
-#' fit <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit2")
+#' fit <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
 #'
 #' # Extract information
 #' summary(fit)
@@ -132,6 +135,8 @@ print.simplexregression <- function(x, digits = max(3, getOption("digits") - 3),
 summary.simplexregression <- function(object, ...) {
 
   parametric <- is_parametric(object)
+
+  P2 <- press(object)[1]
 
   # Extract coefficients
   coef_mean <- object$coefficients$mean
@@ -214,6 +219,7 @@ summary.simplexregression <- function(object, ...) {
     method = ifelse(is.null(object$method), "BFGS", object$method),
     R2_N = object$R2_N,
     R2_FC = object$R2_FC,
+    P2 = P2,
     residuals = if(!is.null(object$residuals)) object$residuals else NULL,
     residuals.type = if(!is.null(object$residuals)) "quantile" else NULL,
     converged = converged
@@ -291,6 +297,7 @@ print.summary.simplexregression <- function(x, digits = max(3, getOption("digits
     cat("\nHQIC:", round(x$hqic, 6))
     cat("\nPseudo R-squared (Nagelkerke):", round(x$R2_N, 6))
     cat("\nPseudo R-squared (Ferrari and Cribari-Neto):", round(x$R2_FC, 6))
+    cat("\nP-squared (Espinheira-Silva-Lima):", round(x$P2, 6))
     cat("\nNumber of observations:", x$nobs)
     cat(paste("\nNumber of iterations:", x$iterations[1L],
               sprintf("(%s) +", x$method), x$iterations[2L], paste("(Fisher scoring)", "\n")))
@@ -402,22 +409,17 @@ predict.simplexregression <- function(object, newdata = NULL,
                   dispersion = object$sigma2.fv
     ))
   }
-  
+
   formula_full <- object$formula
 
-  # ---- Helper: colapsa deparse em string única (evita length > 1) ----------
   deparse1 <- function(x) paste(deparse(x), collapse = " ")
-
-  # ---- Detectar presença de '|' de forma segura ----------------------------
   has_pipe <- function(f) grepl("\\|", deparse1(f), fixed = FALSE)
 
-  # ---- Extrair X (parte média) ---------------------------------------------
-  if (inherits(formula_full, "Formula")) {
-    rhs_formula <- as.Formula(formula_full)[, rhs = 1, lhs = 0]
-  } else if (has_pipe(formula_full)) {
-    f_str      <- deparse1(formula_full)
-    rhs_str    <- sub("^.*~\\s*", "", f_str)          # tudo após '~'
-    lhs_part   <- trimws(strsplit(rhs_str, "\\|")[[1]][1])
+  # ---- Extract X (mean submodel) -------------------------------------------
+  if (has_pipe(formula_full)) {
+    f_str       <- deparse1(formula_full)
+    rhs_str     <- sub("^.*~\\s*", "", f_str)
+    lhs_part    <- trimws(strsplit(rhs_str, "\\|")[[1]][1])
     rhs_formula <- as.formula(paste("~", lhs_part))
   } else {
     rhs_formula <- formula_full
@@ -428,30 +430,11 @@ predict.simplexregression <- function(object, newdata = NULL,
   mf    <- model.frame(Terms, data = newdata, na.action = na.pass)
   x_new <- model.matrix(Terms, data = mf)
 
-  # ---- Extrair Z (parte dispersão) -----------------------------------------
-  if (!is.null(object$sigma2.formula)) {
-    sigma2_Terms <- terms(object$sigma2.formula, data = newdata)
-    mf_sigma2    <- model.frame(sigma2_Terms, data = newdata, na.action = na.pass)
-    z_new        <- model.matrix(sigma2_Terms, data = mf_sigma2)
-
-  } else if (inherits(formula_full, "Formula")) {
-    # Formula com dois RHS: y ~ x1 + x2 | z1 + z2
-    rhs2 <- tryCatch(
-      as.Formula(formula_full)[, rhs = 2, lhs = 0],
-      error = function(e) NULL
-    )
-    if (!is.null(rhs2)) {
-      Terms_disp <- terms(rhs2, data = newdata)
-      mf_disp    <- model.frame(Terms_disp, data = newdata, na.action = na.pass)
-      z_new      <- model.matrix(Terms_disp, data = mf_disp)
-    } else {
-      z_new <- matrix(1, nrow = nrow(newdata), ncol = 1L)
-    }
-
-  } else if (has_pipe(formula_full)) {
-    f_str      <- deparse1(formula_full)
-    rhs_str    <- sub("^.*~\\s*", "", f_str)
-    parts      <- strsplit(rhs_str, "\\|")[[1]]
+  # ---- Extract Z (dispersion submodel) -------------------------------------
+  if (has_pipe(formula_full)) {
+    f_str   <- deparse1(formula_full)
+    rhs_str <- sub("^.*~\\s*", "", f_str)
+    parts   <- strsplit(rhs_str, "\\|")[[1]]
     if (length(parts) > 1L && trimws(parts[2]) != "1") {
       rhs_disp   <- as.formula(paste("~", trimws(parts[2])))
       Terms_disp <- terms(rhs_disp, data = newdata)
@@ -460,35 +443,15 @@ predict.simplexregression <- function(object, newdata = NULL,
     } else {
       z_new <- matrix(1, nrow = nrow(newdata), ncol = 1L)
     }
-
   } else {
     z_new <- matrix(1, nrow = nrow(newdata), ncol = 1L)
   }
 
-  # ---- Coeficientes --------------------------------------------------------
+  # ---- Coefficients --------------------------------------------------------
   beta  <- object$coefficients$mean
   delta <- object$coefficients$dispersion
 
-  # ---- Verificação de dimensão ---------------------------------------------
-  if (ncol(x_new) != length(beta)) {
-    warning(sprintf(
-      "Dimension mismatch: x_new has %d columns but beta has length %d. Using available columns.",
-      ncol(x_new), length(beta)))
-    n_cols <- min(ncol(x_new), length(beta))
-    x_new  <- x_new[, seq_len(n_cols), drop = FALSE]
-    beta   <- beta[seq_len(n_cols)]
-  }
-
-  if (ncol(z_new) != length(delta)) {
-    warning(sprintf(
-      "Dimension mismatch: z_new has %d columns but delta has length %d. Using available columns.",
-      ncol(z_new), length(delta)))
-    n_cols <- min(ncol(z_new), length(delta))
-    z_new  <- z_new[, seq_len(n_cols), drop = FALSE]
-    delta  <- delta[seq_len(n_cols)]
-  }
-
-  # ---- Predição ------------------------------------------------------------
+  # ---- Prediction ----------------------------------------------------------
   if (type %in% c("response", "link")) eta1 <- as.vector(x_new %*% beta)
   if (type %in% c("dispersion", "link")) eta2 <- as.vector(z_new %*% delta)
 
@@ -545,11 +508,16 @@ terms.simplexregression <- function(x, model = c("mean", "dispersion"), ...) {
 #' @rdname simplexreg.methods
 #' @export
 model.frame.simplexregression <- function(formula, ...) {
-  if(!is.null(formula$model)) return(formula$model)
+  if (!is.null(formula$model)) return(formula$model)
 
-  formula$terms <- formula$terms$full
-  formula$call$formula <- formula$formula <- formula(formula$terms)
-  NextMethod()
+  # Reconstruct model frame from the original call when model was not stored
+  call          <- formula$call
+  call[[1L]]    <- quote(stats::model.frame)
+  call$formula  <- formula$formula
+  call$link.mu     <- NULL
+  call$link.sigma2 <- NULL
+  call$model       <- NULL
+  eval(call, parent.frame())
 }
 
 #' @rdname simplexreg.methods
@@ -636,11 +604,11 @@ simulate.simplexregression <- function(object, nsim = 1, seed = NULL, ...) {
 #' @export
 AIC.simplexregression <- function(object, ..., k = 2) {
   objects <- list(object, ...)
-  
+
   aic_fn <- function(obj) -2 * obj$loglik + k * .npar(obj)
-  
+
   if (length(objects) == 1) return(aic_fn(object))
-  
+
   model_names <- c(deparse(substitute(object)),
                    sapply(substitute(list(...)), deparse)[-1])
   data.frame(
@@ -655,11 +623,11 @@ AIC.simplexregression <- function(object, ..., k = 2) {
 #' @export
 BIC.simplexregression <- function(object, ...) {
   objects <- list(object, ...)
-  
+
   bic_fn <- function(obj) -2 * obj$loglik + log(obj$nobs) * .npar(obj)
-  
+
   if (length(objects) == 1) return(bic_fn(object))
-  
+
   model_names <- c(deparse(substitute(object)),
                    sapply(substitute(list(...)), deparse)[-1])
   data.frame(
@@ -677,11 +645,11 @@ HQIC <- function(object, ...) UseMethod("HQIC")
 #' @export
 HQIC.simplexregression <- function(object, ...) {
   objects <- list(object, ...)
-  
+
   hqic_fn <- function(obj) -2 * obj$loglik + 2 * .npar(obj) * log(log(obj$nobs))
-  
+
   if (length(objects) == 1) return(hqic_fn(object))
-  
+
   model_names <- c(deparse(substitute(object)),
                    sapply(substitute(list(...)), deparse)[-1])
   data.frame(
@@ -717,7 +685,7 @@ hatvalues.simplexregression <- function(model, ...) {
     error = function(e) stop("Hat matrix computation failed: design matrix may be singular.")
   )
 
-  diag(Xw %*% Inv %*% t(Xw))
+  rowSums((Xw %*% Inv) * Xw)
 }
 
 #' @rdname simplexreg.methods
@@ -812,7 +780,6 @@ estfun.simplexregression <- function(x, ...) {
 #' @export
 coeftest.simplexregression <- function(x, vcov. = NULL, df = Inf, ...) {
   if (is.null(vcov.)) vcov. <- x$vcov
-  if (is.null(df)) df <- x$df.residual
   lmtest::coeftest.default(x, vcov. = vcov., df = df, ...)
 }
 

@@ -11,29 +11,40 @@
 #' regression models.
 #'
 #' @param model An object of class \code{simplexregression}.
-#' @param dispersion Logical. If \code{TRUE}, includes the squared linear predictor
+#' @param dispersion Logical. If \code{TRUE}, includes the augmented terms
 #' in the dispersion submodel as well. Default is \code{TRUE}.
+#' @param power Integer vector specifying which powers of the linear predictor
+#' (or fitted values) to include as additional regressors. Default is \code{2}
+#' (squared term only). Use \code{power = 2:3} to include both squared and
+#' cubic terms, following the convention of \code{lmtest::resettest}.
+#' @param type Character string specifying the base for the augmented terms.
+#' \code{"lp"} (default) uses the mean linear predictor \eqn{\hat{\eta}_1};
+#' \code{"fitted"} uses the fitted mean values \eqn{\hat{\mu}} on the (0, 1)
+#' scale. For models with parametric link functions, \code{"lp"} is generally
+#' preferred as it operates on an unrestricted scale.
 #'
 #' @details
-#' The RESET test augments the original model by adding the squared linear
-#' predictor as an additional covariate. Under the null hypothesis of correct
-#' functional form, this additional term should not be significant.
+#' The RESET test augments the original model by adding powers of the linear
+#' predictor (or fitted values) as additional covariates. Under the null
+#' hypothesis of correct functional form, these additional terms should not
+#' be significant.
 #'
-#' The test statistic follows a chi-squared distribution with degrees of freedom
-#' equal to the difference in the number of parameters between the augmented
-#' and original models.
+#' The likelihood ratio statistic follows a chi-squared distribution with
+#' degrees of freedom equal to the number of augmented terms added (i.e.,
+#' \code{length(power)} if \code{dispersion = FALSE}, or
+#' \code{2 * length(power)} if \code{dispersion = TRUE}).
 #'
-#' If \code{dispersion = TRUE}, the squared linear predictor is added to both
-#' the mean and dispersion submodels. If \code{FALSE}, it is only added to the
-#' mean submodel.
+#' If \code{dispersion = TRUE}, the augmented terms are added to both the
+#' mean and dispersion submodels. If \code{FALSE}, they are only added to
+#' the mean submodel.
 #'
 #' @return An object of class \code{"htest"} containing:
 #' \itemize{
-#'   \item \code{statistic}: The score test statistic,
+#'   \item \code{statistic}: The likelihood ratio test statistic,
 #'   \item \code{parameter}: Degrees of freedom,
 #'   \item \code{p.value}: The p-value of the test,
 #'   \item \code{method}: Description of the test,
-#'   \item \code{data.name}: Model name and link function being tested.
+#'   \item \code{data.name}: Model formula.
 #' }
 #'
 #' @references
@@ -42,54 +53,90 @@
 #' Society: Series B}, 31(2), 350-371.
 #'
 #' @examples
-#' \dontrun{
-#' # Fit a simplex regression model
-#' model <- simplexreg(y ~ x1 + x2, data = mydata)
+#' # Simulate data
+#' set.seed(2026)
+#' n <- 100
+#' x1 <- runif(n, 0, 1)
+#' x2 <- runif(n, 0, 1)
+#' z1 <- runif(n, 0, 1)
+#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 #'
-#' # Perform RESET test
-#' resettest(model)
+#' # Fit model with parametric mean link functions
+#' fit <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
+#'
+#' # Default: squared linear predictor in both submodels
+#' resettest(fit)
 #'
 #' # RESET test only for mean submodel
-#' resettest(model, dispersion = FALSE)
-#' }
+#' resettest(fit, dispersion = FALSE)
+#'
+#' # Include squared and cubic terms (as in lmtest::resettest)
+#' resettest(fit, power = 2:3)
+#'
+#' # Use fitted values instead of linear predictor
+#' resettest(fit, type = "fitted")
 #'
 #' @importFrom stats pchisq
 #'
 #' @seealso \code{\link{simplexreg}}.
 #' @export
-resettest <- function(model, dispersion = TRUE){
+resettest <- function(model, dispersion = TRUE, power = 2,
+                      type = c("lp", "fitted")) {
 
-  if (!inherits(model, "simplexregression")) {
+  if (!inherits(model, "simplexregression"))
     stop("'model' must be an object of class 'simplexregression'")
-  }
-  
-  METHOD = "RESET test"
-  DNAME <- paste(deparse(model$formula), collapse = "")
+
+  if (!is.numeric(power) || any(power < 2) || any(power != floor(power)))
+    stop("'power' must be a vector of integers >= 2 (e.g., 2 or 2:3).")
+
+  type <- match.arg(type)
+
+  METHOD <- "RESET test"
+  DNAME  <- paste(deparse(model$formula), collapse = "")
 
   y <- as.vector(model$y)
-  mu_lp_squared <- model$mu.lp^2
 
-  x <- cbind(model$mu.x, mu_lp_squared)
-  
-  if(dispersion == TRUE){
-    z <- cbind(model$sigma2.x, mu_lp_squared)
-  } else {
-    z <- model$sigma2.x
-  }
+  # Base for augmented terms: linear predictor or fitted values
+  base <- if (type == "lp") model$mu.lp else model$mu.fv
 
-  ctrl <- model$control
-  ctrl$hessian <- FALSE
+  # Build matrix of augmented terms: base^2, base^3, ...
+  aug_cols <- matrix(
+    sapply(power, function(pw) base^pw),
+    ncol = length(power)
+  )
+  colnames(aug_cols) <- paste0(if (type == "lp") "lp^" else "mu^", power)
 
-  modelh1 <- simplexreg.fit(y, x[, colnames(x) != "(Intercept)", drop = FALSE], 
-                            z[, colnames(z) != "(Intercept)", drop = FALSE],
-                            link.mu = model$mu.link, link.sigma2 = model$sigma2.link,
-                            x_names = colnames(x), z_names = colnames(z), control = ctrl,
-                            weights = model$weights)
+  x <- cbind(model$mu.x, aug_cols)
+  z <- if (dispersion) cbind(model$sigma2.x, aug_cols) else model$sigma2.x
 
-  lH0 <- model$loglik
-  lH1 <- modelh1$loglik
-  LR <- 2*(lH1 - lH0)
-  df <- model$df.residual - modelh1$df.residual
+  ctrl          <- model$control
+  ctrl$hessian  <- FALSE
+
+  modelh1 <- tryCatch(
+    simplexreg.fit(y,
+                   x[, colnames(x) != "(Intercept)", drop = FALSE],
+                   z[, colnames(z) != "(Intercept)", drop = FALSE],
+                   link.mu     = model$mu.link,
+                   link.sigma2 = model$sigma2.link,
+                   x_names     = colnames(x),
+                   z_names     = colnames(z),
+                   control     = ctrl,
+                   weights     = model$weights),
+    error = function(e) {
+      stop("Failed to fit the augmented model for the RESET test. ",
+           "The information matrix is singular. ",
+           "This may occur with parametric link functions or near-collinear predictors. ",
+           "Try fitting the model with a fixed link function (e.g., link.mu = 'logit').")
+    }
+  )
+
+  lH0  <- model$loglik
+  lH1  <- modelh1$loglik
+  LR   <- 2 * (lH1 - lH0)
+  df   <- model$df.residual - modelh1$df.residual
   PVAL <- pchisq(LR, df, lower.tail = FALSE)
 
   names(df) <- "df"

@@ -248,18 +248,18 @@ simplexreg.control <- function(method = "BFGS",
 #'
 #' @examples
 #' # Simulate data
+#' set.seed(2026)
 #' n <- 100
 #' x1 <- runif(n, 0, 1)
 #' x2 <- runif(n, 0, 1)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2 , 0.25, "plogit2")
-#' sigma2 <- 0.5
-#' summary(mu)
+#' z1 <- runif(n, 0, 1)
+#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
 #' y <- rsimplex(n, mu, sigma2)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2)
+#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 #'
-#' # Fit model
-#' fit <- simplexreg(y ~ x1 + x2 | 1, data = data,
-#'                      link.mu = "plogit2", link.sigma2 = "identity")
+#' # Fit model with parametric mean link functions
+#' fit <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
 #' summary(fit)
 #'
 #' @references
@@ -404,7 +404,6 @@ simplexreg <- function(formula, data, subset, na.action, weights, offset,
   if(is.null(offset)) {
     offset <- rep(0, length(Y))
   } else {
-    if(length(offset) == 1) offset <- rep.int(offset, length(Y))
     offset <- as.vector(offset)
   }
   names(offset) <- rownames(mf)
@@ -480,7 +479,7 @@ simplexreg <- function(formula, data, subset, na.action, weights, offset,
 }
 
 #' @rdname simplexreg.fit
-#' @importFrom stats lm.wfit
+#' @importFrom stats lm.wfit sd
 #' @export
 simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
                            link.mu = c("logit", "probit", "loglog", "cloglog", "cauchit",
@@ -727,10 +726,7 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
   # ============================
   # FISHER INFORMATION MATRIX
   # ============================
-  hessfun <- function(par, inverse = FALSE, fit = NULL) {
-    # Extract fitted means/precisions
-    if(is.null(fit)) fit <- fitfun(par, deriv = 2L)
-
+  hessfun <- function(par, fit) {
     with(fit, {
       # Safeguard y
       y_safe <- pmin(pmax(y, 1e-6), 1 - 1e-6)
@@ -770,12 +766,7 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
           cbind(matrix(0, q, p), Kdeltadelta)
         )
       }
-
-      if(inverse) {
-        chol2inv(chol(K))
-      } else {
-        K
-      }
+      chol2inv(chol(K))
     })
   }
 
@@ -838,7 +829,7 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
       # Compute step
       fit <- fitfun(par, deriv = 2L)
       scores <- gradfun(par, fit = fit)
-      InfoInv <- try(hessfun(par, fit = fit, inverse = TRUE), silent = TRUE)
+      InfoInv <- try(hessfun(par, fit = fit), silent = TRUE)
 
       if(inherits(InfoInv, "try-error")) {
         warning("Failed to invert information matrix")
@@ -901,7 +892,7 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
   ll <- loglikfun(par, fit = fit)
 
   # Variance-covariance matrix
-  vcov <- hessfun(par, fit = fit, inverse = TRUE)
+  vcov <- hessfun(par, fit = fit)
 
   # ============================
   # NAMING AND DIAGNOSTICS
@@ -943,12 +934,17 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
   # Pseudo R-squared
   R2_N <- 1 - exp((-2/sum(weights)) * (ll - simplexreg.nul(y, link.mu, weights)))
 
-  if(parametric) {
-    gy <- parametric_mean_link(y, lambda, link.mu)
+  gy <- if(parametric) {
+    parametric_mean_link(y, lambda, link.mu)
   } else {
-    gy <- fixed_mean_link(y, link.mu)
+    fixed_mean_link(y, link.mu)
   }
-  R2_FC <- cor(eta1, gy)^2
+
+  if(sd(eta1) > 0 && sd(gy) > 0) {
+    R2_FC <- cor(eta1, gy)^2
+  } else {
+    R2_FC <- NA
+  }
 
   # Information criteria
   aic <- -2 * ll + 2 * r
@@ -1032,8 +1028,6 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
 simplexreg.nul <- function(y, link.mu, weights = NULL){
   y <- as.vector(y)
   n <- length(y)
-
-  if(is.null(weights)) weights <- rep(1, n)
 
   parametric <- link.mu %in% c("plogit1","plogit2")
 

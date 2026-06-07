@@ -67,14 +67,18 @@ is_parametric <- function(object) {
 #' for parameters.
 #'
 #' @examples
-#' # Simulate and fit data
-#' n <- 100
-#' x1 <- runif(n)
-#' x2 <- runif(n)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-#' y <- rsimplex(n, mu, 0.5)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2)
-#' fit <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit2")
+#' # Simulate data
+#' set.seed(2026)
+#' n <- 50
+#' x1 <- runif(n, 0, 1)
+#' z1 <- runif(n, 0, 1)
+#' mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, z1 = z1)
+#'
+#' # Fit model with parametric mean link functions
+#' fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
 #'
 #' # Local influence under case-weight perturbation — return results
 #' infl_cw <- local.influence(fit, scheme = "case.weight")
@@ -311,10 +315,10 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
     Ci.theta   = res_theta$Ci
   )
 
-  op <- par(no.readonly = TRUE)
-  on.exit(par(op))
-
   if (plot) {
+    op <- par(no.readonly = TRUE)
+    on.exit(par(op))
+
     measure_name <- paste0(type, ".", parameter)
     values <- result[[measure_name]]
 
@@ -371,14 +375,18 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
 #' that have potentially large influence on parameter estimates.
 #'
 #' @examples
-#' # Simulate and fit data
-#' n <- 100
-#' x1 <- runif(n)
-#' x2 <- runif(n)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-#' y <- rsimplex(n, mu, 0.5)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2)
-#' fit <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit2")
+#' # Simulate data
+#' set.seed(2026)
+#' n <- 50
+#' x1 <- runif(n, 0, 1)
+#' z1 <- runif(n, 0, 1)
+#' mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, z1 = z1)
+#'
+#' # Fit model with parametric mean link functions
+#' fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
 #'
 #' # Compute generalized leverage
 #' glev <- gleverage(fit)
@@ -511,8 +519,8 @@ gleverage.simplexregression <- function(model){
     Lty <- t(cbind(sigma2i * Dlink.mu * ci * X, Vi * Dlink.sigma2 * cidag * Z))
   }
 
-  leverage <- D %*% solve(L) %*% Lty
-  diag(leverage)
+  L_inv <- solve(L)
+  rowSums((D %*% L_inv) * t(Lty))
 }
 
 # ==============================================================================
@@ -521,51 +529,67 @@ gleverage.simplexregression <- function(model){
 
 #' @title Sample Influence Measures for Simplex Regression Models
 #' @description Computes leave-one-out sample influence measures \eqn{s_{3,i}}
-#' and \eqn{s_{5,i}} for simplex regression models, based on the information-matrix-based
-#' criteria measures proposed by Cribari-Neto, Vasconcellos and Santana
-#' e Silva (2025).
+#' and \eqn{s_{5,i}} for simplex regression models, based on the
+#' information-matrix-based criteria measures proposed by Cribari-Neto,
+#' Vasconcellos and Santana e Silva (2025).
 #'
 #' @param model An object of class \code{simplexregression}.
 #' @param data The data frame used to fit \code{model}.
 #' @param type Character vector specifying measure(s): \code{"s3"}, \code{"s5"},
-#' or both (default).
+#'   or both (default).
 #' @param interval Character string specifying the outlier detection threshold:
 #'   \code{"I1"} (default, moderate) or \code{"I2"} (strict).
-#' @param parameter Character string indicating the parameter block: \code{"theta"}
-#' (default, all parameters), \code{"beta"} (mean submodel), or \code{"gamma"}
-#' (dispersion submodel).
+#' @param parameter Character string indicating the parameter block:
+#'   \code{"theta"} (default, all parameters), \code{"beta"} (mean submodel),
+#'   or \code{"gamma"} (dispersion submodel).
 #' @param plot Logical; if \code{TRUE}, produces index plots of \eqn{s_{3,i}}
 #'   and \eqn{s_{5,i}} with threshold lines and flagged-observation labels.
 #'   Default is \code{FALSE}.
 #' @param verbose Logical; if \code{TRUE} (default), prints progress during
-#'   leave-one-out refitting.
-#' @param label.pos Position(s) for outlier labels in plot. Can be a single value
-#' (applied to all labels) or a vector. Values: 1=below, 2=left, 3=above, 4=right.
+#'   leave-one-out refitting. Ignored (set to \code{FALSE}) when
+#'   \code{ncores > 1}, since output from parallel workers does not reach
+#'   the main console.
+#' @param ncores Positive integer specifying the number of CPU cores to use
+#'   for the leave-one-out loop. Default is \code{1} (sequential). Values
+#'   greater than \code{1} activate parallel computation via
+#'   \code{\link[parallel]{parLapply}}. If \code{ncores} exceeds
+#'   \code{parallel::detectCores() - 1}, it is silently clamped to that
+#'   value to avoid overloading the system. A safe explicit choice is
+#'   \code{parallel::detectCores() - 1}.
+#' @param label.pos Position(s) for outlier labels in plot. Can be a single
+#'   value (applied to all labels) or a vector. Values: 1 = below, 2 = left,
+#'   3 = above, 4 = right.
 #' @param plot.type Character string controlling the plot style when
-#' \code{plot = TRUE}. If \code{NULL} (default), uses \code{"h"} for
-#' \eqn{n \le 150} and \code{"p"} for \eqn{n > 150} (automatic). Passed
-#' to the \code{type} argument of \code{plot()}.
+#'   \code{plot = TRUE}. If \code{NULL} (default), uses \code{"h"} for
+#'   \eqn{n \le 150} and \code{"p"} for \eqn{n > 150} (automatic). Passed
+#'   to the \code{type} argument of \code{plot()}.
 #' @param ... Additional graphical parameters passed to \code{plot()}.
 #'
-#' @return If \code{plot = FALSE} (default), a list containing only the requested
-#' measures:
+#' @return If \code{plot = FALSE} (default), a list containing only the
+#' requested measures:
 #' \describe{
 #'   \item{\code{s3_i}}{(if requested) Numeric vector of \eqn{s_{3,i}} values.}
 #'   \item{\code{s5_i}}{(if requested) Numeric vector of \eqn{s_{5,i}} values.}
-#'   \item{\code{outliers_s3}}{(if requested) Data frame of flagged observations for \eqn{s_{3,i}}.}
-#'   \item{\code{outliers_s5}}{(if requested) Data frame of flagged observations for \eqn{s_{5,i}}.}
-#'   \item{\code{limits_s3}}{(if requested) Named vector for \eqn{s_{3,i}} thresholds.}
-#'   \item{\code{limits_s5}}{(if requested) Named vector for \eqn{s_{5,i}} thresholds.}
+#'   \item{\code{outliers_s3}}{(if requested) Data frame of flagged observations
+#'     for \eqn{s_{3,i}}.}
+#'   \item{\code{outliers_s5}}{(if requested) Data frame of flagged observations
+#'     for \eqn{s_{5,i}}.}
+#'   \item{\code{limits_s3}}{(if requested) Named vector with lower and upper
+#'     thresholds for \eqn{s_{3,i}}.}
+#'   \item{\code{limits_s5}}{(if requested) Named vector with lower and upper
+#'     thresholds for \eqn{s_{5,i}}.}
 #'   \item{\code{interval}}{Interval type used.}
 #'   \item{\code{parameter}}{Parameter block used.}
 #'   \item{\code{n}}{Number of observations.}
 #' }
+#' If \code{plot = TRUE}, the same list is returned invisibly.
 #'
 #' @details
 #' For each observation \eqn{i}, the model is refit on the dataset with
-#' observation \eqn{i} removed. Let \eqn{\hat\theta} and \eqn{\hat\theta_{(i)}}
-#' denote the full and leave-one-out MLEs, and let \eqn{A_{n,(i)}} and
-#' \eqn{B_{n,(i)}} be the corresponding information matrices.
+#' observation \eqn{i} removed. Let \eqn{\hat\theta} and
+#' \eqn{\hat\theta_{(i)}} denote the full and leave-one-out MLEs, and let
+#' \eqn{A_{n,(i)}} and \eqn{B_{n,(i)}} be the corresponding information
+#' matrices.
 #'
 #' \strong{Measures computed:}
 #' \deqn{s_{3,i} = m_{3,(i)} / m_3}
@@ -593,56 +617,95 @@ gleverage.simplexregression <- function(model){
 #' (upper), with reference value \eqn{v = 1} for \eqn{s_3} and \eqn{v = 0}
 #' for \eqn{s_5}:
 #' \itemize{
-#'   \item \code{I1} (strict): \eqn{z = 2.5} for \eqn{s_3}; \eqn{z = 4.0} for \eqn{s_5}.
-#'   \item \code{I2} (moderate): \eqn{z = 5.0} for \eqn{s_3}; \eqn{z = 8.0} for \eqn{s_5}.
+#'   \item \code{I1} (moderate): \eqn{z = 2.5} for \eqn{s_3};
+#'     \eqn{z = 4.0} for \eqn{s_5}.
+#'   \item \code{I2} (strict): \eqn{z = 5.0} for \eqn{s_3};
+#'     \eqn{z = 8.0} for \eqn{s_5}.
 #' }
 #'
+#' \strong{Parallel computation:} when \code{ncores > 1}, the
+#' leave-one-out loop is distributed across workers using
+#' \code{\link[parallel]{parLapply}} from the \pkg{parallel} package
+#' (included in base R). Each worker receives the necessary objects and
+#' loads the \pkg{simplexregression} package. The random-number stream is
+#' initialised with \code{\link[parallel]{clusterSetRNGStream}} to ensure
+#' reproducibility across runs. Progress messages (\code{verbose}) are
+#' suppressed in parallel mode because worker output does not reach the
+#' main console.
+#'
 #' @examples
-#' n  <- 100
-#' x1 <- runif(n); x2 <- runif(n)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-#' y  <- rsimplex(n, mu, 0.5)
-#' dat <- data.frame(y = y, x1 = x1, x2 = x2)
-#' fit <- simplexreg(y ~ x1 + x2 | 1, data = dat, link.mu = "plogit2")
+#' # Simulate data
+#' set.seed(2026)
+#' n <- 50
+#' x1 <- runif(n, 0, 1)
+#' z1 <- runif(n, 0, 1)
+#' mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, z1 = z1)
+#'
+#' # Fit model
+#' fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
 #'
 #' \donttest{
-#' # Return numeric results
-#' im <- diag.im(fit, data = dat, type = "s3", interval = "I2", parameter = "theta")
+#' # Sequential (default)
+#' im <- diag.im(fit, data = data, type = "s3", interval = "I2",
+#'               parameter = "theta")
 #'
 #' # Produce index plots directly
-#' diag.im(fit, data = dat, type = "s3", interval = "I2", parameter = "theta", plot = TRUE)
+#' diag.im(fit, data = data, type = "s3", interval = "I2",
+#'         parameter = "theta", plot = TRUE)
+#' }
+#'
+#' \dontrun{
+#' # Parallel: use all but one core
+#' # (excluded from R CMD check -- spawning multiple processes is not
+#' #  permitted in the check environment)
+#' im_par <- diag.im(fit, data = data, ncores = parallel::detectCores() - 1)
 #' }
 #'
 #' @references
 #' Cribari-Neto, F.; Vasconcellos, K. L. P.; Santana e Silva, J. J. (2025).
 #' New strategies for detecting atypical observations based on the information
-#' matrix equality. \emph{Journal of Applied Statistics}, \bold{52}, 2873--2893.
-#' \doi{10.1080/02664763.2025.2487914}
+#' matrix equality. \emph{Journal of Applied Statistics}, \bold{52},
+#' 2873--2893. \doi{10.1080/02664763.2025.2487914}
 #'
 #' @seealso \code{\link{local.influence}}, \code{\link{gleverage}},
 #' \code{\link{cooks.distance.simplexregression}}.
 #'
 #' @importFrom stats quantile
 #' @importFrom Matrix nearPD
+#' @importFrom parallel makeCluster stopCluster clusterSetRNGStream
+#'   clusterExport clusterEvalQ parLapply
 #' @export
-diag.im <- function(model, data, type = c("s3", "s5"), interval  = c("I1", "I2"),
+diag.im <- function(model, data, type = c("s3", "s5"), interval = c("I1", "I2"),
                     parameter = c("theta", "beta", "gamma"),
-                    plot = FALSE, verbose = TRUE,
+                    plot = FALSE, verbose = TRUE, ncores = 1,
                     label.pos = 3, plot.type = NULL, ...) {
 
-  if (!inherits(model, "simplexregression")) {
+  # --------------------------------------------------------------------
+  # Input validation
+  # --------------------------------------------------------------------
+  if (!inherits(model, "simplexregression"))
     stop("'model' must be an object of class 'simplexregression'")
-  }
 
   type      <- match.arg(type, several.ok = TRUE)
   interval  <- match.arg(interval)
   parameter <- match.arg(parameter)
 
+  if (!all(ncores == floor(ncores)) || ncores < 1)
+    stop("'ncores' must be a positive integer >= 1")
+
+  max_cores <- max(1L, parallel::detectCores() - 1L)
+  if (ncores > max_cores) {
+    warning(sprintf(
+      "'ncores' (%d) exceeds detectCores() - 1 (%d); clamped to %d.",
+      ncores, max_cores, max_cores))
+    ncores <- max_cores
+  }
+
   parametric <- is_parametric(model)
 
-  # Dispersion submodel has a single intercept-only term when sigma2.x has one
-  # column whose only unique fitted value is constant — i.e. fixed dispersion.
-  # Influence on gamma is undefined in that case.
   dispersion_is_fixed <- ncol(model$sigma2.x) == 1L &&
     length(unique(round(model$sigma2.fv, 10))) == 1L
 
@@ -654,139 +717,178 @@ diag.im <- function(model, data, type = c("s3", "s5"), interval  = c("I1", "I2")
       call. = FALSE
     )
 
+  # --------------------------------------------------------------------
   # Z multipliers for thresholds
+  # --------------------------------------------------------------------
   z_vals <- list(
     I1 = list(s3 = 2.5, s5 = 4.0),
     I2 = list(s3 = 5.0, s5 = 8.0)
   )
 
-  # 1. Global measures on full data
-  n   <- model$nobs
-  p <- ncol(model$mu.x)
-  q <- ncol(model$sigma2.x)
+  n        <- model$nobs
+  p        <- ncol(model$mu.x)
+  q        <- ncol(model$sigma2.x)
   full_sj  <- compute_m3(model, parameter)
   m3_full  <- full_sj$v_m3
-  An_neg <- full_sj$An_neg
-  B_n <- full_sj$Bn
 
-  # ------------------------------------------------------------------
-  # 2. Leave-one-out loop
-  # ------------------------------------------------------------------
-  s3_i <- s5_i <- cook_gen <- cook_mod <- numeric(n)
-  An_neg_i <- Bn_i <- array(NA, c(ncol(An_neg), ncol(An_neg), n))
+  # --------------------------------------------------------------------
+  # Auxiliary: single LOO iteration
+  # Defined here so it closes over the constants above when run
+  # sequentially, and exported explicitly when run in parallel.
+  # --------------------------------------------------------------------
+  loo_one <- function(i) {
 
-  for (i in seq_len(n)) {
+    data_i <- data[-i, , drop = FALSE]
 
-    if (verbose && (i %% 10 == 0 || i == 1))
-      message(sprintf("  Leave-one-out refit: observation %d / %d", i, n))
-
-    data_i  <- data[-i, , drop = FALSE]
-
-    # Refit model without observation i
     fit_i <- tryCatch(
       simplexreg(
-        formula  = model$formula,
-        link.mu  = model$mu.link,
+        formula     = model$formula,
+        link.mu     = model$mu.link,
         link.sigma2 = model$sigma2.link,
-        data = data_i
+        data        = data_i
       ),
       error = function(e) {
-        warning(sprintf("Refit failed for observation %d: %s", i, conditionMessage(e)))
+        warning(sprintf("Refit failed for observation %d: %s",
+                        i, conditionMessage(e)))
         NULL
       }
     )
 
-    if (is.null(fit_i)) {
-      s3_i[i] <- s5_i[i] <- NA
-      next
-    }
+    if (is.null(fit_i))
+      return(list(s3 = NA_real_, s5 = NA_real_))
 
-    # --- s3_i: ratio of m3 measures ---
-    sj_i <- compute_m3(fit_i, parameter = parameter)
-    s3_i[i] <- sj_i$v_m3 / m3_full
+    # --- s3: ratio of m3 measures ---
+    sj_i   <- compute_m3(fit_i, parameter = parameter)
+    s3_val <- sj_i$v_m3 / m3_full
 
-    An_neg_i[,,i] <- sj_i$An_neg
-    Bn_i[,,i] <- sj_i$Bn
-
-    if(parametric){
+    # --- coefficient difference ---
+    if (parametric) {
       coef_full <- unlist(model$coefficients)
-      coef_loo <- unlist(fit_i$coefficients)
+      coef_loo  <- unlist(fit_i$coefficients)
     } else {
-      coef_full <- unlist(model$coefficients[c("mean","dispersion")])
-      coef_loo  <- unlist(fit_i$coefficients[c("mean","dispersion")])
+      coef_full <- unlist(model$coefficients[c("mean", "dispersion")])
+      coef_loo  <- unlist(fit_i$coefficients[c("mean", "dispersion")])
     }
 
-    if(parameter == "beta") {
-      theta_hat_des <- coef_full[1:p] - coef_loo[1:p]
-      theta_hat_des_lin <- t(theta_hat_des)
-    } else if(parameter == "gamma") {
-      theta_hat_des <- coef_full[(p+1):(p+q)] - coef_loo[(p+1):(p+q)]
-      theta_hat_des_lin <- t(theta_hat_des)
-    } else {  # theta
-      theta_hat_des <- coef_full - coef_loo
-      theta_hat_des_lin <- t(theta_hat_des)
-    }
+    theta_d <- switch(parameter,
+                      beta  = coef_full[seq_len(p)]          - coef_loo[seq_len(p)],
+                      gamma = coef_full[(p + 1):(p + q)]     - coef_loo[(p + 1):(p + q)],
+                      coef_full                       - coef_loo
+    )
 
-    cook_gen[i] <- theta_hat_des_lin %*% An_neg_i[,,i] %*% theta_hat_des
-    cook_mod[i] <- theta_hat_des_lin %*% ( 0.5*(An_neg_i[,,i] +  Bn_i[,,i]) ) %*% theta_hat_des
+    An_i <- sj_i$An_neg
+    Bn_i <- sj_i$Bn
 
-    s5_i[i] <- cook_mod[i] - cook_gen[i]
+    cook_gen <- as.numeric(t(theta_d) %*% An_i               %*% theta_d)
+    cook_mod <- as.numeric(t(theta_d) %*% (0.5*(An_i + Bn_i)) %*% theta_d)
+
+    list(s3 = s3_val, s5 = cook_mod - cook_gen)
   }
 
-  # ------------------------------------------------------------------
-  # 3. Robust threshold computation
-  # ------------------------------------------------------------------
+  # --------------------------------------------------------------------
+  # Execute: sequential or parallel
+  # --------------------------------------------------------------------
+  if (ncores == 1L) {
+
+    if (verbose) message("Running leave-one-out refits (sequential)...")
+
+    raw <- lapply(seq_len(n), function(i) {
+      if (verbose && (i == 1L || i %% 10L == 0L))
+        message(sprintf("  Leave-one-out refit: observation %d / %d", i, n))
+      loo_one(i)
+    })
+
+  } else {
+
+    if (verbose)
+      message(sprintf(
+        "Running leave-one-out refits in parallel (%d cores)...", ncores))
+
+    cl <- parallel::makeCluster(ncores)
+    on.exit(parallel::stopCluster(cl), add = TRUE)
+
+    parallel::clusterSetRNGStream(cl, iseed = 123)
+
+    parallel::clusterExport(
+      cl,
+      varlist = c(
+        "loo_one", "m3_full",
+        "model", "data", "parameter", "parametric", "p", "q",
+        "simplexreg", "compute_m3"
+      ),
+      envir = environment()
+    )
+
+    parallel::clusterEvalQ(cl, library(SimplexRegression))
+
+    raw <- parallel::parLapply(cl, seq_len(n), function(i) loo_one(i))
+  }
+
+  # --------------------------------------------------------------------
+  # Unpack results
+  # --------------------------------------------------------------------
+  s3_i <- vapply(raw, `[[`, numeric(1L), "s3")
+  s5_i <- vapply(raw, `[[`, numeric(1L), "s5")
+
+  # --------------------------------------------------------------------
+  # Robust threshold computation
+  # --------------------------------------------------------------------
   iqr_limits <- function(x, ref, z) {
-    q <- quantile(x, c(0.125, 0.5, 0.875), na.rm = TRUE)
-    iqr_left <- q[2] - q[1]
-    iqr_right <- q[3] - q[2]
-    c(lower = ref - z * iqr_left, upper = ref + z * iqr_right)
+    q <- unname(quantile(x, c(0.125, 0.5, 0.875), na.rm = TRUE))
+    iqr_left  <- q[2L] - q[1L]
+    iqr_right <- q[3L] - q[2L]
+    c(lower = ref - z * iqr_left,
+      upper = ref + z * iqr_right)
   }
 
   limits <- list(
-    s3 = if ("s3" %in% type) iqr_limits(s3_i, 1, z_vals[[interval]]$s3) else NULL,
-    s5 = if ("s5" %in% type) iqr_limits(s5_i, 0, z_vals[[interval]]$s5) else NULL
+    s3 = if ("s3" %in% type)
+      iqr_limits(s3_i, ref = 1, z = z_vals[[interval]]$s3) else NULL,
+    s5 = if ("s5" %in% type)
+      iqr_limits(s5_i, ref = 0, z = z_vals[[interval]]$s5) else NULL
   )
 
   # Flag outliers
   outliers <- list()
   if ("s3" %in% type) {
-    idx <- which(s3_i < limits$s3[1] | s3_i > limits$s3[2])
-    outliers$s3 <- if (length(idx)) data.frame(Obs = idx, s3_i = s3_i[idx])
+    idx <- which(s3_i < limits$s3["lower"] | s3_i > limits$s3["upper"])
+    outliers$s3 <- if (length(idx))
+      data.frame(Obs = idx, s3_i = s3_i[idx])
+    else
+      data.frame(Obs = integer(0L), s3_i = numeric(0L))
   }
   if ("s5" %in% type) {
-    idx <- which(s5_i < limits$s5[1] | s5_i > limits$s5[2])
-    outliers$s5 <- if (length(idx)) data.frame(Obs = idx, s5_i = s5_i[idx])
+    idx <- which(s5_i < limits$s5["lower"] | s5_i > limits$s5["upper"])
+    outliers$s5 <- if (length(idx))
+      data.frame(Obs = idx, s5_i = s5_i[idx])
+    else
+      data.frame(Obs = integer(0L), s5_i = numeric(0L))
   }
 
-  # ------------------------------------------------------------------
-  # 5. Return
-  # ------------------------------------------------------------------
-  result <- list(
-    interval = interval,
-    parameter = parameter,
-    n = n
-  )
+  # --------------------------------------------------------------------
+  # Assemble return value
+  # --------------------------------------------------------------------
+  result <- list(interval = interval, parameter = parameter, n = n)
 
   if ("s3" %in% type) {
-    result$s3_i <- s3_i
+    result$s3_i        <- s3_i
     result$outliers_s3 <- outliers$s3
-    result$limits_s3 <- limits$s3
+    result$limits_s3   <- limits$s3
   }
-
   if ("s5" %in% type) {
-    result$s5_i <- s5_i
+    result$s5_i        <- s5_i
     result$outliers_s5 <- outliers$s5
-    result$limits_s5 <- limits$s5
+    result$limits_s5   <- limits$s5
   }
 
-  # ------------------------------------------------------------------
-  # 6. Plot (if requested) or return
-  # ------------------------------------------------------------------
-  old_par <- par(no.readonly = TRUE)
-  on.exit(par(old_par))
+  # --------------------------------------------------------------------
+  # Plot
+  # --------------------------------------------------------------------
 
   if (plot) {
+    old_par <- par(no.readonly = TRUE)
+    on.exit(par(old_par), add = TRUE)
+
     n_plots <- length(type)
     if (n_plots == 2L) par(mfrow = c(1L, 2L))
 
@@ -800,7 +902,7 @@ diag.im <- function(model, data, type = c("s3", "s5"), interval  = c("I1", "I2")
     }
 
     label_obs <- function(vals, lims, lpos) {
-      idx <- which(vals < lims[1] | vals > lims[2])
+      idx <- which(vals < lims[1L] | vals > lims[2L])
       for (k in seq_along(idx)) {
         ii  <- idx[k]
         pos <- lpos[((k - 1L) %% length(lpos)) + 1L]
@@ -810,10 +912,11 @@ diag.im <- function(model, data, type = c("s3", "s5"), interval  = c("I1", "I2")
     }
 
     make_plot <- function(vals, lims, ylab_expr) {
-      par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(2, 0.6, 0))
+      par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5),
+          mgp = c(2, 0.6, 0))
       plot_args <- modifyList(
-        list(type = pt, pch = 1, xlab = "Observation index", ylab = ylab_expr,
-             cex.lab = 1.2, cex = 1, cex.axis = 0.8,
+        list(type = pt, pch = 1, xlab = "Observation index",
+             ylab = ylab_expr, cex.lab = 1.2, cex = 1, cex.axis = 0.8,
              ylim = make_ylim(vals, lims)),
         list(...)
       )
@@ -828,6 +931,7 @@ diag.im <- function(model, data, type = c("s3", "s5"), interval  = c("I1", "I2")
       make_plot(result$s5_i, result$limits_s5, expression(s[5 * i]))
 
     invisible(result)
+
   } else {
     result
   }
@@ -983,115 +1087,188 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 # ==============================================================================
 
 #' @title Distance-Based Influence Diagnostics for Simplex Regression
-#' @description Computes leave-one-out influence measures based on distributional
-#' distances (Wasserstein W1, W2, or Hellinger) for simplex regression models.
+#' @description Computes leave-one-out influence measures based on
+#' distributional distances (Wasserstein W1, W2, or Hellinger) for simplex
+#' regression models.
 #'
 #' @param model An object of class \code{simplexregression}.
 #' @param data The data frame used to fit \code{model}.
 #' @param type Character string or integer specifying the distance measure:
-#'   \code{"W1"} or \code{1} (default, Wasserstein with p_W = 1), \code{"W2"} or \code{2}
-#'   (Wasserstein with p_W = 2), \code{"H"} or \code{3} (Hellinger).
-#' @param plot Logical; if \code{FALSE} (default), returns the numeric vector of
-#'   distances. If \code{TRUE}, produces an index plot with the ad hoc threshold.
+#'   \code{"W1"} or \code{1} (default, Wasserstein with \eqn{p_W = 1}),
+#'   \code{"W2"} or \code{2} (Wasserstein with \eqn{p_W = 2}), \code{"H"}
+#'   or \code{3} (Hellinger).
+#' @param plot Logical; if \code{FALSE} (default), returns the numeric vector
+#'   of distances. If \code{TRUE}, produces an index plot with the ad hoc
+#'   threshold and flagged-observation labels.
 #' @param verbose Logical; if \code{TRUE} (default), prints progress during
-#'   leave-one-out refitting.
-#' @param label.pos Position(s) for outlier labels in plot. Can be a single value
-#' (applied to all labels) or a vector. Values: 1=below, 2=left, 3=above, 4=right.
+#'   leave-one-out refitting. Ignored when \code{ncores > 1}, since output
+#'   from parallel workers does not reach the main console.
+#' @param ncores Positive integer specifying the number of CPU cores to use
+#'   for the leave-one-out loop. Default is \code{1} (sequential). Values
+#'   greater than \code{1} activate parallel computation via
+#'   \code{\link[parallel]{parLapply}}. If \code{ncores} exceeds
+#'   \code{parallel::detectCores() - 1}, it is clamped to that value with a
+#'   warning to avoid overloading the system. A safe explicit choice is
+#'   \code{parallel::detectCores() - 1}.
+#' @param label.pos Position(s) for outlier labels in the plot. Can be a
+#'   single value (applied to all labels) or a vector. Values: 1 = below,
+#'   2 = left, 3 = above, 4 = right.
 #' @param plot.type Character string controlling the plot style when
-#' \code{plot = TRUE}. If \code{NULL} (default), uses \code{"h"} for
-#' \eqn{n \le 150} and \code{"p"} for \eqn{n > 150} (automatic). Passed
-#' to the \code{type} argument of \code{plot()}.
+#'   \code{plot = TRUE}. If \code{NULL} (default), uses \code{"h"} for
+#'   \eqn{n \le 150} and \code{"p"} for \eqn{n > 150} (automatic). Passed
+#'   to the \code{type} argument of \code{plot()}.
 #' @param ... Additional graphical parameters passed to \code{plot()}.
 #'
 #' @return If \code{plot = FALSE}, a list containing:
 #' \describe{
 #'   \item{\code{distances}}{Numeric vector of length \eqn{n} with the
 #'     leave-one-out distances.}
-#'   \item{\code{threshold}}{Named numeric vector with the ad hoc upper threshold.}
-#'   \item{\code{outliers}}{Data frame of flagged observations (index and distance).}
-#'   \item{\code{type}}{Distance type used.}
+#'   \item{\code{threshold}}{Named numeric scalar with the ad hoc upper
+#'     threshold.}
+#'   \item{\code{outliers}}{Data frame of flagged observations (index and
+#'     distance value). An empty data frame if no observations are flagged.}
+#'   \item{\code{type}}{Distance type used (full label).}
 #'   \item{\code{n}}{Number of observations.}
 #' }
 #' If \code{plot = TRUE}, the same list is returned invisibly.
 #'
 #' @details
 #' For each observation \eqn{i}, the model is refit on the dataset with
-#' observation \eqn{i} removed. The distance between the full and leave-one-out
-#' fitted distributions is then computed pointwise and summed.
+#' observation \eqn{i} removed. The chosen distance between the full-model
+#' and leave-one-out fitted distributions is then computed pointwise across
+#' all \eqn{n} observations and summed to produce the scalar influence
+#' measure \eqn{d_i}.
 #'
-#' The ad hoc threshold uses an asymmetric IQR spread:
-#' \deqn{\text{threshold} = Q(0.75) + (1 + a) \cdot (Q(0.75) - Q(0.25))},
-#' where a is its sample skewness.
+#' \strong{Ad hoc threshold} uses an asymmetric IQR spread adjusted for
+#' skewness:
+#' \deqn{\text{threshold} = Q(0.75) + (1 + a)(Q(0.75) - Q(0.25))}
+#' where \eqn{a} is the sample skewness of the distances. Observations with
+#' \eqn{d_i} above this threshold are flagged as potentially influential.
 #'
-#' \strong{Warning:} For \eqn{n > 500}, numerical integration used internally
-#' by the distance functions may be slow. Consider using a subset or a
-#' faster integration method.
+#' \strong{Warning:} for \eqn{n > 500}, the numerical integration used
+#' internally by the distance functions may be slow. Consider using a subset
+#' or a faster integration method.
+#'
+#' \strong{Parallel computation:} when \code{ncores > 1}, the
+#' leave-one-out loop is distributed across workers using
+#' \code{\link[parallel]{parLapply}} from the \pkg{parallel} package
+#' (included in base R). Each worker receives the necessary objects and
+#' loads the \pkg{simplexregression} package. The random-number stream is
+#' initialised with \code{\link[parallel]{clusterSetRNGStream}} to ensure
+#' reproducibility across runs. Progress messages (\code{verbose}) are
+#' suppressed in parallel mode because worker output does not reach the
+#' main console.
 #'
 #' @examples
-#' n  <- 100
-#' x1 <- runif(n); x2 <- runif(n)
-#' mu <- parametric_mean_link_inv(0.8 + 1.8*x1 - 1.5*x2, 0.25, "plogit2")
-#' y  <- rsimplex(n, mu, 0.5)
-#' dat <- data.frame(y = y, x1 = x1, x2 = x2)
-#' fit <- simplexreg(y ~ x1 + x2 | 1, data = dat, link.mu = "plogit2")
+#' # Simulate data
+#' set.seed(2026)
+#' n <- 50
+#' x1 <- runif(n, 0, 1)
+#' z1 <- runif(n, 0, 1)
+#' mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, z1 = z1)
 #'
-#' # Produce index plot
-#' # diag.distances(fit, data = dat, type = "W1", plot = TRUE)
+#' # Fit model
+#' fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
 #'
-#' @seealso \code{\link{diag.im}}
+#' \donttest{
+#' # Sequential (default) — Wasserstein W1
+#' dd <- diag.distances(fit, data = data, type = "W1")
+#'
+#' # Index plot with flagged observations
+#' diag.distances(fit, data = data, type = "W1", plot = TRUE)
+#'
+#' # Hellinger distance
+#' diag.distances(fit, data = data, type = "H", plot = TRUE)
+#' }
+#'
+#' \dontrun{
+#' # Parallel: use all but one core
+#' # (excluded from R CMD check -- spawning multiple processes is not
+#' #  permitted in the check environment)
+#' dd_par <- diag.distances(fit, data = data,
+#'                          ncores = parallel::detectCores() - 1)
+#' }
+#'
+#' @references
+#' Justino, M. E. C. and Cribari-Neto, F. (2026).
+#' Simplex regression with a flexible logit link: Inference and application
+#' to cross-country impunity data.
+#' \emph{Applied Mathematical Modelling}, \bold{154}, 116713.
+#' \doi{10.1016/j.apm.2025.116713}
+#'
+#' @seealso \code{\link{diag.im}}, \code{\link{local.influence}},
+#' \code{\link{gleverage}}.
 #'
 #' @importFrom pracma quadgk
-#'
+#' @importFrom parallel makeCluster stopCluster clusterSetRNGStream
+#'   clusterExport clusterEvalQ parLapply detectCores
 #' @export
 diag.distances <- function(model, data, type = c("W1", "W2", "H"),
-                           plot = FALSE, verbose = TRUE,
+                           plot = FALSE, verbose = TRUE, ncores = 1,
                            label.pos = 3, plot.type = NULL, ...) {
 
+  # --------------------------------------------------------------------
+  # Input validation
+  # --------------------------------------------------------------------
   if (!inherits(model, "simplexregression"))
     stop("'model' must be an object of class 'simplexregression'")
 
-  # ---- Normalise 'type' (accept integer shortcuts) -------------------------
+  # Accept integer shortcuts (1, 2, 3) as in the original
   if (is.numeric(type)) {
     type <- switch(as.character(as.integer(type)),
-                   "1" = "W1",
-                   "2" = "W2",
-                   "3" = "H",
+                   "1" = "W1", "2" = "W2", "3" = "H",
                    stop("'type' must be 1 (W1), 2 (W2), or 3 (H)."))
   } else {
     type <- match.arg(type)
   }
 
+  if (!all(ncores == floor(ncores)) || ncores < 1)
+    stop("'ncores' must be a positive integer >= 1")
+
+  max_cores <- max(1L, parallel::detectCores() - 1L)
+  if (ncores > max_cores) {
+    warning(sprintf(
+      "'ncores' (%d) exceeds detectCores() - 1 (%d); clamped to %d.",
+      ncores, max_cores, max_cores))
+    ncores <- max_cores
+  }
+
   n <- model$nobs
 
-  # ---- Large-sample warning ------------------------------------------------
   if (n > 500)
-    warning(
-      sprintf(paste0("n = %d > 500: numerical integration used by the distance ",
-                     "functions may be slow for large samples."), n),
-      call. = FALSE
-    )
+    warning(sprintf(paste0(
+      "n = %d > 500: numerical integration used by the distance ",
+      "functions may be slow for large samples."), n),
+      call. = FALSE)
 
-  # ---- Pre-compute full-model predictions ----------------------------------
-  mu_full    <- predict.simplexregression(model, newdata = data, type = "response")
-  sigma2_full <- predict.simplexregression(model, newdata = data, type = "dispersion")
+  # --------------------------------------------------------------------
+  # Full-model predictions (computed once, shared across all iterations)
+  # --------------------------------------------------------------------
+  mu_full     <- predict.simplexregression(model, newdata = data,
+                                           type = "response")
+  sigma2_full <- predict.simplexregression(model, newdata = data,
+                                           type = "dispersion")
 
-  # ---- Distance function selector ------------------------------------------
+  # --------------------------------------------------------------------
+  # Distance function selector
+  # --------------------------------------------------------------------
   dist_fun <- switch(type,
                      W1 = function(mf, sf, mr, sr)
-                       wasserstein_simplex(mf, sf, mr, sr, p_W = 1, region = "complete")$sum,
+                       wasserstein_simplex(mf, sf, mr, sr,
+                                           p_W = 1, region = "complete")$sum,
                      W2 = function(mf, sf, mr, sr)
                        wasserstein_simplex(mf, sf, mr, sr, p_W = 2)$sum,
                      H  = function(mf, sf, mr, sr)
                        hellinger_simplex(mf, sf, mr, sr)$sum
   )
 
-  # ---- Leave-one-out loop --------------------------------------------------
-  distances <- numeric(n)
-
-  for (i in seq_len(n)) {
-
-    if (verbose && (i == 1 || i %% 10 == 0))
-      message(sprintf("  Leave-one-out refit: observation %d / %d", i, n))
+  # --------------------------------------------------------------------
+  # Auxiliary: single LOO iteration
+  # --------------------------------------------------------------------
+  loo_one <- function(i) {
 
     fit_i <- tryCatch(
       simplexreg(
@@ -1107,22 +1284,76 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
       }
     )
 
-    if (is.null(fit_i)) {
-      distances[i] <- NA_real_
-      next
-    }
+    if (is.null(fit_i)) return(NA_real_)
 
-    mu_red     <- predict.simplexregression(fit_i, newdata = data, type = "response")
-    sigma2_red <- predict.simplexregression(fit_i, newdata = data, type = "dispersion")
+    mu_red     <- predict.simplexregression(fit_i, newdata = data,
+                                            type = "response")
+    sigma2_red <- predict.simplexregression(fit_i, newdata = data,
+                                            type = "dispersion")
 
-    distances[i] <- dist_fun(mu_full, sigma2_full, mu_red, sigma2_red)
+    dist_fun(mu_full, sigma2_full, mu_red, sigma2_red)
   }
 
-  # ---- Ad hoc threshold (asymmetric IQR) -----------------------------------
+  # --------------------------------------------------------------------
+  # Execute: sequential or parallel
+  # --------------------------------------------------------------------
+  if (ncores == 1L) {
+
+    if (verbose) message("Running leave-one-out refits (sequential)...")
+
+    distances <- vapply(seq_len(n), function(i) {
+      if (verbose && (i == 1L || i %% 10L == 0L))
+        message(sprintf("  Leave-one-out refit: observation %d / %d", i, n))
+      loo_one(i)
+    }, numeric(1L))
+
+  } else {
+
+    if (verbose)
+      message(sprintf(
+        "Running leave-one-out refits in parallel (%d cores)...", ncores))
+
+    cl <- parallel::makeCluster(ncores)
+    on.exit(parallel::stopCluster(cl), add = TRUE)
+
+    parallel::clusterSetRNGStream(cl, iseed = 123)
+
+    parallel::clusterExport(
+      cl,
+      varlist = c(
+        "loo_one", "mu_full", "sigma2_full", "dist_fun",
+        "model", "data",
+        "simplexreg", "predict.simplexregression",
+        "wasserstein_simplex", "hellinger_simplex"
+      ),
+      envir = environment()
+    )
+
+    parallel::clusterEvalQ(cl, library(SimplexRegression))
+
+    distances <- unlist(
+      parallel::parLapply(cl, seq_len(n), function(i) loo_one(i))
+    )
+  }
+
+  na_idx <- which(is.na(distances))
+  if (length(na_idx) > 0L) {
+    warning(sprintf(
+      paste0("%d observation(s) produced NA distances due to numerical ",
+             "integration failure (obs: %s). They are excluded from the ",
+             "threshold computation but kept as NA in the output."),
+      length(na_idx),
+      paste(na_idx, collapse = ", ")
+    ), call. = FALSE)
+  }
+
+  # --------------------------------------------------------------------
+  # Ad hoc threshold (asymmetric IQR adjusted for skewness)
+  # --------------------------------------------------------------------
   ad_hoc_threshold <- function(x) {
-    q <- quantile(x, c(0.25, 0.75), na.rm = TRUE)
-    iqr_right <- q[2] - q[1]
-    unname(q[2] + (1 + moments::skewness(x)) * iqr_right)
+    q       <- quantile(x, c(0.25, 0.75), na.rm = TRUE)
+    iqr_right <- q[2L] - q[1L]
+    unname(q[2L] + (1 + moments::skewness(x)) * iqr_right)
   }
 
   thr <- ad_hoc_threshold(distances)
@@ -1131,10 +1362,14 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
   outliers <- if (length(idx))
     data.frame(Obs = idx, distance = distances[idx])
   else
-    data.frame(Obs = integer(0), distance = numeric(0))
+    data.frame(Obs = integer(0L), distance = numeric(0L))
 
-  # ---- Assemble result -----------------------------------------------------
-  type_label <- c(W1 = "Wasserstein-1", W2 = "Wasserstein-2", H = "Hellinger")[type]
+  # --------------------------------------------------------------------
+  # Assemble result
+  # --------------------------------------------------------------------
+  type_label <- unname(c(W1 = "Wasserstein-1",
+                         W2 = "Wasserstein-2",
+                         H = "Hellinger")[type])
 
   result <- list(
     distances = distances,
@@ -1144,46 +1379,48 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
     n         = n
   )
 
-  # ---- Plot ----------------------------------------------------------------
-  old_par <- par(no.readonly = TRUE)
-  on.exit(par(old_par))
+  # --------------------------------------------------------------------
+  # Plot
+  # --------------------------------------------------------------------
 
   if (plot) {
+    old_par <- par(no.readonly = TRUE)
+    on.exit(par(old_par), add = TRUE)
+
     ylab_expr <- switch(type,
                         W1 = "Wasserstein (p_W = 1) distance",
                         W2 = "Wasserstein (p_W = 2) distance",
                         H  = "Hellinger distance"
     )
 
-    pt <- if (is.null(plot.type)) {
-      if (n > 150) "p" else "h"
-    } else {
-      plot.type
-    }
+    pt <- if (is.null(plot.type)) (if (n > 150L) "p" else "h") else plot.type
 
-    y_max <- if (nrow(outliers) > 0) {
-      max(distances, na.rm = TRUE) * 1.12
-    } else {
-      max(distances, na.rm = TRUE) * 1.05
-    }
+    y_max <- max(distances, na.rm = TRUE) *
+      if (nrow(outliers) > 0L) 1.12 else 1.05
 
-    par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(2, 0.6, 0))
+    par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5),
+        mgp = c(2, 0.6, 0))
 
     plot_args <- modifyList(
-      list(type = pt, pch = 1, xlab = "Observation index", ylab = ylab_expr,
-           cex = 1, cex.lab = 1.2, cex.axis = 0.8,
+      list(type = pt, pch = 1, xlab = "Observation index",
+           ylab = ylab_expr, cex = 1, cex.lab = 1.2, cex.axis = 0.8,
            ylim = c(0, y_max)),
       list(...)
     )
     do.call(graphics::plot, c(list(distances), plot_args))
     graphics::abline(h = thr, lty = 2, col = "gray60", lwd = 1.5)
 
-    if (nrow(outliers) > 0L)
-      text(outliers$Obs, outliers$distance,
-           labels = outliers$Obs, pos = label.pos,
-           cex = 0.8, col = "red", offset = 0.3)
+    if (nrow(outliers) > 0L) {
+      for (k in seq_len(nrow(outliers))) {
+        ii  <- outliers$Obs[k]
+        pos <- label.pos[((k - 1L) %% length(label.pos)) + 1L]
+        text(ii, distances[ii], labels = ii, pos = pos,
+             cex = 0.8, col = "red", offset = 0.3)
+      }
+    }
 
     invisible(result)
+
   } else {
     result
   }

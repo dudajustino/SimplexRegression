@@ -61,18 +61,21 @@
 #'
 #' @examples
 #' # Simulate data
+#' set.seed(2026)
 #' n <- 100
 #' x1 <- runif(n, 0, 1)
 #' x2 <- runif(n, 0, 1)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-#' y <- rsimplex(n, mu, 0.5)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2)
+#' z1 <- runif(n, 0, 1)
+#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 #'
 #' # Fit model with parametric mean link functions
-#' fit <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit2")
+#' fit <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
 #'
 #' # Display all diagnostic plots
-#' par(mfrow = c(3, 2))
+#' par(mfrow = c(3, 3))
 #' plot(fit, which = 1:7)
 #'
 #' @importFrom stats qqnorm qqline residuals cooks.distance
@@ -111,10 +114,12 @@ plot.simplexregression <- function(x, which = 1:7,
   pt_index   <- if (is.null(plot.type)) "h"  else plot.type   # type for plots 6-7
 
   # Configure ask mode
-  op <- par(no.readonly = TRUE)
-  on.exit(par(op))
-  if (ask) par(ask = TRUE)
-  if (reset.par) par(mar = c(3,3,2,3), oma = c(0.5,0.5,0.5,0.5), mgp = c(2,0.6,0))
+  if (ask || reset.par) {
+    op <- par(no.readonly = TRUE)
+    on.exit(par(op))
+    if (ask) par(ask = TRUE)
+    if (reset.par) par(mar = c(3,3,2,3), oma = c(0.5,0.5,0.5,0.5), mgp = c(2,0.6,0))
+  }
 
   # Helper to merge defaults with user ...
   plot_args <- function(..., defaults) modifyList(defaults, list(...))
@@ -232,20 +237,22 @@ plot.simplexregression <- function(x, which = 1:7,
 #' Points outside the envelope may indicate model inadequacy.
 #'
 #' @examples
-#' # Simulate data (quick)
-#' n <- 50
+#' # Simulate data
+#' set.seed(2026)
+#' n <- 100
 #' x1 <- runif(n, 0, 1)
 #' x2 <- runif(n, 0, 1)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-#' y <- rsimplex(n, mu, 0.5)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2)
+#' z1 <- runif(n, 0, 1)
+#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+#' y <- rsimplex(n, mu, sigma2)
+#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 #'
-#' # Fit model
-#' fit <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit2")
+#' # Fit model with parametric mean link functions
+#' fit <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
 #'
 #' \donttest{
-#' # Half-normal plot with fewer simulations (faster)
-#' halfnormal.plot(fit, type = "weighted", nsim = 20)
+#' halfnormal.plot(fit)
 #' }
 #'
 #' @importFrom stats qnorm quantile median residuals
@@ -334,7 +341,7 @@ halfnormal.plot <- function (model, type = c("weighted", "quantile",
   yy <- cbind(e1, e2)
 
   op <- par(no.readonly = TRUE)
-  on.exit(par(op))
+  on.exit(par(op), add = TRUE)
   par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(2, 0.6, 0))
 
   # Plot defaults (can be overridden via ...)

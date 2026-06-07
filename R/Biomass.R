@@ -9,6 +9,9 @@
 #' The response variables (stem, leaves, roots) are proportions bounded in the
 #' (0,1) interval, making them suitable for simplex regression analysis.
 #'
+#' @docType data
+#' @usage data(Biomass)
+#'
 #' @format A data frame with 500 observations and 13 variables:
 #' \describe{
 #'   \item{SpeciesName}{Species code (DfH, DfL, HlH, HlL) where:
@@ -50,4 +53,21 @@
 #' Poorter, H. & Sack, L. (2012) Pitfalls and possibilities in the analysis of
 #' biomass allocation patterns in plants. \emph{Frontiers in Plant Science},
 #' 3, 259. \doi{10.3389/fpls.2012.00259}
+#' @keywords datasets
+#'
+#' @examples
+#' # Load the data
+#' data(Biomass)
+#'
+#' # Quick overview
+#' head(Biomass)
+#' str(Biomass)
+#'
+#' # Check that proportions sum to 1 (within rounding error)
+#' summary(rowSums(Biomass[, c("LMF", "SMF", "RMF")]))
+#'
+#' # Simple plot of root mass fraction by treatment
+#' boxplot(RMF ~ Trt * Species, data = Biomass,
+#'         main = "Root Mass Fraction by Species and Nitrate Treatment",
+#'         las = 2)
 "Biomass"
