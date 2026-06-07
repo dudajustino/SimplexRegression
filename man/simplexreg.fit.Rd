@@ -188,18 +188,18 @@ lmtest package), \code{\link[sandwich]{bread}} and \code{\link[sandwich]{estfun}
 }
 \examples{
 # Simulate data
+set.seed(2026)
 n <- 100
 x1 <- runif(n, 0, 1)
 x2 <- runif(n, 0, 1)
-mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2 , 0.25, "plogit2")
-sigma2 <- 0.5
-summary(mu)
+z1 <- runif(n, 0, 1)
+mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
 y <- rsimplex(n, mu, sigma2)
-data <- data.frame(y = y, x1 = x1, x2 = x2)
+data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 
-# Fit model
-fit <- simplexreg(y ~ x1 + x2 | 1, data = data,
-                     link.mu = "plogit2", link.sigma2 = "identity")
+# Fit model with parametric mean link functions
+fit <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
 summary(fit)
 
 }

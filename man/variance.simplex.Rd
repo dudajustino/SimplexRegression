@@ -42,8 +42,7 @@ variance.simplex(mu = mu_vec, sigma2 = sigma2_vec)
 
 }
 \references{
-Jørgensen, B. (1997).
-\emph{The Theory of Dispersion Models}.
+Jørgensen, B. (1997). \emph{The Theory of Dispersion Models}.
 Chapman and Hall, London.
 
 Song, P. X.-K. and Tan, M. (2000).

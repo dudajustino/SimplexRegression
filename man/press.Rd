@@ -29,27 +29,33 @@ The PRESS statistic for the simplex regression model is given by:
 where \eqn{r_i} denotes the residual for observation \eqn{i} and
 \eqn{h_{ii}} is the \eqn{i}-th diagonal element of the hat matrix.
 
-The \eqn{P^2} statistic is a cross-validation analog of R², defined 
+The \eqn{P^2} statistic is a cross-validation analog of \eqn{R^2}, defined
 for the simplex regression mode as:
 \deqn{P^2 = 1 - \frac{\text{PRESS}}{\left(\frac{n}{n-r}\right)^2 \text{SST}},}
 where \eqn{\text{SST} = \sum_{i=1}^{n}(\hat{y}_i - \bar{\hat{y}})^2} and
 \eqn{r} is the number of estimated parameters.
 
-The adjusted P² is given by:
+The adjusted \eqn{P^2} is given by:
 \deqn{P^2_c = 1 - (1 - P^2)\frac{n-1}{n-r}.}
 
 The \code{type} argument controls which residuals \eqn{r_i} are used in
 the PRESS computation.
 }
 \examples{
-n  <- 100
-x1 <- runif(n); x2 <- runif(n)
-mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-y  <- rsimplex(n, mu, 0.5)
-dat <- data.frame(y = y, x1 = x1, x2 = x2)
+# Simulate data
+set.seed(2026)
+n <- 100
+x1 <- runif(n, 0, 1)
+x2 <- runif(n, 0, 1)
+z1 <- runif(n, 0, 1)
+mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+y <- rsimplex(n, mu, sigma2)
+data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 
-fit1 <- simplexreg(y ~ x1 + x2 | 1, data = dat, link.mu = "plogit2")
-fit2 <- simplexreg(y ~ x1 + x2 | 1, data = dat, link.mu = "logit")
+# Fit model with parametric mean link functions
+fit1 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
+fit2 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "logit")
 
 # Single model
 press(fit1)
@@ -63,7 +69,7 @@ press(fit1, fit2, type = "biasvariance")
 }
 \references{
 Espinheira, P. L., Silva, A. O. (2026). Prediction in the nonlinear simplex model.
-\emph{International Journal of Data Science and Analytics}, \bold{22}, 161. 
+\emph{International Journal of Data Science and Analytics}, \bold{22}, 161.
 \doi{10.1007/s41060-026-01114-9}
 
 Espinheira, P. L., Silva, A. O. (2020). Residual and influence analysis to a

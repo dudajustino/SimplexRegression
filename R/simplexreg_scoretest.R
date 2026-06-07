@@ -57,27 +57,28 @@
 #'  \bold{44}(1), 50--57. \doi{10.1017/S0305004100023987}
 #'
 #' @examples
-#' # Simulate data with plogit2
+#' # Simulate data
+#' set.seed(2026)
 #' n <- 100
 #' x1 <- runif(n, 0, 1)
 #' x2 <- runif(n, 0, 1)
-#' mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2 , 0.25, "plogit2")
-#' sigma2 <- 0.5
+#' z1 <- runif(n, 0, 1)
+#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
+#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
 #' y <- rsimplex(n, mu, sigma2)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2)
+#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
 #'
 #' # Fit model with logit
-#' model <- simplexreg(y ~ x1 + x2 | 1, data = data,
-#'                      link.mu = "logit", link.sigma2 = "identity")
+#' model <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "logit")
 #'
 #' # Test if lambda = 1
-#' scoretest(model, link.mu = "plogit2")
+#' scoretest(model, link.mu = "plogit1")
 #'
 #' @importFrom stats pchisq plogis
 #'
 #' @export
 scoretest <- function(model, link.mu = c("plogit1", "plogit2")) {
-  
+
   if (!inherits(model, "simplexregression")) {
     stop("'model' must be an object of class 'simplexregression'")
   }

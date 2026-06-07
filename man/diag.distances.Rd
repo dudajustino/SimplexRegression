@@ -10,6 +10,7 @@ diag.distances(
   type = c("W1", "W2", "H"),
   plot = FALSE,
   verbose = TRUE,
+  ncores = 1,
   label.pos = 3,
   plot.type = NULL,
   ...
@@ -21,17 +22,29 @@ diag.distances(
 \item{data}{The data frame used to fit \code{model}.}
 
 \item{type}{Character string or integer specifying the distance measure:
-\code{"W1"} or \code{1} (default, Wasserstein with p_W = 1), \code{"W2"} or \code{2}
-(Wasserstein with p_W = 2), \code{"H"} or \code{3} (Hellinger).}
+\code{"W1"} or \code{1} (default, Wasserstein with \eqn{p_W = 1}),
+\code{"W2"} or \code{2} (Wasserstein with \eqn{p_W = 2}), \code{"H"}
+or \code{3} (Hellinger).}
 
-\item{plot}{Logical; if \code{FALSE} (default), returns the numeric vector of
-distances. If \code{TRUE}, produces an index plot with the ad hoc threshold.}
+\item{plot}{Logical; if \code{FALSE} (default), returns the numeric vector
+of distances. If \code{TRUE}, produces an index plot with the ad hoc
+threshold and flagged-observation labels.}
 
 \item{verbose}{Logical; if \code{TRUE} (default), prints progress during
-leave-one-out refitting.}
+leave-one-out refitting. Ignored when \code{ncores > 1}, since output
+from parallel workers does not reach the main console.}
 
-\item{label.pos}{Position(s) for outlier labels in plot. Can be a single value
-(applied to all labels) or a vector. Values: 1=below, 2=left, 3=above, 4=right.}
+\item{ncores}{Positive integer specifying the number of CPU cores to use
+for the leave-one-out loop. Default is \code{1} (sequential). Values
+greater than \code{1} activate parallel computation via
+\code{\link[parallel]{parLapply}}. If \code{ncores} exceeds
+\code{parallel::detectCores() - 1}, it is clamped to that value with a
+warning to avoid overloading the system. A safe explicit choice is
+\code{parallel::detectCores() - 1}.}
+
+\item{label.pos}{Position(s) for outlier labels in the plot. Can be a
+single value (applied to all labels) or a vector. Values: 1 = below,
+2 = left, 3 = above, 4 = right.}
 
 \item{plot.type}{Character string controlling the plot style when
 \code{plot = TRUE}. If \code{NULL} (default), uses \code{"h"} for
@@ -45,42 +58,89 @@ If \code{plot = FALSE}, a list containing:
 \describe{
   \item{\code{distances}}{Numeric vector of length \eqn{n} with the
     leave-one-out distances.}
-  \item{\code{threshold}}{Named numeric vector with the ad hoc upper threshold.}
-  \item{\code{outliers}}{Data frame of flagged observations (index and distance).}
-  \item{\code{type}}{Distance type used.}
+  \item{\code{threshold}}{Named numeric scalar with the ad hoc upper
+    threshold.}
+  \item{\code{outliers}}{Data frame of flagged observations (index and
+    distance value). An empty data frame if no observations are flagged.}
+  \item{\code{type}}{Distance type used (full label).}
   \item{\code{n}}{Number of observations.}
 }
 If \code{plot = TRUE}, the same list is returned invisibly.
 }
 \description{
-Computes leave-one-out influence measures based on distributional
-distances (Wasserstein W1, W2, or Hellinger) for simplex regression models.
+Computes leave-one-out influence measures based on
+distributional distances (Wasserstein W1, W2, or Hellinger) for simplex
+regression models.
 }
 \details{
 For each observation \eqn{i}, the model is refit on the dataset with
-observation \eqn{i} removed. The distance between the full and leave-one-out
-fitted distributions is then computed pointwise and summed.
+observation \eqn{i} removed. The chosen distance between the full-model
+and leave-one-out fitted distributions is then computed pointwise across
+all \eqn{n} observations and summed to produce the scalar influence
+measure \eqn{d_i}.
 
-The ad hoc threshold uses an asymmetric IQR spread:
-\deqn{\text{threshold} = Q(0.75) + (1 + a) \cdot (Q(0.75) - Q(0.25))},
-where a is its sample skewness.
+\strong{Ad hoc threshold} uses an asymmetric IQR spread adjusted for
+skewness:
+\deqn{\text{threshold} = Q(0.75) + (1 + a)(Q(0.75) - Q(0.25))}
+where \eqn{a} is the sample skewness of the distances. Observations with
+\eqn{d_i} above this threshold are flagged as potentially influential.
 
-\strong{Warning:} For \eqn{n > 500}, numerical integration used internally
-by the distance functions may be slow. Consider using a subset or a
-faster integration method.
+\strong{Warning:} for \eqn{n > 500}, the numerical integration used
+internally by the distance functions may be slow. Consider using a subset
+or a faster integration method.
+
+\strong{Parallel computation:} when \code{ncores > 1}, the
+leave-one-out loop is distributed across workers using
+\code{\link[parallel]{parLapply}} from the \pkg{parallel} package
+(included in base R). Each worker receives the necessary objects and
+loads the \pkg{simplexregression} package. The random-number stream is
+initialised with \code{\link[parallel]{clusterSetRNGStream}} to ensure
+reproducibility across runs. Progress messages (\code{verbose}) are
+suppressed in parallel mode because worker output does not reach the
+main console.
 }
 \examples{
-n  <- 100
-x1 <- runif(n); x2 <- runif(n)
-mu <- parametric_mean_link_inv(0.8 + 1.8*x1 - 1.5*x2, 0.25, "plogit2")
-y  <- rsimplex(n, mu, 0.5)
-dat <- data.frame(y = y, x1 = x1, x2 = x2)
-fit <- simplexreg(y ~ x1 + x2 | 1, data = dat, link.mu = "plogit2")
+# Simulate data
+set.seed(2026)
+n <- 50
+x1 <- runif(n, 0, 1)
+z1 <- runif(n, 0, 1)
+mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
+sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+y <- rsimplex(n, mu, sigma2)
+data <- data.frame(y = y, x1 = x1, z1 = z1)
 
-# Produce index plot
-# diag.distances(fit, data = dat, type = "W1", plot = TRUE)
+# Fit model
+fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
+
+\donttest{
+# Sequential (default) — Wasserstein W1
+dd <- diag.distances(fit, data = data, type = "W1")
+
+# Index plot with flagged observations
+diag.distances(fit, data = data, type = "W1", plot = TRUE)
+
+# Hellinger distance
+diag.distances(fit, data = data, type = "H", plot = TRUE)
+}
+
+\dontrun{
+# Parallel: use all but one core
+# (excluded from R CMD check -- spawning multiple processes is not
+#  permitted in the check environment)
+dd_par <- diag.distances(fit, data = data,
+                         ncores = parallel::detectCores() - 1)
+}
 
 }
+\references{
+Justino, M. E. C. and Cribari-Neto, F. (2026).
+Simplex regression with a flexible logit link: Inference and application
+to cross-country impunity data.
+\emph{Applied Mathematical Modelling}, \bold{154}, 116713.
+\doi{10.1016/j.apm.2025.116713}
+}
 \seealso{
-\code{\link{diag.im}}
+\code{\link{diag.im}}, \code{\link{local.influence}},
+\code{\link{gleverage}}.
 }

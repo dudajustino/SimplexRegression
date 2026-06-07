@@ -41,7 +41,7 @@ biomass allocation patterns in plants. \emph{Frontiers in Plant Science},
 3, 259.
 }
 \usage{
-Biomass
+data(Biomass)
 }
 \description{
 This dataset examines biomass allocation patterns in plants, specifically
@@ -51,6 +51,22 @@ supply in fast-growing and slow-growing grass species.
 
 The response variables (stem, leaves, roots) are proportions bounded in the
 (0,1) interval, making them suitable for simplex regression analysis.
+}
+\examples{
+# Load the data
+data(Biomass)
+
+# Quick overview
+head(Biomass)
+str(Biomass)
+
+# Check that proportions sum to 1 (within rounding error)
+summary(rowSums(Biomass[, c("LMF", "SMF", "RMF")]))
+
+# Simple plot of root mass fraction by treatment
+boxplot(RMF ~ Trt * Species, data = Biomass,
+        main = "Root Mass Fraction by Species and Nitrate Treatment",
+        las = 2)
 }
 \references{
 When using this data, please cite:

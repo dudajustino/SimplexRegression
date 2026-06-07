@@ -12,6 +12,7 @@ diag.im(
   parameter = c("theta", "beta", "gamma"),
   plot = FALSE,
   verbose = TRUE,
+  ncores = 1,
   label.pos = 3,
   plot.type = NULL,
   ...
@@ -28,19 +29,30 @@ or both (default).}
 \item{interval}{Character string specifying the outlier detection threshold:
 \code{"I1"} (default, moderate) or \code{"I2"} (strict).}
 
-\item{parameter}{Character string indicating the parameter block: \code{"theta"}
-(default, all parameters), \code{"beta"} (mean submodel), or \code{"gamma"}
-(dispersion submodel).}
+\item{parameter}{Character string indicating the parameter block:
+\code{"theta"} (default, all parameters), \code{"beta"} (mean submodel),
+or \code{"gamma"} (dispersion submodel).}
 
 \item{plot}{Logical; if \code{TRUE}, produces index plots of \eqn{s_{3,i}}
 and \eqn{s_{5,i}} with threshold lines and flagged-observation labels.
 Default is \code{FALSE}.}
 
 \item{verbose}{Logical; if \code{TRUE} (default), prints progress during
-leave-one-out refitting.}
+leave-one-out refitting. Ignored (set to \code{FALSE}) when
+\code{ncores > 1}, since output from parallel workers does not reach
+the main console.}
 
-\item{label.pos}{Position(s) for outlier labels in plot. Can be a single value
-(applied to all labels) or a vector. Values: 1=below, 2=left, 3=above, 4=right.}
+\item{ncores}{Positive integer specifying the number of CPU cores to use
+for the leave-one-out loop. Default is \code{1} (sequential). Values
+greater than \code{1} activate parallel computation via
+\code{\link[parallel]{parLapply}}. If \code{ncores} exceeds
+\code{parallel::detectCores() - 1}, it is silently clamped to that
+value to avoid overloading the system. A safe explicit choice is
+\code{parallel::detectCores() - 1}.}
+
+\item{label.pos}{Position(s) for outlier labels in plot. Can be a single
+value (applied to all labels) or a vector. Values: 1 = below, 2 = left,
+3 = above, 4 = right.}
 
 \item{plot.type}{Character string controlling the plot style when
 \code{plot = TRUE}. If \code{NULL} (default), uses \code{"h"} for
@@ -50,31 +62,37 @@ to the \code{type} argument of \code{plot()}.}
 \item{...}{Additional graphical parameters passed to \code{plot()}.}
 }
 \value{
-If \code{plot = FALSE} (default), a list containing only the requested
-measures:
+If \code{plot = FALSE} (default), a list containing only the
+requested measures:
 \describe{
   \item{\code{s3_i}}{(if requested) Numeric vector of \eqn{s_{3,i}} values.}
   \item{\code{s5_i}}{(if requested) Numeric vector of \eqn{s_{5,i}} values.}
-  \item{\code{outliers_s3}}{(if requested) Data frame of flagged observations for \eqn{s_{3,i}}.}
-  \item{\code{outliers_s5}}{(if requested) Data frame of flagged observations for \eqn{s_{5,i}}.}
-  \item{\code{limits_s3}}{(if requested) Named vector for \eqn{s_{3,i}} thresholds.}
-  \item{\code{limits_s5}}{(if requested) Named vector for \eqn{s_{5,i}} thresholds.}
+  \item{\code{outliers_s3}}{(if requested) Data frame of flagged observations
+    for \eqn{s_{3,i}}.}
+  \item{\code{outliers_s5}}{(if requested) Data frame of flagged observations
+    for \eqn{s_{5,i}}.}
+  \item{\code{limits_s3}}{(if requested) Named vector with lower and upper
+    thresholds for \eqn{s_{3,i}}.}
+  \item{\code{limits_s5}}{(if requested) Named vector with lower and upper
+    thresholds for \eqn{s_{5,i}}.}
   \item{\code{interval}}{Interval type used.}
   \item{\code{parameter}}{Parameter block used.}
   \item{\code{n}}{Number of observations.}
 }
+If \code{plot = TRUE}, the same list is returned invisibly.
 }
 \description{
 Computes leave-one-out sample influence measures \eqn{s_{3,i}}
-and \eqn{s_{5,i}} for simplex regression models, based on the information-matrix-based
-criteria measures proposed by Cribari-Neto, Vasconcellos and Santana
-e Silva (2025).
+and \eqn{s_{5,i}} for simplex regression models, based on the
+information-matrix-based criteria measures proposed by Cribari-Neto,
+Vasconcellos and Santana e Silva (2025).
 }
 \details{
 For each observation \eqn{i}, the model is refit on the dataset with
-observation \eqn{i} removed. Let \eqn{\hat\theta} and \eqn{\hat\theta_{(i)}}
-denote the full and leave-one-out MLEs, and let \eqn{A_{n,(i)}} and
-\eqn{B_{n,(i)}} be the corresponding information matrices.
+observation \eqn{i} removed. Let \eqn{\hat\theta} and
+\eqn{\hat\theta_{(i)}} denote the full and leave-one-out MLEs, and let
+\eqn{A_{n,(i)}} and \eqn{B_{n,(i)}} be the corresponding information
+matrices.
 
 \strong{Measures computed:}
 \deqn{s_{3,i} = m_{3,(i)} / m_3}
@@ -102,32 +120,59 @@ Limits are \eqn{v - z \cdot IQR_1} (lower) and \eqn{v + z \cdot IQR_2}
 (upper), with reference value \eqn{v = 1} for \eqn{s_3} and \eqn{v = 0}
 for \eqn{s_5}:
 \itemize{
-  \item \code{I1} (strict): \eqn{z = 2.5} for \eqn{s_3}; \eqn{z = 4.0} for \eqn{s_5}.
-  \item \code{I2} (moderate): \eqn{z = 5.0} for \eqn{s_3}; \eqn{z = 8.0} for \eqn{s_5}.
+  \item \code{I1} (moderate): \eqn{z = 2.5} for \eqn{s_3};
+    \eqn{z = 4.0} for \eqn{s_5}.
+  \item \code{I2} (strict): \eqn{z = 5.0} for \eqn{s_3};
+    \eqn{z = 8.0} for \eqn{s_5}.
 }
+
+\strong{Parallel computation:} when \code{ncores > 1}, the
+leave-one-out loop is distributed across workers using
+\code{\link[parallel]{parLapply}} from the \pkg{parallel} package
+(included in base R). Each worker receives the necessary objects and
+loads the \pkg{simplexregression} package. The random-number stream is
+initialised with \code{\link[parallel]{clusterSetRNGStream}} to ensure
+reproducibility across runs. Progress messages (\code{verbose}) are
+suppressed in parallel mode because worker output does not reach the
+main console.
 }
 \examples{
-n  <- 100
-x1 <- runif(n); x2 <- runif(n)
-mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-y  <- rsimplex(n, mu, 0.5)
-dat <- data.frame(y = y, x1 = x1, x2 = x2)
-fit <- simplexreg(y ~ x1 + x2 | 1, data = dat, link.mu = "plogit2")
+# Simulate data
+set.seed(2026)
+n <- 50
+x1 <- runif(n, 0, 1)
+z1 <- runif(n, 0, 1)
+mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
+sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+y <- rsimplex(n, mu, sigma2)
+data <- data.frame(y = y, x1 = x1, z1 = z1)
+
+# Fit model
+fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
 
 \donttest{
-# Return numeric results
-im <- diag.im(fit, data = dat, type = "s3", interval = "I2", parameter = "theta")
+# Sequential (default)
+im <- diag.im(fit, data = data, type = "s3", interval = "I2",
+              parameter = "theta")
 
 # Produce index plots directly
-diag.im(fit, data = dat, type = "s3", interval = "I2", parameter = "theta", plot = TRUE)
+diag.im(fit, data = data, type = "s3", interval = "I2",
+        parameter = "theta", plot = TRUE)
+}
+
+\dontrun{
+# Parallel: use all but one core
+# (excluded from R CMD check -- spawning multiple processes is not
+#  permitted in the check environment)
+im_par <- diag.im(fit, data = data, ncores = parallel::detectCores() - 1)
 }
 
 }
 \references{
 Cribari-Neto, F.; Vasconcellos, K. L. P.; Santana e Silva, J. J. (2025).
 New strategies for detecting atypical observations based on the information
-matrix equality. \emph{Journal of Applied Statistics}, \bold{52}, 2873--2893.
-\doi{10.1080/02664763.2025.2487914}
+matrix equality. \emph{Journal of Applied Statistics}, \bold{52},
+2873--2893. \doi{10.1080/02664763.2025.2487914}
 }
 \seealso{
 \code{\link{local.influence}}, \code{\link{gleverage}},

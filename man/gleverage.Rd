@@ -26,14 +26,18 @@ mean and dispersion parameters. High leverage values indicate observations
 that have potentially large influence on parameter estimates.
 }
 \examples{
-# Simulate and fit data
-n <- 100
-x1 <- runif(n)
-x2 <- runif(n)
-mu <- parametric_mean_link_inv(0.8 - 1.2*x1 - 1.5*x2, 0.25, "plogit2")
-y <- rsimplex(n, mu, 0.5)
-data <- data.frame(y = y, x1 = x1, x2 = x2)
-fit <- simplexreg(y ~ x1 + x2 | 1, data = data, link.mu = "plogit2")
+# Simulate data
+set.seed(2026)
+n <- 50
+x1 <- runif(n, 0, 1)
+z1 <- runif(n, 0, 1)
+mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
+sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
+y <- rsimplex(n, mu, sigma2)
+data <- data.frame(y = y, x1 = x1, z1 = z1)
+
+# Fit model with parametric mean link functions
+fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
 
 # Compute generalized leverage
 glev <- gleverage(fit)
