@@ -7,13 +7,6 @@
 ################################################################################
 
 # ==============================================================================
-# HELPER: Check if model uses parametric mean link function
-# ==============================================================================
-is_parametric <- function(object) {
-  !is.na(object$coefficients$lambda)
-}
-
-# ==============================================================================
 # 1. LOCAL INFLUENCE
 # ==============================================================================
 
@@ -67,18 +60,9 @@ is_parametric <- function(object) {
 #' for parameters.
 #'
 #' @examples
-#' # Simulate data
-#' set.seed(2026)
-#' n <- 50
-#' x1 <- runif(n, 0, 1)
-#' z1 <- runif(n, 0, 1)
-#' mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
-#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
-#' y <- rsimplex(n, mu, sigma2)
-#' data <- data.frame(y = y, x1 = x1, z1 = z1)
-#'
-#' # Fit model with parametric mean link functions
-#' fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
+#' data(ReadingSkills, package = "SimplexRegression")
+#' fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
+#'                  data = ReadingSkills)
 #'
 #' # Local influence under case-weight perturbation — return results
 #' infl_cw <- local.influence(fit, scheme = "case.weight")
@@ -317,7 +301,7 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
 
   if (plot) {
     op <- par(no.readonly = TRUE)
-    on.exit(par(op))
+    on.exit(par(op), add = TRUE)
 
     measure_name <- paste0(type, ".", parameter)
     values <- result[[measure_name]]
@@ -375,18 +359,9 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
 #' that have potentially large influence on parameter estimates.
 #'
 #' @examples
-#' # Simulate data
-#' set.seed(2026)
-#' n <- 50
-#' x1 <- runif(n, 0, 1)
-#' z1 <- runif(n, 0, 1)
-#' mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
-#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
-#' y <- rsimplex(n, mu, sigma2)
-#' data <- data.frame(y = y, x1 = x1, z1 = z1)
-#'
-#' # Fit model with parametric mean link functions
-#' fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
+#' data(ReadingSkills, package = "SimplexRegression")
+#' fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
+#'                  data = ReadingSkills)
 #'
 #' # Compute generalized leverage
 #' glev <- gleverage(fit)
@@ -628,32 +603,23 @@ gleverage.simplexregression <- function(model){
 #' \code{\link[parallel]{parLapply}} from the \pkg{parallel} package
 #' (included in base R). Each worker receives the necessary objects and
 #' loads the \pkg{simplexregression} package. The random-number stream is
-#' initialised with \code{\link[parallel]{clusterSetRNGStream}} to ensure
+#' initialized with \code{\link[parallel]{clusterSetRNGStream}} to ensure
 #' reproducibility across runs. Progress messages (\code{verbose}) are
 #' suppressed in parallel mode because worker output does not reach the
 #' main console.
 #'
 #' @examples
-#' # Simulate data
-#' set.seed(2026)
-#' n <- 50
-#' x1 <- runif(n, 0, 1)
-#' z1 <- runif(n, 0, 1)
-#' mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
-#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
-#' y <- rsimplex(n, mu, sigma2)
-#' data <- data.frame(y = y, x1 = x1, z1 = z1)
-#'
-#' # Fit model
-#' fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
+#' data(ReadingSkills, package = "SimplexRegression")
+#' fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
+#'                  data = ReadingSkills)
 #'
 #' \donttest{
 #' # Sequential (default)
-#' im <- diag.im(fit, data = data, type = "s3", interval = "I2",
+#' im <- diag.im(fit, data = ReadingSkills, type = "s3", interval = "I1",
 #'               parameter = "theta")
 #'
 #' # Produce index plots directly
-#' diag.im(fit, data = data, type = "s3", interval = "I2",
+#' diag.im(fit, data = ReadingSkills, type = "s3", interval = "I1",
 #'         parameter = "theta", plot = TRUE)
 #' }
 #'
@@ -661,7 +627,7 @@ gleverage.simplexregression <- function(model){
 #' # Parallel: use all but one core
 #' # (excluded from R CMD check -- spawning multiple processes is not
 #' #  permitted in the check environment)
-#' im_par <- diag.im(fit, data = data, ncores = parallel::detectCores() - 1)
+#' im_par <- diag.im(fit, data = ReadingSkills, ncores = parallel::detectCores() - 1)
 #' }
 #'
 #' @references
@@ -1094,9 +1060,8 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 #' @param model An object of class \code{simplexregression}.
 #' @param data The data frame used to fit \code{model}.
 #' @param type Character string or integer specifying the distance measure:
-#'   \code{"W1"} or \code{1} (default, Wasserstein with \eqn{p_W = 1}),
-#'   \code{"W2"} or \code{2} (Wasserstein with \eqn{p_W = 2}), \code{"H"}
-#'   or \code{3} (Hellinger).
+#'   \code{"W1"} (default, Wasserstein with \eqn{p_W = 1}),
+#'   \code{"W2"} (Wasserstein with \eqn{p_W = 2}), \code{"H"} (Hellinger).
 #' @param plot Logical; if \code{FALSE} (default), returns the numeric vector
 #'   of distances. If \code{TRUE}, produces an index plot with the ad hoc
 #'   threshold and flagged-observation labels.
@@ -1154,41 +1119,32 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 #' \code{\link[parallel]{parLapply}} from the \pkg{parallel} package
 #' (included in base R). Each worker receives the necessary objects and
 #' loads the \pkg{simplexregression} package. The random-number stream is
-#' initialised with \code{\link[parallel]{clusterSetRNGStream}} to ensure
+#' initialized with \code{\link[parallel]{clusterSetRNGStream}} to ensure
 #' reproducibility across runs. Progress messages (\code{verbose}) are
 #' suppressed in parallel mode because worker output does not reach the
 #' main console.
 #'
 #' @examples
-#' # Simulate data
-#' set.seed(2026)
-#' n <- 50
-#' x1 <- runif(n, 0, 1)
-#' z1 <- runif(n, 0, 1)
-#' mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
-#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
-#' y <- rsimplex(n, mu, sigma2)
-#' data <- data.frame(y = y, x1 = x1, z1 = z1)
-#'
-#' # Fit model
-#' fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
+#' data(ReadingSkills, package = "SimplexRegression")
+#' fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
+#'                  data = ReadingSkills)
 #'
 #' \donttest{
 #' # Sequential (default) — Wasserstein W1
-#' dd <- diag.distances(fit, data = data, type = "W1")
+#' dd <- diag.distances(fit, data = ReadingSkills, type = "W1")
 #'
 #' # Index plot with flagged observations
-#' diag.distances(fit, data = data, type = "W1", plot = TRUE)
+#' diag.distances(fit, data = ReadingSkills, type = "W1", plot = TRUE)
 #'
 #' # Hellinger distance
-#' diag.distances(fit, data = data, type = "H", plot = TRUE)
+#' diag.distances(fit, data = ReadingSkills, type = "H", plot = TRUE)
 #' }
 #'
 #' \dontrun{
 #' # Parallel: use all but one core
 #' # (excluded from R CMD check -- spawning multiple processes is not
 #' #  permitted in the check environment)
-#' dd_par <- diag.distances(fit, data = data,
+#' dd_par <- diag.distances(fit, data = ReadingSkills, type = "H",
 #'                          ncores = parallel::detectCores() - 1)
 #' }
 #'
@@ -1216,14 +1172,7 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
   if (!inherits(model, "simplexregression"))
     stop("'model' must be an object of class 'simplexregression'")
 
-  # Accept integer shortcuts (1, 2, 3) as in the original
-  if (is.numeric(type)) {
-    type <- switch(as.character(as.integer(type)),
-                   "1" = "W1", "2" = "W2", "3" = "H",
-                   stop("'type' must be 1 (W1), 2 (W2), or 3 (H)."))
-  } else {
-    type <- match.arg(type)
-  }
+  type <- match.arg(type)
 
   if (!all(ncores == floor(ncores)) || ncores < 1)
     stop("'ncores' must be a positive integer >= 1")
@@ -1258,7 +1207,7 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
   dist_fun <- switch(type,
                      W1 = function(mf, sf, mr, sr)
                        wasserstein_simplex(mf, sf, mr, sr,
-                                           p_W = 1, region = "complete")$sum,
+                                           p_W = 1)$sum,
                      W2 = function(mf, sf, mr, sr)
                        wasserstein_simplex(mf, sf, mr, sr, p_W = 2)$sum,
                      H  = function(mf, sf, mr, sr)
@@ -1458,10 +1407,6 @@ wasserstein_simplex_p_W1 <- function(mu1, sig1, mu2, sig2, lower = 0, upper = 1)
 
 #' @keywords internal
 wasserstein_simplex_general <- function(mu1, sig1, mu2, sig2, p_W = 2) {
-  if (abs(p_W - 1) < 1e-10) {
-    return(wasserstein_simplex_p_W1(mu1, sig1, mu2, sig2))
-  }
-
   integrand <- function(q) {
     abs(qsimplex(q, mu1, sig1) - qsimplex(q, mu2, sig2))^p_W
   }
@@ -1471,46 +1416,20 @@ wasserstein_simplex_general <- function(mu1, sig1, mu2, sig2, p_W = 2) {
 }
 
 #' @keywords internal
-wasserstein_simplex <- function(mu1, sig1, mu2, sig2, p_W = 1,
-                                region = c("complete", "center", "tails")) {
-
+wasserstein_simplex <- function(mu1, sig1, mu2, sig2, p_W = 1) {
   if (p_W < 1) stop("p_W must be >= 1 to be a valid distance")
 
-  region <- match.arg(region)
   n <- length(mu1)
 
-  if (p_W != 1 && region != "complete") {
-    stop("Region calculation only available for p_W = 1")
-  }
-
-  if (p_W == 1 && region == "complete") {
-    distances <- sapply(seq_len(n), function(i) {
-      wasserstein_simplex_p_W1(mu1[i], sig1[i], mu2[i], sig2[i], lower = 0, upper = 1)
-    })
-  } else if (p_W == 1 && region != "complete") {
-    distances <- sapply(seq_len(n), function(i) {
-
-      q1 <- qsimplex(0.25, mu1[i], sig1[i])
-      q3 <- qsimplex(0.75, mu1[i], sig1[i])
-
-      if (region == "center") {
-        wasserstein_simplex_p_W1(mu1[i], sig1[i], mu2[i], sig2[i], q1, q3)
-      } else {
-        d_inf <- wasserstein_simplex_p_W1(mu1[i], sig1[i], mu2[i], sig2[i], 0, q1)
-        d_sup <- wasserstein_simplex_p_W1(mu1[i], sig1[i], mu2[i], sig2[i], q3, 1)
-        d_inf + d_sup
-      }
-    })
+  if (p_W == 1) {
+    distances <- vapply(seq_len(n), function(i) {
+      wasserstein_simplex_p_W1(mu1[i], sig1[i], mu2[i], sig2[i])
+    }, numeric(1L))
   } else {
-    distances <- sapply(seq_len(n), function(i) {
+    distances <- vapply(seq_len(n), function(i) {
       wasserstein_simplex_general(mu1[i], sig1[i], mu2[i], sig2[i], p_W = p_W)
-    })
+    }, numeric(1L))
   }
 
-  return(list(
-    distances = distances,
-    sum = sum(distances),
-    region = region,
-    p_W = p_W
-  ))
+  list(distances = distances, sum = sum(distances), p_W = p_W)
 }

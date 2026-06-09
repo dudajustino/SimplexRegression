@@ -132,7 +132,7 @@ penalized.ic <- function(..., kappa = 0.1, verbose = TRUE) {
     # Calculate degrees of freedom (number of parameters)
     df_values[i] <- length(model$coefficients$mean) +
       length(model$coefficients$dispersion) +
-      ifelse(!is.null(model$lambda.fv), 1, 0)
+      as.integer(!is.null(model$lambda.fv))
 
     n <- length(model$fitted.values)
     ll <- model$loglik

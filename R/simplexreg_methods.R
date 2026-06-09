@@ -48,19 +48,9 @@ is_parametric <- function(object) {
 #' @seealso \code{\link{simplexreg}}.
 #'
 #' @examples
-#' # Simulate data
-#' set.seed(2026)
-#' n <- 100
-#' x1 <- runif(n, 0, 1)
-#' x2 <- runif(n, 0, 1)
-#' z1 <- runif(n, 0, 1)
-#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
-#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
-#' y <- rsimplex(n, mu, sigma2)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
-#'
-#' # Fit model with parametric mean link functions
-#' fit <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
+#' data(ReadingSkills, package = "SimplexRegression")
+#' fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
+#'                  data = ReadingSkills)
 #'
 #' # Extract information
 #' summary(fit)
@@ -93,9 +83,9 @@ print.simplexregression <- function(x, digits = max(3, getOption("digits") - 3),
   cat("\nCall:", deparse(x$call, width.cutoff = floor(getOption("width") * 0.85)),
       "", sep = "\n")
 
-  if(!(is.null(x$optim$convergence) || (x$optim$convergence == 0))) {
-    cat("model did not converge\n")
-  } else {
+  converged <- is.null(x$optim$convergence) || x$optim$convergence == 0
+
+  if(converged) {
     # Coefficients (Mean model)
     if(length(x$coefficients$mean)) {
       cat(sprintf("Coefficients (mean model with %s link):\n", x$mu.link))
@@ -124,6 +114,8 @@ print.simplexregression <- function(x, digits = max(3, getOption("digits") - 3),
                   x$mu.link,
                   format(round(x$coefficients$lambda, 10), nsmall = 10)))
     }
+  } else {
+    cat("model did not converge\n")
   }
 
   invisible(x)
@@ -158,7 +150,7 @@ summary.simplexregression <- function(object, ...) {
   cf <- c(coef_mean, coef_disp)
   if(parametric) cf <- c(cf, coef_lambda)
 
-  se_all <- se[1:length(cf)]
+  se_all <- se[seq_len(length(cf))]
   cf_table <- cbind(cf, se_all, cf/se_all, 2 * pnorm(-abs(cf/se_all)))
   colnames(cf_table) <- c("Estimate", "Std. Error", "z value", "Pr(>|z|)")
 
@@ -237,9 +229,7 @@ print.summary.simplexregression <- function(x, digits = max(3, getOption("digits
   cat("\nCall:", deparse(x$call, width.cutoff = floor(getOption("width") * 0.85)),
       "", sep = "\n")
 
-  if(!x$converged) {
-    cat("model did not converge\n")
-  } else {
+  if(x$converged) {
 
     if(!is.null(x$residuals)) {
       cat(sprintf("%s:\n", "Quantile residuals"))
@@ -301,6 +291,8 @@ print.summary.simplexregression <- function(x, digits = max(3, getOption("digits
     cat("\nNumber of observations:", x$nobs)
     cat(paste("\nNumber of iterations:", x$iterations[1L],
               sprintf("(%s) +", x$method), x$iterations[2L], paste("(Fisher scoring)", "\n")))
+  } else{
+    cat("model did not converge\n")
    }
 
   invisible(x)
@@ -550,7 +542,7 @@ update.simplexregression <- function(object, formula., ..., evaluate = TRUE) {
   if(length(extras)) {
     existing <- !is.na(match(names(extras), names(call)))
     for (a in names(extras)[existing]) call[[a]] <- extras[[a]]
-    if(any(!existing)) {
+    if(!all(existing)) {
       call <- c(as.list(call), extras[!existing])
       call <- as.call(call)
     }
@@ -578,7 +570,7 @@ simulate.simplexregression <- function(object, nsim = 1, seed = NULL, ...) {
     R.seed <- get(".Random.seed", envir = .GlobalEnv)
     set.seed(seed)
     RNGstate <- structure(seed, kind = as.list(RNGkind()))
-    on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+    on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv), add = TRUE)
   }
 
   mu <- object$mu.fv

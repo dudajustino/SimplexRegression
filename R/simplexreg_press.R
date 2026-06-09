@@ -47,29 +47,20 @@
 #' \doi{10.1007/s11749-019-00665-3}
 #'
 #' @examples
-#' # Simulate data
-#' set.seed(2026)
-#' n <- 100
-#' x1 <- runif(n, 0, 1)
-#' x2 <- runif(n, 0, 1)
-#' z1 <- runif(n, 0, 1)
-#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
-#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
-#' y <- rsimplex(n, mu, sigma2)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
+#' data(ReadingSkills, package = "SimplexRegression")
+#' fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
+#'                  data = ReadingSkills)
 #'
-#' # Fit model with parametric mean link functions
-#' fit1 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
-#' fit2 <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "logit")
-#'
+#' fit1 <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
+#'                  data = ReadingSkills, link.mu = "loglog")
 #' # Single model
-#' press(fit1)
+#' press(fit)
 #'
 #' # Comparing multiple models
-#' press(fit1, fit2)
+#' press(fit, fit1)
 #'
 #' # Using bias-variance residuals
-#' press(fit1, fit2, type = "biasvariance")
+#' press(fit, fit1, type = "biasvariance")
 #'
 #' @seealso \code{\link{simplexreg}}, \code{\link{residuals.simplexregression}}.
 #' @export
