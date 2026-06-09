@@ -76,18 +76,9 @@ jointly influential for parameters. The index plot of the normal curvature
 for parameters.
 }
 \examples{
-# Simulate data
-set.seed(2026)
-n <- 50
-x1 <- runif(n, 0, 1)
-z1 <- runif(n, 0, 1)
-mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
-sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
-y <- rsimplex(n, mu, sigma2)
-data <- data.frame(y = y, x1 = x1, z1 = z1)
-
-# Fit model with parametric mean link functions
-fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
+data(ReadingSkills, package = "SimplexRegression")
+fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
+                 data = ReadingSkills)
 
 # Local influence under case-weight perturbation — return results
 infl_cw <- local.influence(fit, scheme = "case.weight")

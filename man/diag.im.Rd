@@ -131,32 +131,23 @@ leave-one-out loop is distributed across workers using
 \code{\link[parallel]{parLapply}} from the \pkg{parallel} package
 (included in base R). Each worker receives the necessary objects and
 loads the \pkg{simplexregression} package. The random-number stream is
-initialised with \code{\link[parallel]{clusterSetRNGStream}} to ensure
+initialized with \code{\link[parallel]{clusterSetRNGStream}} to ensure
 reproducibility across runs. Progress messages (\code{verbose}) are
 suppressed in parallel mode because worker output does not reach the
 main console.
 }
 \examples{
-# Simulate data
-set.seed(2026)
-n <- 50
-x1 <- runif(n, 0, 1)
-z1 <- runif(n, 0, 1)
-mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
-sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
-y <- rsimplex(n, mu, sigma2)
-data <- data.frame(y = y, x1 = x1, z1 = z1)
-
-# Fit model
-fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
+data(ReadingSkills, package = "SimplexRegression")
+fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
+                 data = ReadingSkills)
 
 \donttest{
 # Sequential (default)
-im <- diag.im(fit, data = data, type = "s3", interval = "I2",
+im <- diag.im(fit, data = ReadingSkills, type = "s3", interval = "I1",
               parameter = "theta")
 
 # Produce index plots directly
-diag.im(fit, data = data, type = "s3", interval = "I2",
+diag.im(fit, data = ReadingSkills, type = "s3", interval = "I1",
         parameter = "theta", plot = TRUE)
 }
 
@@ -164,7 +155,7 @@ diag.im(fit, data = data, type = "s3", interval = "I2",
 # Parallel: use all but one core
 # (excluded from R CMD check -- spawning multiple processes is not
 #  permitted in the check environment)
-im_par <- diag.im(fit, data = data, ncores = parallel::detectCores() - 1)
+im_par <- diag.im(fit, data = ReadingSkills, ncores = parallel::detectCores() - 1)
 }
 
 }

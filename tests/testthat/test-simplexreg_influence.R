@@ -274,6 +274,8 @@ test_that("diag.im plot = TRUE on pre-computed result returns invisibly and plot
 # ==============================================================================
 
 dd_H <- diag.distances(fit_logit, data = data, type = "H", verbose = FALSE)
+dd_W1 <- diag.distances(fit_logit, data = data, type = "W1", verbose = FALSE)
+dd_W2 <- diag.distances(fit_logit, data = data, type = "W2", verbose = FALSE)
 
 test_that("diag.distances requires an object of class simplexregression", {
   expect_error(diag.distances(list(),  data = data), "class 'simplexregression'")
@@ -339,4 +341,21 @@ test_that("diag.distances plot = TRUE returns list invisibly", {
   dev.off()
   expect_false(result$visible)
   expect_type(result$value, "list")
+})
+
+test_that("diag.distances W1 returns correct type label", {
+  expect_equal(dd_W1$type, "Wasserstein-1")
+})
+
+test_that("diag.distances W2 returns correct type label", {
+  expect_equal(dd_W2$type, "Wasserstein-2")
+})
+
+test_that("diag.distances W1 distances are non-negative and finite", {
+  expect_true(all(dd_W1$distances >= 0))
+  expect_true(all(is.finite(dd_W1$distances)))
+})
+
+test_that("diag.distances H and W1 give different distances", {
+  expect_false(identical(dd_H$distances, dd_W1$distances))
 })

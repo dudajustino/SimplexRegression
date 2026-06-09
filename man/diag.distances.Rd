@@ -22,9 +22,8 @@ diag.distances(
 \item{data}{The data frame used to fit \code{model}.}
 
 \item{type}{Character string or integer specifying the distance measure:
-\code{"W1"} or \code{1} (default, Wasserstein with \eqn{p_W = 1}),
-\code{"W2"} or \code{2} (Wasserstein with \eqn{p_W = 2}), \code{"H"}
-or \code{3} (Hellinger).}
+\code{"W1"} (default, Wasserstein with \eqn{p_W = 1}),
+\code{"W2"} (Wasserstein with \eqn{p_W = 2}), \code{"H"} (Hellinger).}
 
 \item{plot}{Logical; if \code{FALSE} (default), returns the numeric vector
 of distances. If \code{TRUE}, produces an index plot with the ad hoc
@@ -94,41 +93,32 @@ leave-one-out loop is distributed across workers using
 \code{\link[parallel]{parLapply}} from the \pkg{parallel} package
 (included in base R). Each worker receives the necessary objects and
 loads the \pkg{simplexregression} package. The random-number stream is
-initialised with \code{\link[parallel]{clusterSetRNGStream}} to ensure
+initialized with \code{\link[parallel]{clusterSetRNGStream}} to ensure
 reproducibility across runs. Progress messages (\code{verbose}) are
 suppressed in parallel mode because worker output does not reach the
 main console.
 }
 \examples{
-# Simulate data
-set.seed(2026)
-n <- 50
-x1 <- runif(n, 0, 1)
-z1 <- runif(n, 0, 1)
-mu <- fixed_mean_link_inv(1 - 1.5*x1, "loglog")
-sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
-y <- rsimplex(n, mu, sigma2)
-data <- data.frame(y = y, x1 = x1, z1 = z1)
-
-# Fit model
-fit <- simplexreg(y ~ x1 | z1, data = data, link.mu = "loglog")
+data(ReadingSkills, package = "SimplexRegression")
+fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
+                 data = ReadingSkills)
 
 \donttest{
 # Sequential (default) — Wasserstein W1
-dd <- diag.distances(fit, data = data, type = "W1")
+dd <- diag.distances(fit, data = ReadingSkills, type = "W1")
 
 # Index plot with flagged observations
-diag.distances(fit, data = data, type = "W1", plot = TRUE)
+diag.distances(fit, data = ReadingSkills, type = "W1", plot = TRUE)
 
 # Hellinger distance
-diag.distances(fit, data = data, type = "H", plot = TRUE)
+diag.distances(fit, data = ReadingSkills, type = "H", plot = TRUE)
 }
 
 \dontrun{
 # Parallel: use all but one core
 # (excluded from R CMD check -- spawning multiple processes is not
 #  permitted in the check environment)
-dd_par <- diag.distances(fit, data = data,
+dd_par <- diag.distances(fit, data = ReadingSkills, type = "H",
                          ncores = parallel::detectCores() - 1)
 }
 
