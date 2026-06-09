@@ -247,19 +247,9 @@ simplexreg.control <- function(method = "BFGS",
 #' }
 #'
 #' @examples
-#' # Simulate data
-#' set.seed(2026)
-#' n <- 100
-#' x1 <- runif(n, 0, 1)
-#' x2 <- runif(n, 0, 1)
-#' z1 <- runif(n, 0, 1)
-#' mu <- parametric_mean_link_inv(0.6 - 2*x1 - 1.5*x2, 0.5, "plogit1")
-#' sigma2 <- dispersion_link_inv(-2 - 2.5*z1, "log")
-#' y <- rsimplex(n, mu, sigma2)
-#' data <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
-#'
-#' # Fit model with parametric mean link functions
-#' fit <- simplexreg(y ~ x1 + x2 | z1, data = data, link.mu = "plogit1")
+#' data(ReadingSkills, package = "SimplexRegression")
+#' fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
+#'                  data = ReadingSkills)
 #' summary(fit)
 #'
 #' @references
@@ -649,7 +639,7 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
 
     with(fit, {
       # Check for problematic values
-      if(any(!is.finite(mu)) || any(!is.finite(sigma2))) {
+      if(!all(is.finite(mu)) || !all(is.finite(sigma2))) {
         return(-1e10)
       }
 
@@ -662,7 +652,7 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
       muonemu <- mu * (1 - mu)
       dev <- (diff / muonemu)^2 / yoneminy
 
-      if(any(!is.finite(dev))) {
+      if(!all(is.finite(dev))) {
         return(-1e10)
       }
 
@@ -693,7 +683,7 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
       dev <- (diff / muonemu)^2 / yoneminy
 
       # Check for non-finite values
-      if(any(!is.finite(c(mu, sigma2, diff, muonemu, dev)))) {
+      if(!all(is.finite(c(mu, sigma2, diff, muonemu, dev)))) {
         warning("Non-finite values in score vector estimates.")
         if(parametric) {
           return(rep(0, p + q + 1))
@@ -709,7 +699,7 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
       Udelta <- crossprod(z1, dsigma2_deta * a)
 
       if(parametric) {
-        if(any(!is.finite(rho))) {
+        if(!all(is.finite(rho))) {
           warning("Non-finite values in rho.")
           return(rep(0, p + q + 1))
         }

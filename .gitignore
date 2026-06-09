@@ -1,4 +1,4 @@
-.Rproj.user
+.Rproj.user/
 /doc/
 /Meta/
 inst/doc
@@ -7,3 +7,15 @@ inst/doc
 .httr-oauth
 .DS_Store
 .quarto
+.Rapp.history
+.Ruserdata
+*-Ex.R
+/*.tar.gz
+/*.Rcheck/
+vignettes/*.html
+vignettes/*.pdf
+*_cache/
+/cache/
+*.utf8.md
+*.knit.md
+.Renviron
