@@ -123,7 +123,7 @@ simplexreg.control <- function(method = "BFGS",
 #' (parametric functions: "plogit1", "plogit2"; fixed functions: "logit", "probit",
 #' "loglog", "cloglog", "cauchit").
 #' @param link.sigma2 Character specification of the link function in the dispersion
-#' submodel ("log", "sqrt", "identity", "softplus.inv").
+#' submodel ("log", "sqrt", "identity").
 #' @param control A list of control arguments specified via \code{\link{simplexreg.control}}.
 #' @param contrasts An optional list. See the \code{contrasts.arg} argument of
 #' \code{\link[stats]{model.matrix.default}}.
@@ -153,7 +153,7 @@ simplexreg.control <- function(method = "BFGS",
 #' linear predictors through link functions. This package implements five fixed link
 #' functions ("logit", "probit", "loglog", "cloglog", "cauchit") and two parametric
 #' link functions ("plogit1", "plogit2") for the mean submodel. For the dispersion
-#' submodel, the links "log", "sqrt", "identity" and "softplus.inv" are supported.
+#' submodel, the links "log", "sqrt" and "identity" are supported.
 #'
 #' The model is specified through a two-part formula separated by \code{|}. The
 #' left side contains the predictors for the mean submodel and the right side contains
@@ -411,7 +411,7 @@ simplexreg <- function(formula, data, subset, na.action, weights, offset,
       link.sigma2 <- "log"
     }
   } else {
-    link.sigma2 <- match.arg(link.sigma2, c("log", "sqrt", "identity", "softplus.inv"))
+    link.sigma2 <- match.arg(link.sigma2, c("log", "sqrt", "identity"))
   }
 
   parametric <- link.mu %in% c("plogit1","plogit2")
@@ -474,7 +474,7 @@ simplexreg <- function(formula, data, subset, na.action, weights, offset,
 simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
                            link.mu = c("logit", "probit", "loglog", "cloglog", "cauchit",
                                        "plogit1", "plogit2"),
-                           link.sigma2 = c("log", "sqrt", "identity", "softplus.inv"),
+                           link.sigma2 = c("log", "sqrt", "identity"),
                            x_names = NULL, z_names = NULL,
                            control = simplexreg.control(...), ...){
 
@@ -574,8 +574,6 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
       eta2 <- pmax(eta2, 0.01)
     } else if (link.sigma2 == "identity") {
       eta2 <- pmax(eta2, 1e-6)
-    } else if (link.sigma2 == "softplus.inv") {
-      eta2 <- pmin(pmax(eta2, -10), 10)
     }
 
     if(parametric) {

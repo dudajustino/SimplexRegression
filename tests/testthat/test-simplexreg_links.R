@@ -336,7 +336,7 @@ test_that("fixed_mean_link_inv_deriv1 approximates numerical derivative of inver
 # 3. DISPERSION LINK FUNCTIONS
 # ==============================================================================
 
-disp_types <- c("log", "sqrt", "identity", "softplus.inv")
+disp_types <- c("log", "sqrt", "identity")
 
 # --- dispersion_link ----------------------------------------------------------
 
@@ -395,10 +395,6 @@ test_that("dispersion_link_inv returns appropriate values based on link type", {
       res <- dispersion_link_inv(eta, type = type)
       expect_true(all(res > 0), label = paste(type, "returns positive values when eta > 0"))
 
-    } else if (type == "softplus.inv") {
-      eta <- c(-2, -1, 0, 1, 2)
-      res <- dispersion_link_inv(eta, type = type)
-      expect_true(all(res > 0), label = paste(type, "returns positive values"))
     }
   }
 })
@@ -492,11 +488,6 @@ test_that("dispersion_link_inv_deriv1 returns appropriate values based on link t
       expect_true(all(is.finite(res)), label = paste(type, "finite"))
       expect_true(all(res == 1),       label = paste(type, "equals 1"))
 
-    } else if (type == "softplus.inv") {
-      eta <- c(-2, -1, 0, 1, 2)
-      res <- dispersion_link_inv_deriv1(eta, type = type)
-      expect_true(all(is.finite(res)), label = paste(type, "finite"))
-      expect_true(all(res > 0 & res < 1), label = paste(type, "between 0 and 1"))
     }
   }
 })
@@ -517,8 +508,7 @@ test_that("dispersion_link_inv_deriv1 approximates numerical derivative of inver
   test_cases <- list(
     log = 0.5,
     sqrt = 2.0,
-    identity = 0.5,
-    softplus.inv = 0.5
+    identity = 0.5
   )
 
   h <- 1e-6

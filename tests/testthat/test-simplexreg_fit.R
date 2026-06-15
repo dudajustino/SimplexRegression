@@ -312,7 +312,7 @@ test_that("simplexreg mu.link is stored correctly", {
 test_that("simplexreg sigma2.link is stored", {
   expect_true(!is.null(fit_plogit2$sigma2.link))
   expect_true(fit_plogit2$sigma2.link %in%
-                c("log", "sqrt", "identity", "softplus.inv"))
+                c("log", "sqrt", "identity"))
 })
 
 # ==============================================================================
@@ -385,7 +385,7 @@ test_that("simplexreg produces finite log-likelihood for all mean link functions
 # 13. simplexreg — all dispersion link functions fit without error
 # ==============================================================================
 
-disp_links <- c("log", "sqrt", "identity", "softplus.inv")
+disp_links <- c("log", "sqrt", "identity")
 
 test_that("simplexreg fits without error for all dispersion link functions", {
   for (lnk in disp_links) {

@@ -140,8 +140,7 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
   deriv2_linksigma2 <- switch(link_sigma2,
                               log = -1 / sigma2^2,
                               sqrt = -1 / (4 * sigma2 * sqrt(sigma2)),
-                              identity = 0,
-                              softplus.inv = -exp(sigma2) / (expm1(sigma2))^2)
+                              identity = 0)
 
   sdag <- ai * deriv2_linksigma2
 
@@ -432,8 +431,7 @@ gleverage.simplexregression <- function(model){
   deriv2_linksigma2 <- switch(link_sigma2,
                               log = -1 / sigma2^2,
                               sqrt = -1 / (4 * sigma2 * sqrt(sigma2)),
-                              identity = 0,
-                              softplus.inv = -exp(sigma2) / (expm1(sigma2))^2)
+                              identity = 0)
 
   sdag <- ai * deriv2_linksigma2
 
@@ -941,8 +939,7 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
   deriv2_linksigma2 <- switch(link_sigma2,
                               log = -1 / sigma2^2,
                               sqrt = -1 / (4 * sigma2 * sqrt(sigma2)),
-                              identity = 0,
-                              softplus.inv = -exp(sigma2) / (expm1(sigma2))^2)
+                              identity = 0)
 
   sdag <- ai * deriv2_linksigma2
 

@@ -8,25 +8,18 @@
 \alias{dispersion_link_inv_deriv1}
 \title{Dispersion Link Functions and Their Derivatives}
 \usage{
-dispersion_link(sigma2, type = c("log", "sqrt", "identity", "softplus.inv"))
+dispersion_link(sigma2, type = c("log", "sqrt", "identity"))
 
-dispersion_link_inv(eta, type = c("log", "sqrt", "identity", "softplus.inv"))
+dispersion_link_inv(eta, type = c("log", "sqrt", "identity"))
 
-dispersion_link_deriv1(
-  sigma2,
-  type = c("log", "sqrt", "identity", "softplus.inv")
-)
+dispersion_link_deriv1(sigma2, type = c("log", "sqrt", "identity"))
 
-dispersion_link_inv_deriv1(
-  eta,
-  type = c("log", "sqrt", "identity", "softplus.inv")
-)
+dispersion_link_inv_deriv1(eta, type = c("log", "sqrt", "identity"))
 }
 \arguments{
 \item{sigma2}{Dispersion parameter (numeric vector, \eqn{\sigma^2 > 0}).}
 
-\item{type}{Type of link: \code{"log"}, \code{"sqrt"}, \code{"identity"}
-or \code{"softplus.inv"}.}
+\item{type}{Type of link: \code{"log"}, \code{"sqrt"} or \code{"identity"}.}
 
 \item{eta}{Linear predictor of dispersion (numeric vector).}
 }
@@ -36,8 +29,7 @@ Numeric vector with transformed values.
 \description{
 Provides the link function, its inverse, and derivative for the dispersion
 submodel in the simplex regression.
-Supported link types are: \code{"log"}, \code{"sqrt"}, \code{"identity"} and
-\code{"softplus.inv"}.
+Supported link types are: \code{"log"}, \code{"sqrt"} and \code{"identity"}.
 }
 \details{
 Available link functions:
@@ -45,7 +37,6 @@ Available link functions:
   \item Log (\code{"log"}): \eqn{h(\sigma^2) = \log(\sigma^2)} (ensures positivity)
   \item Sqrt (\code{"sqrt"}): \eqn{h(\sigma^2) = \sqrt{\sigma^2}}
   \item Identity (\code{"identity"}): \eqn{h(\sigma^2) = \sigma^2} (no transformation)
-  \item Inverse softplus (\code{"softplus.inv"}): \eqn{h(\sigma^2) = \log(\exp(\sigma^2) - 1)}
 }
 }
 \examples{

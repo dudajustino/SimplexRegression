@@ -29,7 +29,7 @@ simplexreg.fit(
   weights = NULL,
   offset = NULL,
   link.mu = c("logit", "probit", "loglog", "cloglog", "cauchit", "plogit1", "plogit2"),
-  link.sigma2 = c("log", "sqrt", "identity", "softplus.inv"),
+  link.sigma2 = c("log", "sqrt", "identity"),
   x_names = NULL,
   z_names = NULL,
   control = simplexreg.control(...),
@@ -59,7 +59,7 @@ or as well, and if more than one is specified their sum is used. See
 "loglog", "cloglog", "cauchit").}
 
 \item{link.sigma2}{Character specification of the link function in the dispersion
-submodel ("log", "sqrt", "identity", "softplus.inv").}
+submodel ("log", "sqrt", "identity").}
 
 \item{contrasts}{An optional list. See the \code{contrasts.arg} argument of
 \code{\link[stats]{model.matrix.default}}.}
@@ -152,7 +152,7 @@ the mean of the response variable and the dispersion parameter to their respecti
 linear predictors through link functions. This package implements five fixed link
 functions ("logit", "probit", "loglog", "cloglog", "cauchit") and two parametric
 link functions ("plogit1", "plogit2") for the mean submodel. For the dispersion
-submodel, the links "log", "sqrt", "identity" and "softplus.inv" are supported.
+submodel, the links "log", "sqrt" and "identity" are supported.
 
 The model is specified through a two-part formula separated by \code{|}. The
 left side contains the predictors for the mean submodel and the right side contains

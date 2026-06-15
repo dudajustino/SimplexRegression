@@ -292,13 +292,11 @@ fixed_mean_link_inv_deriv1 <- function(eta, type = c("logit", "probit", "loglog"
 #' @description
 #' Provides the link function, its inverse, and derivative for the dispersion
 #' submodel in the simplex regression.
-#' Supported link types are: \code{"log"}, \code{"sqrt"}, \code{"identity"} and
-#' \code{"softplus.inv"}.
+#' Supported link types are: \code{"log"}, \code{"sqrt"} and \code{"identity"}.
 #'
 #' @param sigma2 Dispersion parameter (numeric vector, \eqn{\sigma^2 > 0}).
 #' @param eta Linear predictor of dispersion (numeric vector).
-#' @param type Type of link: \code{"log"}, \code{"sqrt"}, \code{"identity"}
-#' or \code{"softplus.inv"}.
+#' @param type Type of link: \code{"log"}, \code{"sqrt"} or \code{"identity"}.
 #'
 #' @details
 #' Available link functions:
@@ -306,7 +304,6 @@ fixed_mean_link_inv_deriv1 <- function(eta, type = c("logit", "probit", "loglog"
 #'   \item Log (\code{"log"}): \eqn{h(\sigma^2) = \log(\sigma^2)} (ensures positivity)
 #'   \item Sqrt (\code{"sqrt"}): \eqn{h(\sigma^2) = \sqrt{\sigma^2}}
 #'   \item Identity (\code{"identity"}): \eqn{h(\sigma^2) = \sigma^2} (no transformation)
-#'   \item Inverse softplus (\code{"softplus.inv"}): \eqn{h(\sigma^2) = \log(\exp(\sigma^2) - 1)}
 #' }
 #'
 #' @return Numeric vector with transformed values.
@@ -325,7 +322,7 @@ NULL
 
 #' @rdname dispersion_links
 #' @export
-dispersion_link <- function(sigma2, type = c("log", "sqrt", "identity", "softplus.inv")) {
+dispersion_link <- function(sigma2, type = c("log", "sqrt", "identity")) {
   type <- match.arg(type)
 
   if (any(sigma2 <= 0)) {
@@ -336,7 +333,6 @@ dispersion_link <- function(sigma2, type = c("log", "sqrt", "identity", "softplu
                    log = log(sigma2),
                    sqrt = sqrt(sigma2),
                    identity = sigma2,
-                   softplus.inv = log(expm1(sigma2)),
   )
 
   return(result)
@@ -344,14 +340,13 @@ dispersion_link <- function(sigma2, type = c("log", "sqrt", "identity", "softplu
 
 #' @rdname dispersion_links
 #' @export
-dispersion_link_inv <- function(eta, type = c("log", "sqrt", "identity", "softplus.inv")) {
+dispersion_link_inv <- function(eta, type = c("log", "sqrt", "identity")) {
   type <- match.arg(type)
 
   result <- switch(type,
                    log = exp(eta),
                    sqrt = eta^2,
-                   identity = eta,
-                   softplus.inv = log1p(exp(eta))
+                   identity = eta
   )
 
   return(result)
@@ -359,7 +354,7 @@ dispersion_link_inv <- function(eta, type = c("log", "sqrt", "identity", "softpl
 
 #' @rdname dispersion_links
 #' @export
-dispersion_link_deriv1 <- function(sigma2, type = c("log", "sqrt", "identity", "softplus.inv")) {
+dispersion_link_deriv1 <- function(sigma2, type = c("log", "sqrt", "identity")) {
   type <- match.arg(type)
 
   if (any(sigma2 <= 0)) {
@@ -369,8 +364,7 @@ dispersion_link_deriv1 <- function(sigma2, type = c("log", "sqrt", "identity", "
   result <- switch(type,
                    log = 1 / sigma2,
                    sqrt = 0.5 * sigma2^(-0.5),
-                   identity = rep.int(1, length(sigma2)),
-                   softplus.inv = exp(sigma2) / expm1(sigma2)
+                   identity = rep.int(1, length(sigma2))
   )
 
   return(result)
@@ -378,14 +372,13 @@ dispersion_link_deriv1 <- function(sigma2, type = c("log", "sqrt", "identity", "
 
 #' @rdname dispersion_links
 #' @export
-dispersion_link_inv_deriv1 <- function(eta, type = c("log", "sqrt", "identity", "softplus.inv")) {
+dispersion_link_inv_deriv1 <- function(eta, type = c("log", "sqrt", "identity")) {
   type <- match.arg(type)
 
   result <- switch(type,
                    log = exp(eta),
                    sqrt = 2 * eta,
-                   identity = rep.int(1, length(eta)),
-                   softplus.inv = 1 / (1 + exp(-eta))
+                   identity = rep.int(1, length(eta))
   )
 
   return(result)
