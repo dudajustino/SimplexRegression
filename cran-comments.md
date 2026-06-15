@@ -8,9 +8,9 @@
 
 * This is a new submission.
 
+* Possibly misspelled words in DESCRIPTION: "simplex", "Scout", 
+  "submodel", "Cribari-Neto", "Cook's" — these are correct 
+  statistical terms and proper names.
+
 ## Reverse dependencies
 There are no reverse dependencies.
-
-## Additional comments
-This package implements simplex regression models with flexible link functions.
-All tests pass and documentation is complete.

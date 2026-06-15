@@ -558,65 +558,6 @@ local.influence(
 A small set of observations is identified as locally influential under both
 perturbation schemes, but none produces an extreme influence value.
 
-## Information matrix-based measures (`diag.im`)
-
-The `diag.im` function computes leave-one-out influence measures $s_{3,i}$
-and $s_{5,i}$, proposed by Cribari-Neto, Vasconcellos and Santana e Silva
-(2025). For each observation $i$, the model is refit without observation $i$
-and the deviation from the full-data estimates is quantified through
-information matrix comparisons. The `type` argument selects which
-measure(s) to compute (`"s3"`, `"s5"`, or both). Detection thresholds are
-controlled by `interval`: `"I1"` for moderate detection and `"I2"` for
-stricter detection. The `verbose` argument controls whether progress
-messages are printed during the leave-one-out refitting.
-
-```{r diag-im-s3, fig.height = 5, fig.cap = "Index plot of the $s_{3,i}$ measure with detection threshold I2."}
-diag.im(
-  fit_loglog,
-  data      = rh,
-  type      = "s3",
-  interval  = "I2",
-  parameter = "theta",
-  verbose   = FALSE,
-  plot      = TRUE,
-  label.pos = c(1, 4, 3, 3, 3, 2, 3)
-)
-```
-
-```{r diag-im-s5, fig.height = 5, fig.cap = "Index plot of the $s_{5,i}$ measure with detection threshold I2."}
-diag.im(
-  fit_loglog,
-  data      = rh,
-  type      = "s5",
-  interval  = "I2",
-  parameter = "theta",
-  verbose   = FALSE,
-  plot      = TRUE,
-  label.pos = c(3, 1, 1, 2, 1, 1, 1)
-)
-```
-
-## Distance-based measures (`diag.distances`)
-
-The `diag.distances` function computes leave-one-out influence diagnostics
-based on distributional distances between the full-data and leave-one-out
-fitted simplex distributions. Three distances are available via `type`:
-Hellinger (`"H"`), Wasserstein with $p_W = 1$ (`"W1"`), and Wasserstein
-with $p_W = 2$ (`"W2"`). Influential observations are flagged using an
-ad hoc threshold based on an asymmetric IQR rule. The `verbose` argument
-controls progress reporting.
-
-```{r diag-dist-H, fig.height = 5, fig.cap = "Hellinger distance between full-data and leave-one-out fitted simplex distributions."}
-diag.distances(
-  fit_loglog,
-  data      = rh,
-  type      = "H",
-  plot      = TRUE,
-  verbose   = FALSE,
-  label.pos = c(3, 3, 4, 4, 3, 2, 3, 3, 3)
-)
-```
-
 ## Half-normal plot with simulated envelope
 
 The `halfnormal.plot` function produces a half-normal plot of the absolute
@@ -626,7 +567,7 @@ envelope may indicate model inadequacy. The `type` argument selects the
 residual type (default `"weighted"`) and `seed` ensures reproducibility.
 
 ```{r halfnormal, fig.height = 5, fig.cap = "Half-normal plot of absolute weighted residuals with 95% simulated envelope (100 replications)."}
-halfnormal.plot(fit_loglog, nsim = 100, type = "weighted", seed = 2026)
+halfnormal.plot(fit_loglog, nsim = 19, type = "weighted", seed = 2026)
 ```
 
 All diagnostic plots reveal no evidence against the adequacy of the fitted
