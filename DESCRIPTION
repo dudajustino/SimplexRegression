@@ -2,7 +2,7 @@ Type: Package
 Package: SimplexRegression
 Title: Simplex Regression Models with Parametric or Fixed Mean Link
     Functions
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Maria Eduarda", "da Cruz Justino", , "eueduardacruz@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9501-2642")),
