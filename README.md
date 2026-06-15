@@ -41,7 +41,7 @@ Or install the development version from GitHub:
 
 ``` r
 # install.packages("remotes")
-remotes::install_github("YOUR_USERNAME/SimplexRegression")
+remotes::install_github("dudajustino/SimplexRegression")
 ```
 
 ## Quick Start
@@ -81,10 +81,10 @@ fit <- simplexreg(y ~ x1 + x2 | 1, data = dat, link.mu = "plogit1")
 ### Model Selection
 
 ``` r
-# Penalized Scout Score (for parametric links)
+# Penalized Scout Score (for use with parametric links)
 penalized.ss(fit_p1, fit_p2, kappa = 0.1)
 
-# Penalized information criteria
+# Penalized information criteria (for use with parametric links)
 penalized.ic(fit_p1, fit_p2, kappa = 0.1)
 
 # Standard criteria for multiple models
@@ -102,7 +102,7 @@ lmtest::lrtest(fit, update(fit, . ~ . | 1))
 # Score test for H0: lambda = 1
 scoretest(fit_logit, link.mu = "plogit1")
 
-# RESET test for functional form
+# RESET missipecification test
 resettest(fit)
 ```
 
@@ -206,13 +206,23 @@ citation("SimplexRegression")
 - Barndorff-Nielsen, O. E. and Jørgensen, B. (1991). Some parametric
   models on the simplex. *Journal of Multivariate Analysis*, **39**(1),
   106–116.
-- Espinheira, P. L. and Silva, A. O. (2020). Residual and influence
-  analysis to a general class of simplex regression. *TEST*, **29**,
-  523–552.
+- Costa E., Cribari-Neto F., Scher V.T. (2024). Test inferences and link
+  function selection in dynamic beta modeling of seasonal
+  hydro-environmental time series with temporary abnormal regimes.
+  *Journal of Hydrology*, **638**, 131489.
+- Cribari-Neto F., Justino M.E.C. (2026). Influence diagnostics in beta
+  regression via Hellinger and Wasserstein distances. *Statistical
+  Papers*, **67**(3), 50.
 - Cribari-Neto, F., Vasconcellos, K. L. P. and Santana e Silva, J. J.
   (2025). New strategies for detecting atypical observations based on
   the information matrix equality. *Journal of Applied Statistics*,
-  **52**, 2873–2893.
+  **52**(15), 2873–2893.
+- Espinheira P.L., Silva L.C., Lima F.P. (2026). Prediction in the
+  nonlinear simplex model. *International Journal of Data Science and
+  Analytics*, **22**(1), 161.
+- Espinheira, P. L. and Silva, A. O. (2020). Residual and influence
+  analysis to a general class of simplex regression. *TEST*, **29**(2),
+  523–552.
 - Justino, M. E. C. and Cribari-Neto, F. (2026). Simplex regression with
-  a flexible logit link. *Applied Mathematical Modelling*,
-  **154**, 116713. README_EOF
+  a flexible logit link. *Applied Mathematical Modelling*, **154**,
+  116713.
