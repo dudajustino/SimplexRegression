@@ -50,8 +50,7 @@ head(RelativeHumidity)
 # Check structure
 str(RelativeHumidity)
 
-data(RelativeHumidity)
-
+# Insolation with and without imputation
 plot(RelativeHumidity$Ins, type = "l", col = "red",
      ylab = "Insolation", main = "Missing values visible as gaps")
 points(RelativeHumidity$Ins2, type = "l", col = "blue")

@@ -59,6 +59,9 @@
 #'   influential observations.
 #' }
 #'
+#' @return Called for its side effects (diagnostic plots). Returns \code{NULL}
+#' invisibly.
+#'
 #' @examples
 #' data(ReadingSkills, package = "SimplexRegression")
 #' fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
@@ -104,12 +107,10 @@ plot.simplexregression <- function(x, which = 1:7,
   pt_index   <- if (is.null(plot.type)) "h"  else plot.type   # type for plots 6-7
 
   # Configure ask mode
-  if (ask || reset.par) {
-    op <- par(no.readonly = TRUE)
-    on.exit(par(op), add = TRUE)
-    if (ask) par(ask = TRUE)
-    if (reset.par) par(mar = c(3,3,2,3), oma = c(0.5,0.5,0.5,0.5), mgp = c(2,0.6,0))
-  }
+  op <- par(no.readonly = TRUE)
+  on.exit(par(op), add = TRUE)
+  if (ask) par(ask = TRUE)
+  if (reset.par) par(mar = c(3,3,2,3), oma = c(0.5,0.5,0.5,0.5), mgp = c(2,0.6,0))
 
   # Helper to merge defaults with user ...
   plot_args <- function(..., defaults) modifyList(defaults, list(...))
@@ -226,13 +227,16 @@ plot.simplexregression <- function(x, which = 1:7,
 #'
 #' Points outside the envelope may indicate model inadequacy.
 #'
+#' @return Called for its side effects (half-normal plot with simulated envelope).
+#' Returns \code{NULL} invisibly.
+#'
 #' @examples
 #' data(ReadingSkills, package = "SimplexRegression")
 #' fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
 #'                  data = ReadingSkills)
 #'
 #' \donttest{
-#' halfnormal.plot(fit, seed = "2008")
+#' halfnormal.plot(fit, seed = 2008)
 #' }
 #'
 #' @importFrom stats qnorm quantile median residuals

@@ -621,13 +621,6 @@ gleverage.simplexregression <- function(model){
 #'         parameter = "theta", plot = TRUE)
 #' }
 #'
-#' \dontrun{
-#' # Parallel: use all but one core
-#' # (excluded from R CMD check -- spawning multiple processes is not
-#' #  permitted in the check environment)
-#' im_par <- diag.im(fit, data = ReadingSkills, ncores = parallel::detectCores() - 1)
-#' }
-#'
 #' @references
 #' Cribari-Neto, F.; Vasconcellos, K. L. P.; Santana e Silva, J. J. (2025).
 #' New strategies for detecting atypical observations based on the information
@@ -1137,13 +1130,6 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 #' diag.distances(fit, data = ReadingSkills, type = "H", plot = TRUE)
 #' }
 #'
-#' \dontrun{
-#' # Parallel: use all but one core
-#' # (excluded from R CMD check -- spawning multiple processes is not
-#' #  permitted in the check environment)
-#' dd_par <- diag.distances(fit, data = ReadingSkills, type = "H",
-#'                          ncores = parallel::detectCores() - 1)
-#' }
 #'
 #' @references
 #' Justino, M. E. C. and Cribari-Neto, F. (2026).

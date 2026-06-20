@@ -45,6 +45,36 @@ is_parametric <- function(object) {
 #'
 #' @name simplexreg.methods
 #'
+#' @return The return value depends on the method called:
+#' \itemize{
+#'   \item \code{print}: returns \code{x} invisibly;
+#'   \item \code{summary}: returns an object of class
+#'     \code{"summary.simplexregression"};
+#'   \item \code{print.summary}: returns \code{x} invisibly;
+#'   \item \code{coef}: named numeric vector of coefficients;
+#'   \item \code{vcov}: numeric matrix (variance-covariance);
+#'   \item \code{logLik}: object of class \code{"logLik"};
+#'   \item \code{fitted}: numeric vector of fitted mean values;
+#'   \item \code{predict}: numeric vector or list depending on \code{type};
+#'   \item \code{nobs}: integer scalar (number of observations);
+#'   \item \code{df.residual}: integer scalar (residual degrees of freedom);
+#'   \item \code{deviance}: numeric scalar (total deviance);
+#'   \item \code{formula}: the model formula;
+#'   \item \code{terms}: the model terms for the selected submodel;
+#'   \item \code{model.frame}: a data frame;
+#'   \item \code{model.matrix}: numeric matrix of regressors;
+#'   \item \code{update}: fitted model or call depending on \code{evaluate};
+#'   \item \code{simulate}: a data frame with \code{nsim} columns;
+#'   \item \code{AIC}, \code{BIC}, \code{HQIC}: numeric scalar (single model)
+#'     or data frame (multiple models);
+#'   \item \code{hatvalues}: numeric vector of leverage values;
+#'   \item \code{cooks.distance}: numeric vector of Cook's distances;
+#'   \item \code{bread}: numeric matrix;
+#'   \item \code{estfun}: numeric matrix of score contributions;
+#'   \item \code{coeftest}: object of class \code{"coeftest"};
+#'   \item \code{lrtest}: object of class \code{"anova"}.
+#' }
+#'
 #' @seealso \code{\link{simplexreg}}.
 #'
 #' @examples
@@ -560,18 +590,9 @@ update.simplexregression <- function(object, formula., ..., evaluate = TRUE) {
 #' @export
 simulate.simplexregression <- function(object, nsim = 1, seed = NULL, ...) {
 
-  if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-    runif(1)
-  }
-
-  if (is.null(seed)) {
-    RNGstate <- get(".Random.seed", envir = .GlobalEnv)
-  } else {
-    R.seed <- get(".Random.seed", envir = .GlobalEnv)
-    set.seed(seed)
-    RNGstate <- structure(seed, kind = as.list(RNGkind()))
-    on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv), add = TRUE)
-  }
+  if (!is.null(seed)) set.seed(seed)
+  if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) runif(1)
+  RNGstate <- get(".Random.seed", envir = .GlobalEnv)
 
   mu <- object$mu.fv
   sigma2 <- object$sigma2.fv

@@ -114,13 +114,6 @@ diag.distances(fit, data = ReadingSkills, type = "W1", plot = TRUE)
 diag.distances(fit, data = ReadingSkills, type = "H", plot = TRUE)
 }
 
-\dontrun{
-# Parallel: use all but one core
-# (excluded from R CMD check -- spawning multiple processes is not
-#  permitted in the check environment)
-dd_par <- diag.distances(fit, data = ReadingSkills, type = "H",
-                         ncores = parallel::detectCores() - 1)
-}
 
 }
 \references{

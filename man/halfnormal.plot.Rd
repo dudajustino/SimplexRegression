@@ -28,6 +28,10 @@ See \code{\link{residuals.simplexregression}} for available options.}
 
 \item{...}{Additional graphical parameters.}
 }
+\value{
+Called for its side effects (half-normal plot with simulated envelope).
+Returns \code{NULL} invisibly.
+}
 \description{
 Produces half-normal plots with simulated envelopes for simplex
 regression model with parametric or fixed mean link function.
@@ -50,7 +54,7 @@ fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
                  data = ReadingSkills)
 
 \donttest{
-halfnormal.plot(fit, seed = "2008")
+halfnormal.plot(fit, seed = 2008)
 }
 
 }

@@ -151,13 +151,6 @@ diag.im(fit, data = ReadingSkills, type = "s3", interval = "I1",
         parameter = "theta", plot = TRUE)
 }
 
-\dontrun{
-# Parallel: use all but one core
-# (excluded from R CMD check -- spawning multiple processes is not
-#  permitted in the check environment)
-im_par <- diag.im(fit, data = ReadingSkills, ncores = parallel::detectCores() - 1)
-}
-
 }
 \references{
 Cribari-Neto, F.; Vasconcellos, K. L. P.; Santana e Silva, J. J. (2025).

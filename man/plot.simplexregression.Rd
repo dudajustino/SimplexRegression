@@ -47,6 +47,10 @@ directly to \code{pch} (for scatter plots) or \code{type} (for index plots).}
 
 \item{...}{Additional graphical parameters.}
 }
+\value{
+Called for its side effects (diagnostic plots). Returns \code{NULL}
+invisibly.
+}
 \description{
 Produces diagnostic plots for fitted simplex regression models with
 parametric or fixed mean link function.

@@ -123,6 +123,37 @@ should be initialized.}
 
 \item{df}{the degrees of freedom to be used.}
 }
+\value{
+The return value depends on the method called:
+\itemize{
+  \item \code{print}: returns \code{x} invisibly;
+  \item \code{summary}: returns an object of class
+    \code{"summary.simplexregression"};
+  \item \code{print.summary}: returns \code{x} invisibly;
+  \item \code{coef}: named numeric vector of coefficients;
+  \item \code{vcov}: numeric matrix (variance-covariance);
+  \item \code{logLik}: object of class \code{"logLik"};
+  \item \code{fitted}: numeric vector of fitted mean values;
+  \item \code{predict}: numeric vector or list depending on \code{type};
+  \item \code{nobs}: integer scalar (number of observations);
+  \item \code{df.residual}: integer scalar (residual degrees of freedom);
+  \item \code{deviance}: numeric scalar (total deviance);
+  \item \code{formula}: the model formula;
+  \item \code{terms}: the model terms for the selected submodel;
+  \item \code{model.frame}: a data frame;
+  \item \code{model.matrix}: numeric matrix of regressors;
+  \item \code{update}: fitted model or call depending on \code{evaluate};
+  \item \code{simulate}: a data frame with \code{nsim} columns;
+  \item \code{AIC}, \code{BIC}, \code{HQIC}: numeric scalar (single model)
+    or data frame (multiple models);
+  \item \code{hatvalues}: numeric vector of leverage values;
+  \item \code{cooks.distance}: numeric vector of Cook's distances;
+  \item \code{bread}: numeric matrix;
+  \item \code{estfun}: numeric matrix of score contributions;
+  \item \code{coeftest}: object of class \code{"coeftest"};
+  \item \code{lrtest}: object of class \code{"anova"}.
+}
+}
 \description{
 Methods for extracting information from fitted simplex regression model objects
 of class \code{simplexregression}.

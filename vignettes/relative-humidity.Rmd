@@ -502,8 +502,9 @@ leverages. The default residual type is `"quantile"`. For plots 6 and 7,
 label placement (1 = below, 2 = left, 3 = above, 4 = right).
 
 ```{r plots-1-5, fig.height = 8, fig.cap = "Diagnostic plots (1–6) for the fitted simplex regression model with log-log link."}
-par(mfrow = c(3, 2))
+oldpar <- par(mfrow = c(3, 2))
 plot(fit_loglog, which = 1:5, reset.par = FALSE)
+par(oldpar)
 ```
 
 ```{r plot-cook, fig.height = 4, fig.cap = "Cook's distances. Observations exceeding the threshold of 0.15 are labeled."}
