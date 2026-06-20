@@ -42,6 +42,7 @@ Suggests:
     knitr,
     moments,
     rmarkdown,
+    spelling,
     testthat (>= 3.0.0),
     tseries
 VignetteBuilder: 
