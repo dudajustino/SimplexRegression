@@ -15,20 +15,21 @@
 ## Reverse dependencies
 There are no reverse dependencies.
 
-## Resubmission (version 0.1.2)
+## Resubmission (version 0.1.3)
 
-This is a resubmission addressing the comments from Konstanze Lauseker.
+This is a resubmission addressing the remaining comments from 
+Konstanze Lauseker regarding graphical parameter restoration.
+
 All requested changes have been made:
 
-* Removed redundant "Provides functions for" from DESCRIPTION.
-* Added references (Barndorff-Nielsen & Jorgensen, 1991; Justino &
-  Cribari-Neto, 2026) to DESCRIPTION in the required format.
-* Added \value tags to halfnormal.plot.Rd, plot.simplexregression.Rd,
-  and simplexreg.methods.Rd.
-* Replaced \dontrun{} with \donttest{} in examples of diag.im and
-  diag.distances; parallel examples were removed as they cannot run
-  in check environments.
-* Fixed par() calls in R/simplexreg_plots.R to use on.exit() immediately
-  after modification.
-* Fixed par() call in vignette to restore graphical parameters after use.
-* Fixed simulate.simplexregression() to avoid writing to .GlobalEnv.
+* Fixed `par()` call in `plot.simplexregression.Rd` example to properly
+  save and restore graphical parameters using `oldpar <- par(...)` and
+  `par(oldpar)`.
+* Fixed `options()` call in vignette (`relative-humidity.Rmd`) to properly
+  save and restore user settings using `old_opts <- options(...)` and
+  `options(old_opts)`.
+* Recompiled vignettes to ensure both `par()` and `options()` fixes are
+  reflected in `doc/relative-humidity.R`.
+* Re-roxygenized documentation to ensure all `.Rd` changes are reflected.
+* All graphical parameters modified in examples, vignettes, and demos
+  are now properly restored to user's original settings.

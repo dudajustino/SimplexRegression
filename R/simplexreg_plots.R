@@ -68,8 +68,9 @@
 #'                  data = ReadingSkills)
 #'
 #' # Display all diagnostic plots
-#' par(mfrow = c(3, 3))
+#' oldpar <- par(mfrow = c(3, 3))
 #' plot(fit, which = 1:7)
+#' par(oldpar)
 #'
 #' @importFrom stats qqnorm qqline residuals cooks.distance
 #' @importFrom graphics par abline text lines

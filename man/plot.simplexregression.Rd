@@ -85,8 +85,9 @@ fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
                  data = ReadingSkills)
 
 # Display all diagnostic plots
-par(mfrow = c(3, 3))
+oldpar <- par(mfrow = c(3, 3))
 plot(fit, which = 1:7)
+par(oldpar)
 
 }
 \seealso{

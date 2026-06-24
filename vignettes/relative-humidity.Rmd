@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
   message    = FALSE,
   warning    = FALSE
 )
-options(width = 70, prompt = "R> ", continue = "+  ", digits = 5)
+old_opts <- options(width = 70, prompt = "R> ", continue = "+  ", digits = 5)
 ```
 
 # Introduction
@@ -625,6 +625,10 @@ of formula-based regression modeling in R.
 - Justino, M. E. C. and Cribari-Neto, F. (2026). Simplex regression with a
   flexible logit link: Inference and application to cross-country impunity
   data. *Applied Mathematical Modelling*, **154**, 116713.
+
+```{r restore-options, include = FALSE}
+options(old_opts)
+```
 
 # Session Info
 

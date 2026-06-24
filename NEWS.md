@@ -1,3 +1,14 @@
+# SimplexRegression 0.1.3
+
+* Fixed `par()` call in `plot.simplexregression.Rd` example to properly save
+  and restore graphical parameters using `oldpar <- par(...)` and
+  `par(oldpar)`.
+* Fixed `options()` call in vignette to properly save and restore user
+  settings using `old_opts <- options(...)` and `options(old_opts)`.
+* Recompiled vignettes to ensure fixes are reflected in
+  `doc/relative-humidity.R`.
+* Re-roxygenized documentation to ensure all `.Rd` changes are reflected.
+
 # SimplexRegression 0.1.2
 
 * Removed redundant "Provides functions for" from DESCRIPTION.
