@@ -37,7 +37,8 @@ for the simplex regression models. Two parametric link types are supported:
 \code{"plogit1"} and \code{"plogit2"}.
 }
 \details{
-Two parametric mean link functions are available:
+Two parametric mean link functions are available, as proposed by
+Justino and Cribari-Neto (2026):
 \itemize{
   \item Parametric logit type 1 (\code{"plogit1"}): \eqn{g(\mu; \lambda) = \log((1-\mu)^{-\lambda} - 1)};
   \item Parametric logit type 2 (\code{"plogit2"}): \eqn{g(\mu; \lambda) = \log(\mu^\lambda / (1 - \mu^\lambda))}.
@@ -60,5 +61,6 @@ to cross-country impunity data.
 \emph{Applied Mathematical Modelling}, \bold{154}, 116713. \doi{10.1016/j.apm.2025.116713}
 }
 \seealso{
-\code{\link{simplexreg}}, \code{\link{fixed_mean_links}}.
+\code{\link{simplexreg}}, \code{\link{fixed_mean_links}},
+\code{\link{dispersion_links}}.
 }

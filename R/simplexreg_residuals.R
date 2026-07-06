@@ -47,14 +47,14 @@
 #' \strong{Weighted residuals} (\code{"weighted"}): Proposed by Espinheira and
 #' Silva (2020, Eq. 16) as \eqn{r_i^{\beta*} = \hat{u}_i(y_i - \hat{\mu}_i) /
 #' \sqrt{\hat{\sigma}^2_i \hat{w}_i(1-\hat{h}_{ii})}}, where \eqn{\hat{h}_{ii}}
-#' are the diagonal elements of the hat matrix (see
+#' are the diagonal elements of the hat matrix (see \cr
 #' \code{\link{hatvalues.simplexregression}}).
 #' These residuals are recommended for simulated envelope plots.
 #'
 #' \strong{Variance residuals} (\code{"variance"}): Proposed by Espinheira et al.
 #' (2021, Eq. 7) as \eqn{r_i^\gamma = (\hat{d}_i - \hat{\sigma}^2_i) /
 #' (\hat{\sigma}^2_i\sqrt{2})}, where \eqn{\hat{d}_i} is the estimated unit
-#' deviance.
+#' deviance (see \code{\link{dev.unit.simplex }}).
 #'
 #' \strong{Bias–variance residuals} (\code{"biasvariance"}): Proposed by Espinheira
 #' et al. (2021, Eq. 8) as \eqn{r_i^{\beta \gamma} =

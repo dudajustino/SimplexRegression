@@ -18,7 +18,7 @@ halfnormal.plot(
 \item{model}{An object of class \code{simplexregression}.}
 
 \item{type}{Character string specifying the residual type (default: \code{"weighted"}).
-See \code{\link{residuals.simplexregression}} for available options.}
+\cr See \code{\link{residuals.simplexregression}} for available options.}
 
 \item{nsim}{Number of simulations for envelope construction (default: 100).}
 

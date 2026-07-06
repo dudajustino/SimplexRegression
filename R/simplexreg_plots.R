@@ -17,17 +17,20 @@
 #' @param x An object of class \code{simplexregression}.
 #' @param which Numeric vector indicating which plots to display (\code{1:7}).
 #' @param type Character string specifying the residual type (default: \code{"quantile"}).
-#' See \code{\link{residuals.simplexregression}} for available options.
+#' \cr See \code{\link{residuals.simplexregression}} for available options.
 #' @param ask Logical; if \code{TRUE}, the user is asked before each plot.
 #' Default is \code{TRUE} when multiple plots are requested.
 #' @param reset.par Logical; if \code{TRUE}, resets graphical parameters before plotting.
 #' Set to \code{FALSE} to preserve user-defined \code{par()} settings such as \code{mfrow}.
 #' Default is \code{TRUE}.
-#' @param threshold Numeric threshold for identifying influential observations in.
-#' If \code{NULL} (default), no observations are highlighted.
-#' @param label.pos Position(s) for outlier labels in plots 7 and 8. Can be a single value
-#' (applied to all labels) or a vector. Values: 1=below, 2=left, 3=above, 4=right.
-#' Default is \code{3} (above). See \code{\link[graphics]{text}} for details.
+#' @param threshold Numeric threshold for identifying influential or outlying
+#' observations in plots 1--3 (residuals plots), 6 (Cook's distance), and
+#' 7 (generalized leverage). If \code{NULL} (default), no observations are
+#' highlighted.
+#' @param label.pos Position(s) for outlier labels in plots 1--3, 6, and 7.
+#' Can be a single value (applied to all labels) or a vector. Values:
+#' 1 = below, 2 = left, 3 = above, 4 = right. Default is \code{3} (above).
+#' See \code{\link[graphics]{text}} for details.
 #' @param plot.type Controls the plot symbol/type for scatter plots and index plots.
 #' If \code{NULL} (default), uses \code{pch = 1} (open circles) for residual plots
 #' (which = 1--5) and \code{type = "h"} (vertical lines) for Cook's distance and
@@ -127,6 +130,11 @@ plot.simplexregression <- function(x, which = 1:7,
                          scatter_defaults), user_args)
     do.call(plot, args)
     abline(h = c(-3, -2, 0, 2, 3), lty = 2, col = "gray60")
+    if (!is.null(threshold)) {
+      idx <- which(abs(resid) > threshold)
+      if (length(idx) > 0)
+        text(idx, resid[idx], labels = idx, pos = label.pos, cex = 0.8, col = "red")
+    }
   }
 
   # 2. Residuals vs fitted values
@@ -136,6 +144,11 @@ plot.simplexregression <- function(x, which = 1:7,
                          scatter_defaults), user_args)
     do.call(plot, args)
     abline(h = c(-3, -2, 0, 2, 3), lty = 2, col = "gray60")
+    if (!is.null(threshold)) {
+      idx <- which(abs(resid) > threshold)
+      if (length(idx) > 0)
+        text(x$fitted.values[idx], resid[idx], labels = idx, pos = label.pos, cex = 0.8, col = "red")
+    }
   }
 
   # 3. Residuals vs linear predictor
@@ -145,6 +158,11 @@ plot.simplexregression <- function(x, which = 1:7,
                          scatter_defaults), user_args)
     do.call(plot, args)
     abline(h = c(-3, -2, 0, 2, 3), lty = 2, col = "gray60")
+    if (!is.null(threshold)) {
+      idx <- which(abs(resid) > threshold)
+      if (length(idx) > 0)
+        text(x$mu.lp[idx], resid[idx], labels = idx, pos = label.pos, cex = 0.8, col = "red")
+    }
   }
 
   # 4. Observed vs fitted
@@ -210,7 +228,7 @@ plot.simplexregression <- function(x, which = 1:7,
 #'
 #' @param model An object of class \code{simplexregression}.
 #' @param type Character string specifying the residual type (default: \code{"weighted"}).
-#' See \code{\link{residuals.simplexregression}} for available options.
+#' \cr See \code{\link{residuals.simplexregression}} for available options.
 #' @param nsim Number of simulations for envelope construction (default: 100).
 #' @param seed Integer setting the random seed for reproducibility (default: 1987).
 #' @param level Confidence level for envelope bounds (default: 0.95).

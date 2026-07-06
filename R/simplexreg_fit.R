@@ -959,7 +959,7 @@ simplexreg.fit <- function(y, x, z, weights = NULL, offset = NULL,
     optim = list(
       start = ini,
       convergence = opt$convergence,
-      counts = opt$counts[1],
+      counts = opt$counts, # mudei aqui
       method = method
     ),
     scoring = iter,

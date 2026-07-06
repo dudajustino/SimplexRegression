@@ -17,9 +17,14 @@
 #' mean parameter. Default is 0.1.
 #' @param verbose Logical. If \code{TRUE} (default), prints the criteria values.
 #' If \code{FALSE}, returns results silently.
+#' @param digits Integer specifying the number of decimal places for output.
+#' Default is \code{max(3, getOption("digits") - 3)}.
 #'
 #' @details
-#' The penalized information criteria are computed as:
+#' The penalized information criteria, as proposed by Justino and
+#' Cribari-Neto (2026), extend the classical Akaike, Schwarz and
+#' Hannan--Quinn criteria with an additional penalty term for the link
+#' parameter \eqn{\lambda}:
 #' \deqn{AIC^{(\lambda)} = -2 \ell + (2 + \kappa \, |\log(\lambda)|)r}
 #' \deqn{BIC^{(\lambda)} = -2 \ell + (\log(n) + \kappa \, |\log(\lambda)|)r}
 #' \deqn{HQIC^{(\lambda)}  = -2 \ell + (2 \log(\log(n)) + \kappa \, |\log(\lambda)|)r}
@@ -88,7 +93,8 @@
 #'
 #' @seealso \code{\link{penalized.ss}}
 #' @export
-penalized.ic <- function(..., kappa = 0.1, verbose = TRUE) {
+penalized.ic <- function(..., kappa = 0.1, verbose = TRUE,
+                         digits = max(3, getOption("digits") - 3)) {
 
   models <- list(...)
   M <- length(models)
@@ -167,10 +173,21 @@ penalized.ic <- function(..., kappa = 0.1, verbose = TRUE) {
     if (kappa == 0) {
       cat("Information criteria values:\n")
     } else {
-      cat(sprintf("Penalized information criteria values (kappa = %.3f):\n", kappa))
+      cat(sprintf("Penalized information criteria values (kappa = %s):\n",
+                  formatC(kappa, digits = 3, format = "f")))
     }
 
-    print(result)
+    result_print <- data.frame(
+      df = formatC(result[, 1], digits = 0, format = "f"),
+      AICc = formatC(result[, 2], digits = digits, format = "f"),
+      BICc = formatC(result[, 3], digits = digits, format = "f"),
+      HQICc = formatC(result[, 4], digits = digits, format = "f"),
+      row.names = rownames(result)
+    )
+
+    names(result_print) <- names(result)
+
+    print(result_print, quote = FALSE, right = TRUE)
     return(invisible(result))
   } else {
     return(result)

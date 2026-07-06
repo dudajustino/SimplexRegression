@@ -6,8 +6,6 @@
 ## R CMD check results
 0 errors | 0 warnings | 1 note
 
-* This is a new submission.
-
 * Possibly misspelled words in DESCRIPTION: "simplex", "Scout", 
   "submodel", "Cribari-Neto", "Cook's" — these are correct 
   statistical terms and proper names.
@@ -15,21 +13,20 @@
 ## Reverse dependencies
 There are no reverse dependencies.
 
-## Resubmission (version 0.1.3)
-
-This is a resubmission addressing the remaining comments from 
-Konstanze Lauseker regarding graphical parameter restoration.
-
-All requested changes have been made:
-
-* Fixed `par()` call in `plot.simplexregression.Rd` example to properly
-  save and restore graphical parameters using `oldpar <- par(...)` and
-  `par(oldpar)`.
-* Fixed `options()` call in vignette (`relative-humidity.Rmd`) to properly
-  save and restore user settings using `old_opts <- options(...)` and
-  `options(old_opts)`.
-* Recompiled vignettes to ensure both `par()` and `options()` fixes are
-  reflected in `doc/relative-humidity.R`.
-* Re-roxygenized documentation to ensure all `.Rd` changes are reflected.
-* All graphical parameters modified in examples, vignettes, and demos
-  are now properly restored to user's original settings.
+## Summary of changes (version 0.1.4)
+ 
+This is a routine update with bug fixes, new features, and documentation
+improvements. No previous CRAN comments are being addressed in this
+submission.
+ 
+* Fixed `opt$counts` handling in `simplexreg.fit()`.
+* Made decimal-place formatting consistent across `summary()`, `print()`,
+  and `print.summary()` methods.
+* Added a `digits` argument to `penalized.ss()` and `penalized.ic()`.
+* `plot.simplexregression()` now accepts a cutoff/threshold argument for
+  flagging observations in residual plots.
+* Improved English wording and mathematical notation in function
+  documentation.
+* Added a new dataset, `AbortionOpposition`.
+* Standardized variable names across package datasets (converted to
+  lowercase).

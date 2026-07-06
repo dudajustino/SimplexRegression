@@ -68,8 +68,9 @@ If \code{plot = TRUE}, the same list is returned invisibly.
 }
 \description{
 Computes leave-one-out influence measures based on
-distributional distances (Wasserstein W1, W2, or Hellinger) for simplex
-regression models.
+distributional distances (Wasserstein with \eqn{p_W = 1} and \eqn{p_W = 2} or
+Hellinger) for simplex regression models, as proposed by Justino and
+Cribari-Neto (2026).
 }
 \details{
 For each observation \eqn{i}, the model is refit on the dataset with
@@ -79,7 +80,8 @@ all \eqn{n} observations and summed to produce the scalar influence
 measure \eqn{d_i}.
 
 \strong{Ad hoc threshold} uses an asymmetric IQR spread adjusted for
-skewness:
+skewness, as proposed by Justino and Cribari-Neto (2026). Let \eqn{Q(p)} denote the
+empirical \eqn{p}-th quantile of the distances \eqn{d_i}, the threshold is
 \deqn{\text{threshold} = Q(0.75) + (1 + a)(Q(0.75) - Q(0.25))}
 where \eqn{a} is the sample skewness of the distances. Observations with
 \eqn{d_i} above this threshold are flagged as potentially influential.
@@ -118,10 +120,9 @@ diag.distances(fit, data = ReadingSkills, type = "H", plot = TRUE)
 }
 \references{
 Justino, M. E. C. and Cribari-Neto, F. (2026).
-Simplex regression with a flexible logit link: Inference and application
-to cross-country impunity data.
-\emph{Applied Mathematical Modelling}, \bold{154}, 116713.
-\doi{10.1016/j.apm.2025.116713}
+Influence diagnostics in beta regression via Hellinger and Wasserstein
+distances. \emph{Statistical Papers}, \bold{67}(3), 50.
+\doi{10.1007/s00362-026-01823-0}
 }
 \seealso{
 \code{\link{diag.im}}, \code{\link{local.influence}},

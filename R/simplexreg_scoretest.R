@@ -31,7 +31,7 @@
 #' element of the inverse Fisher information matrix associated with \eqn{\lambda},
 #' both evaluated at \eqn{\boldsymbol{\tilde{\theta}} = (\boldsymbol{\tilde{\beta}}^\top,
 #' \boldsymbol{\tilde{\gamma}}^\top, 1)^\top}, the maximum likelihood estimator under
-#' the null hypothesis. For more details see Justino and Cribari-Neto (2025).
+#' the null hypothesis. For more details see Justino and Cribari-Neto (2026).
 #'
 #' Under regularity conditions, the null hypothesis, and when \eqn{n} is large,
 #' the test statistic follows a chi-squared distribution with 1 degree of freedom.

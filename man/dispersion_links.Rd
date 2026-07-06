@@ -34,9 +34,9 @@ Supported link types are: \code{"log"}, \code{"sqrt"} and \code{"identity"}.
 \details{
 Available link functions:
 \itemize{
-  \item Log (\code{"log"}): \eqn{h(\sigma^2) = \log(\sigma^2)} (ensures positivity)
-  \item Sqrt (\code{"sqrt"}): \eqn{h(\sigma^2) = \sqrt{\sigma^2}}
-  \item Identity (\code{"identity"}): \eqn{h(\sigma^2) = \sigma^2} (no transformation)
+  \item Log (\code{"log"}): \eqn{h(\sigma^2) = \log(\sigma^2)} (ensures positivity);
+  \item Sqrt (\code{"sqrt"}): \eqn{h(\sigma^2) = \sqrt{\sigma^2}};
+  \item Identity (\code{"identity"}): \eqn{h(\sigma^2) = \sigma^2} (no transformation).
 }
 }
 \examples{
@@ -48,5 +48,6 @@ dispersion_link_inv_deriv1(0, type = "log")
 
 }
 \seealso{
-\code{\link{simplexreg}}.
+\code{\link{simplexreg}}, \code{\link{fixed_mean_links}},
+\code{\link{parametric_mean_links}}.
 }

@@ -2,17 +2,16 @@ Type: Package
 Package: SimplexRegression
 Title: Simplex Regression Models with Parametric or Fixed Mean Link
     Functions
-Version: 0.1.3
+Version: 0.1.4
 Authors@R: c(
     person("Maria Eduarda", "da Cruz Justino", , "eueduardacruz@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9501-2642")),
     person("Francisco", "Cribari-Neto", , "francisco.cribari@ufpe.br", role = c("ctb", "ths"),
-           comment = c(ORCID = "0000-0002-5909-6698", "Theoretical foundations"))
+           comment = c(ORCID = "0000-0002-5909-6698"))
   )
 Author: Maria Eduarda da Cruz Justino [aut, cre] (ORCID:
     <https://orcid.org/0000-0001-9501-2642>), Francisco Cribari-Neto [ctb,
-    ths] (ORCID: <https://orcid.org/0000-0002-5909-6698>, Theoretical
-    foundations)
+    ths] (ORCID: <https://orcid.org/0000-0002-5909-6698>)
 Maintainer: Maria Eduarda da Cruz Justino <eueduardacruz@gmail.com>
 Description: Fits and analyzes simplex regression models with either
     fixed or parametric mean link functions. Implements the simplex

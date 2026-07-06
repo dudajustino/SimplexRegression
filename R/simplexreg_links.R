@@ -18,7 +18,8 @@
 #' \code{"plogit1"} and \code{"plogit2"}.
 #'
 #' @details
-#' Two parametric mean link functions are available:
+#' Two parametric mean link functions are available, as proposed by
+#' Justino and Cribari-Neto (2026):
 #' \itemize{
 #'   \item Parametric logit type 1 (\code{"plogit1"}): \eqn{g(\mu; \lambda) = \log((1-\mu)^{-\lambda} - 1)};
 #'   \item Parametric logit type 2 (\code{"plogit2"}): \eqn{g(\mu; \lambda) = \log(\mu^\lambda / (1 - \mu^\lambda))}.
@@ -34,7 +35,8 @@
 #'
 #' @return Numeric vector with transformed values.
 #'
-#' @seealso \code{\link{simplexreg}}, \code{\link{fixed_mean_links}}.
+#' @seealso \code{\link{simplexreg}}, \code{\link{fixed_mean_links}},
+#' \code{\link{dispersion_links}}.
 #'
 #' @examples
 #' parametric_mean_link(0.2, lambda = 1.2, type = "plogit2")
@@ -177,7 +179,8 @@ parametric_mean_link_deriv2 <- function(mu, lambda, type = c("plogit1", "plogit2
 #' @return A numeric vector corresponding to the evaluated link,
 #' its inverse, or derivative depending on the function.
 #'
-#' @seealso \code{\link{simplexreg}}, \code{\link{parametric_mean_links}}.
+#' @seealso \code{\link{simplexreg}}, \code{\link{parametric_mean_links}},
+#' \code{\link{dispersion_links}}.
 #'
 #' @examples
 #' fixed_mean_link(0.5, type = "logit")
@@ -301,14 +304,15 @@ fixed_mean_link_inv_deriv1 <- function(eta, type = c("logit", "probit", "loglog"
 #' @details
 #' Available link functions:
 #' \itemize{
-#'   \item Log (\code{"log"}): \eqn{h(\sigma^2) = \log(\sigma^2)} (ensures positivity)
-#'   \item Sqrt (\code{"sqrt"}): \eqn{h(\sigma^2) = \sqrt{\sigma^2}}
-#'   \item Identity (\code{"identity"}): \eqn{h(\sigma^2) = \sigma^2} (no transformation)
+#'   \item Log (\code{"log"}): \eqn{h(\sigma^2) = \log(\sigma^2)} (ensures positivity);
+#'   \item Sqrt (\code{"sqrt"}): \eqn{h(\sigma^2) = \sqrt{\sigma^2}};
+#'   \item Identity (\code{"identity"}): \eqn{h(\sigma^2) = \sigma^2} (no transformation).
 #' }
 #'
 #' @return Numeric vector with transformed values.
 #'
-#' @seealso \code{\link{simplexreg}}.
+#' @seealso \code{\link{simplexreg}}, \code{\link{fixed_mean_links}},
+#' \code{\link{parametric_mean_links}}.
 #'
 #' @examples
 #' dispersion_link(1.5, type = "log")

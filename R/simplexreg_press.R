@@ -5,14 +5,16 @@
 # Description: PRESS-Based P2 Statistics for Simplex Regression                #
 ################################################################################
 
-#' @title PRESS-Based \eqn{P^2} Statistics for Simplex Regression
+#' @title PRESS-Based \eqn{P2} Statistics for Simplex Regression
 #' @description Computes the PRESS (Predicted Residual Error Sum of Squares)
 #' statistic and the associated \eqn{P^2} and adjusted \eqn{P^2} measures for simplex
-#' regression models with parametric or fixed mean link function.
+#' regression models with parametric or fixed mean link function, as proposed by
+#' Espinheira and Silva (2026).
 #'
 #' @param ... One or more objects of class \code{simplexregression}.
 #' @param type Character string specifying the type of residual to use.
-#' Options are \code{"standardized"} (default) or \code{"biasvariance"}.
+#' Options are \code{"standardized"} (default) or \code{"biasvariance"}
+#' (see \code{\link{residuals.simplexregression}}).
 #'
 #' @details
 #' The PRESS statistic for the simplex regression model is given by:

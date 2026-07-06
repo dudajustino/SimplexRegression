@@ -14,7 +14,7 @@
 #'
 #' @format A data frame with 500 observations and 13 variables:
 #' \describe{
-#'   \item{SpeciesName}{Species code (DfH, DfL, HlH, HlL) where:
+#'   \item{species_name}{Species code (DfH, DfL, HlH, HlL) where:
 #'     \itemize{
 #'       \item DfH = D. flexuosa (slow-growing), high nitrate
 #'       \item DfL = D. flexuosa (slow-growing), low nitrate
@@ -22,22 +22,24 @@
 #'       \item HlL = H. lanatus (fast-growing), low nitrate
 #'     }
 #'   }
-#'   \item{Species}{Species scientific name (D. flexuosa or H. lanatus)}
-#'   \item{Trt}{Nitrate treatment level (high or low)}
-#'   \item{Day}{Experimental day (0 to 49)}
-#'   \item{PlNum}{Plant number (individual plant identifier, 6-8 replicates per treatment)}
-#'   \item{LDM..mg.}{Leaf dry mass (mg)}
-#'   \item{SDM..mg.}{Stem dry mass (mg)}
-#'   \item{RDM..mg.}{Root dry mass (mg)}
-#'   \item{TDM..mg.}{Total dry mass (mg)}
-#'   \item{LMF}{Leaf mass fraction - proportion of biomass allocated to leaves (0-1)}
-#'   \item{SMF}{Stem mass fraction - proportion of biomass allocated to stems (0-1)}
-#'   \item{RMF}{Root mass fraction - proportion of biomass allocated to roots (0-1)}
-#'   \item{lnTDM}{Natural log of total dry mass (log-transformed for allometric analysis)}
+#'   \item{species}{Species scientific name (D. flexuosa or H. lanatus)}
+#'   \item{trt}{Nitrate treatment level (high or low)}
+#'   \item{day}{Experimental day (0 to 49)}
+#'   \item{pl_num}{Plant number (individual plant identifier, 6-8 replicates per treatment)}
+#'   \item{ldm_mg}{Leaf dry mass (mg)}
+#'   \item{sdm_mg}{Stem dry mass (mg)}
+#'   \item{rdm_mg}{Root dry mass (mg)}
+#'   \item{tdm_mg}{Total dry mass (mg)}
+#'   \item{lmf}{Leaf mass fraction - proportion of biomass allocated to leaves (0-1)}
+#'   \item{smf}{Stem mass fraction - proportion of biomass allocated to stems (0-1)}
+#'   \item{rmf}{Root mass fraction - proportion of biomass allocated to roots (0-1)}
+#'   \item{ln_tdm}{Natural log of total dry mass (log-transformed for allometric analysis)}
 #' }
 #'
 #' @source
-#' Data collected by Hendrik Poorter and co-workers. Published in:
+#' Data originally made available by bobdouma (2019) at
+#' \doi{10.5281/zenodo.3234670}, derived from the
+#' experiment described in:
 #'
 #' Poorter, H., van de Vijver, C.A.D.M., Boot, R.G.A. & Lambers, H. (1995)
 #' Growth and carbon economy of a fast-growing and a slow-growing grass species
@@ -50,9 +52,13 @@
 #' @references
 #' When using this data, please cite:
 #'
+#' bobdouma (2019) \emph{bobdouma/proportions_beta_Dirichlet: v.01}.
+#' \doi{10.5281/zenodo.3234670}.
+#'
 #' Poorter, H. & Sack, L. (2012) Pitfalls and possibilities in the analysis of
 #' biomass allocation patterns in plants. \emph{Frontiers in Plant Science},
 #' 3, 259. \doi{10.3389/fpls.2012.00259}
+#'
 #' @keywords datasets
 #'
 #' @examples
@@ -64,10 +70,10 @@
 #' str(Biomass)
 #'
 #' # Check that proportions sum to 1 (within rounding error)
-#' summary(rowSums(Biomass[, c("LMF", "SMF", "RMF")]))
+#' summary(rowSums(Biomass[, c("lmf", "smf", "rmf")]))
 #'
 #' # Simple plot of root mass fraction by treatment
-#' boxplot(RMF ~ Trt * Species, data = Biomass,
+#' boxplot(rmf ~ trt * species, data = Biomass,
 #'         main = "Root Mass Fraction by Species and Nitrate Treatment",
 #'         las = 2)
 "Biomass"

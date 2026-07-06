@@ -90,30 +90,42 @@ Vasconcellos and Santana e Silva (2025).
 \details{
 For each observation \eqn{i}, the model is refit on the dataset with
 observation \eqn{i} removed. Let \eqn{\hat\theta} and
-\eqn{\hat\theta_{(i)}} denote the full and leave-one-out MLEs, and let
-\eqn{A_{n,(i)}} and \eqn{B_{n,(i)}} be the corresponding information
-matrices.
+\eqn{\hat\theta_{(i)}} denote the full and leave-one-out MLEs. Following
+Cribari-Neto, Vasconcellos and Santana e Silva (2025), let \eqn{A_n}
+denote the sample average of the second-order log-likelihood derivatives
+(\eqn{n^{-1}\sum_i \partial^2\ell_i/\partial\theta\partial\theta'}) and
+\eqn{B_n} denote the sample average of the outer products of the
+individual score vectors
+(\eqn{n^{-1}\sum_i (\partial\ell_i/\partial\theta)(\partial\ell_i/\partial\theta)'}),
+the two matrices that comprise the information matrix equality. Let
+\eqn{A^{(i)}_{n-1}} and \eqn{B^{(i)}_{n-1}} denote these same quantities
+recomputed with observation \eqn{i} excluded (i.e. based on \eqn{n-1}
+observations).
 
 \strong{Measures computed:}
 \deqn{s_{3,i} = m_{3,(i)} / m_3}
 \deqn{s_{5,i} = D_i^{\mathrm{mod}} - D_i^{\mathrm{gen}}}
 
-where
-\deqn{D_i^{\mathrm{gen}} =
-  (\hat\theta - \hat\theta_{(i)})^\top (-A_{n,(i)})
+Here \eqn{m_3 = \|\mathrm{vech}(P_n^{-1} B_n P_n^{-\top} - I)\|_2}, where
+\eqn{P_n} is obtained from the Cholesky decomposition of \eqn{-A_n}
+(i.e. \eqn{-A_n = P_n P_n^\top}); \eqn{m_{3,(i)}} is the same quantity
+recomputed with observation \eqn{i} excluded from the sample.
+
+\deqn{D_i^{\mathrm{gen}} = (n-1) \,
+  (\hat\theta - \hat\theta_{(i)})^\top (-A^{(i)}_{n-1})
   (\hat\theta - \hat\theta_{(i)})}
-\deqn{D_i^{\mathrm{mod}} =
+\deqn{D_i^{\mathrm{mod}} = (n-1) \,
   (\hat\theta - \hat\theta_{(i)})^\top
-  \tfrac{1}{2}(-A_{n,(i)} + B_{n,(i)})
+  0.5(-A^{(i)}_{n-1} + B^{(i)}_{n-1})
   (\hat\theta - \hat\theta_{(i)})}
 
-and \eqn{m_3 = \|\mathrm{vech}(P_n^{-1} B_n P_n^{-\top} - I)\|_2},
-with \eqn{-A_n = P_n P_n^\top} (Cholesky factorisation).
-
-If \eqn{-A_{n,(i)}} is not positive definite, \code{nearPD} is used to
+If \eqn{-A^{(i)}_{n-1}} is not positive definite, \code{nearPD} is used to
 find the nearest positive-definite matrix and a message is printed.
 
-\strong{Threshold intervals} use two asymmetric IQR spreads:
+\strong{Threshold intervals} use two asymmetric IQR spreads, as proposed
+by Cribari-Neto, Vasconcellos and Santana e Silva (2025). Let
+\eqn{Q(p)} denote the empirical \eqn{p}-th quantile of the relevant
+measure (\eqn{s_{3,i}} or \eqn{s_{5,i}}, computed separately for each):
 \eqn{IQR_1 = Q(0.50) - Q(0.125)} (left) and
 \eqn{IQR_2 = Q(0.875) - Q(0.50)} (right).
 Limits are \eqn{v - z \cdot IQR_1} (lower) and \eqn{v + z \cdot IQR_2}
@@ -159,6 +171,6 @@ matrix equality. \emph{Journal of Applied Statistics}, \bold{52},
 2873--2893. \doi{10.1080/02664763.2025.2487914}
 }
 \seealso{
-\code{\link{local.influence}}, \code{\link{gleverage}},
-\code{\link{cooks.distance.simplexregression}}.
+\code{\link{diag.distances}}, \code{\link{local.influence}},
+\code{\link{gleverage}}.
 }

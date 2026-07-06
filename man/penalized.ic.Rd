@@ -4,7 +4,12 @@
 \alias{penalized.ic}
 \title{Penalized Information Criteria for Simplex Regression Model Selection}
 \usage{
-penalized.ic(..., kappa = 0.1, verbose = TRUE)
+penalized.ic(
+  ...,
+  kappa = 0.1,
+  verbose = TRUE,
+  digits = max(3, getOption("digits") - 3)
+)
 }
 \arguments{
 \item{...}{One or more objects of class \code{simplexregression} fitted with a
@@ -15,6 +20,9 @@ mean parameter. Default is 0.1.}
 
 \item{verbose}{Logical. If \code{TRUE} (default), prints the criteria values.
 If \code{FALSE}, returns results silently.}
+
+\item{digits}{Integer specifying the number of decimal places for output.
+Default is \code{max(3, getOption("digits") - 3)}.}
 }
 \value{
 A data frame with rows named after the candidate models and four columns:
@@ -34,7 +42,10 @@ criteria with a penalty term for selecting among competing simplex regression
 models with parametric mean link functions.
 }
 \details{
-The penalized information criteria are computed as:
+The penalized information criteria, as proposed by Justino and
+Cribari-Neto (2026), extend the classical Akaike, Schwarz and
+Hannan--Quinn criteria with an additional penalty term for the link
+parameter \eqn{\lambda}:
 \deqn{AIC^{(\lambda)} = -2 \ell + (2 + \kappa \, |\log(\lambda)|)r}
 \deqn{BIC^{(\lambda)} = -2 \ell + (\log(n) + \kappa \, |\log(\lambda)|)r}
 \deqn{HQIC^{(\lambda)}  = -2 \ell + (2 \log(\log(n)) + \kappa \, |\log(\lambda)|)r}

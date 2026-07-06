@@ -115,13 +115,15 @@ print.simplexregression <- function(x, digits = max(3, getOption("digits") - 3),
 
   converged <- is.null(x$optim$convergence) || x$optim$convergence == 0
 
-  if(converged) {
+  if(!converged) {
+    cat("model did not converge\n")
+  } else {
     # Coefficients (Mean model)
     if(length(x$coefficients$mean)) {
       cat(sprintf("Coefficients (mean model with %s link):\n", x$mu.link))
       coef_mean <- x$coefficients$mean
       if (!is.null(x$x_names)) names(coef_mean) <- x$x_names
-      print.default(format(round(coef_mean, 10), nsmall = 10), print.gap = 2, quote = FALSE)
+      print.default(format(coef_mean, digits = digits), print.gap = 2, quote = FALSE)
       cat("\n")
     } else {
       cat("No coefficients (in mean model)\n\n")
@@ -133,7 +135,7 @@ print.simplexregression <- function(x, digits = max(3, getOption("digits") - 3),
                   x$sigma2.link))
       coef_disp <- x$coefficients$dispersion
       if (!is.null(x$z_names)) names(coef_disp) <- x$z_names
-      print.default(format(round(coef_disp, 10), nsmall = 10), print.gap = 2, quote = FALSE)
+      print.default(format(coef_disp, digits = digits), print.gap = 2, quote = FALSE)
       cat("\n")
     } else {
       cat("No coefficients (in dispersion model)\n\n")
@@ -142,10 +144,8 @@ print.simplexregression <- function(x, digits = max(3, getOption("digits") - 3),
     if (is_parametric(x)) {
       cat(sprintf("Link function parameter (parametric %s model)\nlambda: %s\n\n",
                   x$mu.link,
-                  format(round(x$coefficients$lambda, 10), nsmall = 10)))
+                  format(x$coefficients$lambda, digits = digits)))
     }
-  } else {
-    cat("model did not converge\n")
   }
 
   invisible(x)
@@ -263,19 +263,16 @@ print.summary.simplexregression <- function(x, digits = max(3, getOption("digits
 
     if(!is.null(x$residuals)) {
       cat(sprintf("%s:\n", "Quantile residuals"))
-      print(structure(round(as.vector(quantile(x$residuals)), digits = digits),
-                      .Names = c("Min", "1Q", "Median", "3Q", "Max")))
+      qres <- quantile(x$residuals)
+      names(qres) <- c("Min", "1Q", "Median", "3Q", "Max")
+      print(formatC(qres, digits = digits, format = "f"), quote = FALSE)
     }
 
     # Coefficients (Mean model)
     if(NROW(x$coefficients$mean)) {
       cat(sprintf("\nCoefficients (mean model with %s link):\n", x$mu.link))
       coef_mean_print <- x$coefficients$mean
-      coef_mean_print[, "Estimate"] <- round(coef_mean_print[, "Estimate"], 10)
-      coef_mean_print[, "Std. Error"] <- round(coef_mean_print[, "Std. Error"], 10)
-      coef_mean_print[, "z value"] <- round(coef_mean_print[, "z value"], 4)
-      coef_mean_print[, "Pr(>|z|)"] <- round(coef_mean_print[, "Pr(>|z|)"], 4)
-      printCoefmat(coef_mean_print, digits = 10, signif.legend = FALSE)
+      printCoefmat(coef_mean_print, digits = digits, signif.legend = FALSE)
     } else {
       cat("\nNo coefficients (in mean model)\n")
     }
@@ -285,11 +282,7 @@ print.summary.simplexregression <- function(x, digits = max(3, getOption("digits
       cat(sprintf("\nDispersion coefficients (dispersion model with %s link):\n",
                   x$sigma2.link))
       coef_disp_print <- x$coefficients$dispersion
-      coef_disp_print[, "Estimate"] <- round(coef_disp_print[, "Estimate"], 10)
-      coef_disp_print[, "Std. Error"] <- round(coef_disp_print[, "Std. Error"], 10)
-      coef_disp_print[, "z value"] <- round(coef_disp_print[, "z value"], 4)
-      coef_disp_print[, "Pr(>|z|)"] <- round(coef_disp_print[, "Pr(>|z|)"], 4)
-      printCoefmat(coef_disp_print, digits = 10, signif.legend = FALSE)
+      printCoefmat(coef_disp_print, digits = digits, signif.legend = FALSE)
     } else {
       cat("\nNo coefficients (in dispersion model)\n")
     }
@@ -298,9 +291,7 @@ print.summary.simplexregression <- function(x, digits = max(3, getOption("digits
     if(x$parametric && !is.null(x$coefficients$lambda)) {
       cat(sprintf("\nLink function parameter (parametric %s model):\n", x$mu.link))
       lambda_print <- x$coefficients$lambda[, c("Estimate", "Std. Error"), drop = FALSE]
-      lambda_print[, "Estimate"] <- round(lambda_print[, "Estimate"], 10)
-      lambda_print[, "Std. Error"] <- round(lambda_print[, "Std. Error"], 10)
-      printCoefmat(lambda_print, P.values = FALSE, has.Pvalue = FALSE, digits = 10)
+      print(formatC(lambda_print, digits = digits, format = "f"), quote = FALSE)
     }
 
     if(getOption("show.signif.stars") &&
@@ -310,14 +301,14 @@ print.summary.simplexregression <- function(x, digits = max(3, getOption("digits
     }
 
     # Model fit statistics
-    cat("\nLog-likelihood:", round(x$loglik, 6),
+    cat("\nLog-likelihood:", formatC(x$loglik, digits = digits, format = "f"),
         "on", sum(sapply(x$coefficients, NROW)), "Df")
-    cat("\nAIC:", round(x$aic, 6))
-    cat("\nBIC:", round(x$bic, 6))
-    cat("\nHQIC:", round(x$hqic, 6))
-    cat("\nPseudo R-squared (Nagelkerke):", round(x$R2_N, 6))
-    cat("\nPseudo R-squared (Ferrari and Cribari-Neto):", round(x$R2_FC, 6))
-    cat("\nP-squared (Espinheira-Silva-Lima):", round(x$P2, 6))
+    cat("\nAIC:", formatC(x$aic, digits = digits, format = "f"))
+    cat("  BIC:", formatC(x$bic, digits = digits, format = "f"))
+    cat("  HQIC:", formatC(x$hqic, digits = digits, format = "f"))
+    cat("\nPseudo R-squared (Nagelkerke):", formatC(x$R2_N, digits = digits, format = "f"))
+    cat("\nPseudo R-squared (Ferrari and Cribari-Neto):", formatC(x$R2_FC, digits = digits, format = "f"))
+    cat("\nP-squared (Espinheira, Silva and Lima):", formatC(x$P2, digits = digits, format = "f"))
     cat("\nNumber of observations:", x$nobs)
     cat(paste("\nNumber of iterations:", x$iterations[1L],
               sprintf("(%s) +", x$method), x$iterations[2L], paste("(Fisher scoring)", "\n")))

@@ -69,5 +69,6 @@ fixed_mean_link_deriv1(mu = 0.5, type = "logit")
 
 }
 \seealso{
-\code{\link{simplexreg}}, \code{\link{parametric_mean_links}}.
+\code{\link{simplexreg}}, \code{\link{parametric_mean_links}},
+\code{\link{dispersion_links}}.
 }

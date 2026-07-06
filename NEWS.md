@@ -1,3 +1,15 @@
+# SimplexRegression 0.1.4
+ 
+* Fixed `opt$counts` handling in `simplexreg.fit()`.
+* Made decimal-place formatting consistent across `summary.simplexregression()`,
+  `print.simplexregression()`, and `print.summary.simplexregression()`.
+* Added a `digits` argument to `penalized.ss()` and `penalized.ic()`.
+* `plot.simplexregression()` now accepts a cutoff/threshold argument for
+  flagging observations in residual plots.
+* Improved English wording and mathematical notation in function documentation.
+* Added the `AbortionOpposition` dataset.
+* Standardized variable names across package datasets (converted to lowercase).
+
 # SimplexRegression 0.1.3
 
 * Fixed `par()` call in `plot.simplexregression.Rd` example to properly save

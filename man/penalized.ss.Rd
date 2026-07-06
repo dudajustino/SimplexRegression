@@ -4,7 +4,12 @@
 \alias{penalized.ss}
 \title{Scout Score Criterion for Simplex Regression Model Selection}
 \usage{
-penalized.ss(..., kappa = 0.1, verbose = TRUE)
+penalized.ss(
+  ...,
+  kappa = 0.1,
+  verbose = TRUE,
+  digits = max(3, getOption("digits") - 3)
+)
 }
 \arguments{
 \item{...}{Two or more objects of class \code{simplexregression} to be compared.}
@@ -14,6 +19,9 @@ parameter. Default is 0.1. Use \code{kappa = 0} for standard Scout Score.}
 
 \item{verbose}{Logical. If \code{TRUE} (default), prints the SS values for
 all models and the selected model. If \code{FALSE}, returns results silently.}
+
+\item{digits}{Integer specifying the number of decimal places for output.
+Default is \code{max(3, getOption("digits") - 3)}.}
 }
 \value{
 A data frame with rows named after the candidate models and two columns:
@@ -58,9 +66,9 @@ Here, \eqn{f_{ji}(\boldsymbol{\hat{\theta}}_j)} and
 models \eqn{j} and \eqn{k}, respectively.
 
 The penalization term \eqn{\delta_{jk}} for simplex models with parametric and
-fixed mean links is given by:
+fixed mean links, as proposed by Justino and Cribari-Neto (2026), is given by:
 
-\deqn{\delta_{jk} = \frac{1}{2}[(r_j - r_k) + \kappa(|\log(\hat{\lambda}_j)| -
+\deqn{\delta_{jk} = 0.5[(r_j - r_k) + \kappa(|\log(\hat{\lambda}_j)| -
 |\log(\hat{\lambda}_k)|)]\log(n),}
 where \eqn{r_j} and \eqn{r_k} indicate the dimensions of their parameter vectors,
 and \eqn{\kappa \geq 0} controls the additional penalty associated with the link

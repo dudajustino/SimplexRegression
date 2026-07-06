@@ -29,7 +29,8 @@
 #' @param threshold Numeric threshold for identifying influential observations in.
 #' If \code{NULL} (default), no observations are highlighted.
 #' @param label.pos Position(s) for outlier labels in plot. Can be a single value
-#' (applied to all labels) or a vector. Values: 1=below, 2=left, 3=above, 4=right.
+#' (applied to all labels) or a vector. Values: 1 = below, 2 = left, 3 = above,
+#' 4 = right.
 #' @param plot.type Character string controlling the plot style when
 #' \code{plot = TRUE}. If \code{NULL} (default), uses \code{"h"} (vertical
 #' lines). Passed to the \code{type} argument of \code{plot()}.
@@ -560,30 +561,42 @@ gleverage.simplexregression <- function(model){
 #' @details
 #' For each observation \eqn{i}, the model is refit on the dataset with
 #' observation \eqn{i} removed. Let \eqn{\hat\theta} and
-#' \eqn{\hat\theta_{(i)}} denote the full and leave-one-out MLEs, and let
-#' \eqn{A_{n,(i)}} and \eqn{B_{n,(i)}} be the corresponding information
-#' matrices.
+#' \eqn{\hat\theta_{(i)}} denote the full and leave-one-out MLEs. Following
+#' Cribari-Neto, Vasconcellos and Santana e Silva (2025), let \eqn{A_n}
+#' denote the sample average of the second-order log-likelihood derivatives
+#' (\eqn{n^{-1}\sum_i \partial^2\ell_i/\partial\theta\partial\theta'}) and
+#' \eqn{B_n} denote the sample average of the outer products of the
+#' individual score vectors
+#' (\eqn{n^{-1}\sum_i (\partial\ell_i/\partial\theta)(\partial\ell_i/\partial\theta)'}),
+#' the two matrices that comprise the information matrix equality. Let
+#' \eqn{A^{(i)}_{n-1}} and \eqn{B^{(i)}_{n-1}} denote these same quantities
+#' recomputed with observation \eqn{i} excluded (i.e. based on \eqn{n-1}
+#' observations).
 #'
 #' \strong{Measures computed:}
 #' \deqn{s_{3,i} = m_{3,(i)} / m_3}
 #' \deqn{s_{5,i} = D_i^{\mathrm{mod}} - D_i^{\mathrm{gen}}}
 #'
-#' where
-#' \deqn{D_i^{\mathrm{gen}} =
-#'   (\hat\theta - \hat\theta_{(i)})^\top (-A_{n,(i)})
+#' Here \eqn{m_3 = \|\mathrm{vech}(P_n^{-1} B_n P_n^{-\top} - I)\|_2}, where
+#' \eqn{P_n} is obtained from the Cholesky decomposition of \eqn{-A_n}
+#' (i.e. \eqn{-A_n = P_n P_n^\top}); \eqn{m_{3,(i)}} is the same quantity
+#' recomputed with observation \eqn{i} excluded from the sample.
+#'
+#' \deqn{D_i^{\mathrm{gen}} = (n-1) \,
+#'   (\hat\theta - \hat\theta_{(i)})^\top (-A^{(i)}_{n-1})
 #'   (\hat\theta - \hat\theta_{(i)})}
-#' \deqn{D_i^{\mathrm{mod}} =
+#' \deqn{D_i^{\mathrm{mod}} = (n-1) \,
 #'   (\hat\theta - \hat\theta_{(i)})^\top
-#'   \tfrac{1}{2}(-A_{n,(i)} + B_{n,(i)})
+#'   0.5(-A^{(i)}_{n-1} + B^{(i)}_{n-1})
 #'   (\hat\theta - \hat\theta_{(i)})}
 #'
-#' and \eqn{m_3 = \|\mathrm{vech}(P_n^{-1} B_n P_n^{-\top} - I)\|_2},
-#' with \eqn{-A_n = P_n P_n^\top} (Cholesky factorisation).
-#'
-#' If \eqn{-A_{n,(i)}} is not positive definite, \code{nearPD} is used to
+#' If \eqn{-A^{(i)}_{n-1}} is not positive definite, \code{nearPD} is used to
 #' find the nearest positive-definite matrix and a message is printed.
 #'
-#' \strong{Threshold intervals} use two asymmetric IQR spreads:
+#' \strong{Threshold intervals} use two asymmetric IQR spreads, as proposed
+#' by Cribari-Neto, Vasconcellos and Santana e Silva (2025). Let
+#' \eqn{Q(p)} denote the empirical \eqn{p}-th quantile of the relevant
+#' measure (\eqn{s_{3,i}} or \eqn{s_{5,i}}, computed separately for each):
 #' \eqn{IQR_1 = Q(0.50) - Q(0.125)} (left) and
 #' \eqn{IQR_2 = Q(0.875) - Q(0.50)} (right).
 #' Limits are \eqn{v - z \cdot IQR_1} (lower) and \eqn{v + z \cdot IQR_2}
@@ -627,8 +640,8 @@ gleverage.simplexregression <- function(model){
 #' matrix equality. \emph{Journal of Applied Statistics}, \bold{52},
 #' 2873--2893. \doi{10.1080/02664763.2025.2487914}
 #'
-#' @seealso \code{\link{local.influence}}, \code{\link{gleverage}},
-#' \code{\link{cooks.distance.simplexregression}}.
+#' @seealso \code{\link{diag.distances}}, \code{\link{local.influence}},
+#' \code{\link{gleverage}}.
 #'
 #' @importFrom stats quantile
 #' @importFrom Matrix nearPD
@@ -733,8 +746,9 @@ diag.im <- function(model, data, type = c("s3", "s5"), interval = c("I1", "I2"),
                       coef_full                       - coef_loo
     )
 
-    An_i <- sj_i$An_neg
-    Bn_i <- sj_i$Bn
+    n_loo <- fit_i$nobs
+    An_i <- sj_i$An_neg * n_loo
+    Bn_i <- sj_i$Bn     * n_loo
 
     cook_gen <- as.numeric(t(theta_d) %*% An_i               %*% theta_d)
     cook_mod <- as.numeric(t(theta_d) %*% (0.5*(An_i + Bn_i)) %*% theta_d)
@@ -1044,8 +1058,9 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 
 #' @title Distance-Based Influence Diagnostics for Simplex Regression
 #' @description Computes leave-one-out influence measures based on
-#' distributional distances (Wasserstein W1, W2, or Hellinger) for simplex
-#' regression models.
+#' distributional distances (Wasserstein with \eqn{p_W = 1} and \eqn{p_W = 2} or
+#' Hellinger) for simplex regression models, as proposed by Justino and
+#' Cribari-Neto (2026).
 #'
 #' @param model An object of class \code{simplexregression}.
 #' @param data The data frame used to fit \code{model}.
@@ -1095,7 +1110,8 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 #' measure \eqn{d_i}.
 #'
 #' \strong{Ad hoc threshold} uses an asymmetric IQR spread adjusted for
-#' skewness:
+#' skewness, as proposed by Justino and Cribari-Neto (2026). Let \eqn{Q(p)} denote the
+#' empirical \eqn{p}-th quantile of the distances \eqn{d_i}, the threshold is
 #' \deqn{\text{threshold} = Q(0.75) + (1 + a)(Q(0.75) - Q(0.25))}
 #' where \eqn{a} is the sample skewness of the distances. Observations with
 #' \eqn{d_i} above this threshold are flagged as potentially influential.
@@ -1133,10 +1149,9 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 #'
 #' @references
 #' Justino, M. E. C. and Cribari-Neto, F. (2026).
-#' Simplex regression with a flexible logit link: Inference and application
-#' to cross-country impunity data.
-#' \emph{Applied Mathematical Modelling}, \bold{154}, 116713.
-#' \doi{10.1016/j.apm.2025.116713}
+#' Influence diagnostics in beta regression via Hellinger and Wasserstein
+#' distances. \emph{Statistical Papers}, \bold{67}(3), 50.
+#' \doi{10.1007/s00362-026-01823-0}
 #'
 #' @seealso \code{\link{diag.im}}, \code{\link{local.influence}},
 #' \code{\link{gleverage}}.

@@ -23,7 +23,7 @@
 \item{which}{Numeric vector indicating which plots to display (\code{1:7}).}
 
 \item{type}{Character string specifying the residual type (default: \code{"quantile"}).
-See \code{\link{residuals.simplexregression}} for available options.}
+\cr See \code{\link{residuals.simplexregression}} for available options.}
 
 \item{ask}{Logical; if \code{TRUE}, the user is asked before each plot.
 Default is \code{TRUE} when multiple plots are requested.}
@@ -32,12 +32,15 @@ Default is \code{TRUE} when multiple plots are requested.}
 Set to \code{FALSE} to preserve user-defined \code{par()} settings such as \code{mfrow}.
 Default is \code{TRUE}.}
 
-\item{threshold}{Numeric threshold for identifying influential observations in.
-If \code{NULL} (default), no observations are highlighted.}
+\item{threshold}{Numeric threshold for identifying influential or outlying
+observations in plots 1--3 (residuals plots), 6 (Cook's distance), and
+7 (generalized leverage). If \code{NULL} (default), no observations are
+highlighted.}
 
-\item{label.pos}{Position(s) for outlier labels in plots 7 and 8. Can be a single value
-(applied to all labels) or a vector. Values: 1=below, 2=left, 3=above, 4=right.
-Default is \code{3} (above). See \code{\link[graphics]{text}} for details.}
+\item{label.pos}{Position(s) for outlier labels in plots 1--3, 6, and 7.
+Can be a single value (applied to all labels) or a vector. Values:
+1 = below, 2 = left, 3 = above, 4 = right. Default is \code{3} (above).
+See \code{\link[graphics]{text}} for details.}
 
 \item{plot.type}{Controls the plot symbol/type for scatter plots and index plots.
 If \code{NULL} (default), uses \code{pch = 1} (open circles) for residual plots

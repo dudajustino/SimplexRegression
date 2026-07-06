@@ -2,7 +2,7 @@
 % Please edit documentation in R/simplexreg_press.R
 \name{press}
 \alias{press}
-\title{PRESS-Based \eqn{P^2} Statistics for Simplex Regression}
+\title{PRESS-Based \eqn{P2} Statistics for Simplex Regression}
 \usage{
 press(..., type = c("standardized", "biasvariance"))
 }
@@ -10,7 +10,8 @@ press(..., type = c("standardized", "biasvariance"))
 \item{...}{One or more objects of class \code{simplexregression}.}
 
 \item{type}{Character string specifying the type of residual to use.
-Options are \code{"standardized"} (default) or \code{"biasvariance"}.}
+Options are \code{"standardized"} (default) or \code{"biasvariance"}
+(see \code{\link{residuals.simplexregression}}).}
 }
 \value{
 When a single model is provided, a named numeric vector with components
@@ -21,7 +22,8 @@ a data frame with one row per model and columns \code{P2}, \code{P2_c}, and
 \description{
 Computes the PRESS (Predicted Residual Error Sum of Squares)
 statistic and the associated \eqn{P^2} and adjusted \eqn{P^2} measures for simplex
-regression models with parametric or fixed mean link function.
+regression models with parametric or fixed mean link function, as proposed by
+Espinheira and Silva (2026).
 }
 \details{
 The PRESS statistic for the simplex regression model is given by:

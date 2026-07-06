@@ -37,7 +37,8 @@ measure. Default is \code{FALSE}.}
 If \code{NULL} (default), no observations are highlighted.}
 
 \item{label.pos}{Position(s) for outlier labels in plot. Can be a single value
-(applied to all labels) or a vector. Values: 1=below, 2=left, 3=above, 4=right.}
+(applied to all labels) or a vector. Values: 1 = below, 2 = left, 3 = above,
+4 = right.}
 
 \item{plot.type}{Character string controlling the plot style when
 \code{plot = TRUE}. If \code{NULL} (default), uses \code{"h"} (vertical

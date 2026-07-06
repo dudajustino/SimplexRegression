@@ -1,0 +1,118 @@
+#' Public Opinion on Abortion Across U.S. States
+#'
+#' @description
+#' This dataset examines the relationship between public opposition to abortion
+#' and demographic, religious, and socioeconomic characteristics across the
+#' 50 U.S. states and the District of Columbia. The response variable is a
+#' proportion bounded in the (0,1) interval, making the data suitable for
+#' simplex regression and beta regression analyses.
+#'
+#' @docType data
+#' @usage data(AbortionOpposition)
+#'
+#' @format A data frame with 51 observations and 9 variables:
+#' \describe{
+#'   \item{state}{Factor. U.S. state or the District of Columbia.}
+#'   \item{abortion_opposition}{Numeric. Proportion of adults who believe
+#'         abortion should be illegal in all or most cases, bounded in the
+#'         (0,1) interval, based on the Pew Research Center 2023--24
+#'         Religious Landscape Study. This is the response variable used
+#'         in the regression analyses.}
+#'   \item{religious_attendance}{Numeric. Percentage of adults who report
+#'         attending religious services at least once a week, based on the
+#'         Pew Research Center 2023--24 Religious Landscape Study.}
+#'   \item{income}{Numeric. Mean household income (in U.S. dollars) in 2024.}
+#'   \item{sex_ratio}{Numeric. Number of males per 100 females in 2024.}
+#'   \item{female}{Numeric. Proportion of the population that is female,
+#'         bounded in the (0,1) interval, in 2024.}
+#'   \item{pop_18_24}{Numeric. Percentage of the population aged 18--24 years,
+#'         obtained directly from the 2024 American Community Survey (ACS)
+#'         1-Year Estimates (Table S0101).}
+#'   \item{bachelors}{Numeric. Percentage of adults aged 25 and older with a
+#'         bachelor's degree or higher, in 2024.}
+#'   \item{urban}{Numeric. Percentage of the population living in urban areas,
+#'         based on 2020 U.S. Census Bureau estimates.}
+#' }
+#'
+#' @details
+#' The dataset was assembled by the package authors from multiple publicly
+#' available sources. The response variable, \code{abortion_opposition},
+#' was obtained from the Pew Research Center 2023--24 Religious Landscape
+#' Study and rescaled to the (0,1) interval.
+#'
+#' The explanatory variables were obtained as follows:
+#' \enumerate{
+#'   \item \code{religious_attendance} was obtained from the Pew Research Center
+#'         2023--24 Religious Landscape Study.
+#'   \item \code{income} and \code{sex_ratio} were obtained from
+#'         World Population Review using U.S. Census Bureau estimates.
+#'   \item \code{female} was derived from \code{sex_ratio} and is provided
+#'         on the (0,1) proportion scale, unlike the other percentage-based
+#'         explanatory variables in this dataset, which are on the 0--100
+#'         scale. Note that \code{sex_ratio} and \code{female} are
+#'         mathematically related (\code{female = 100 / (100 + sex_ratio)})
+#'         and should generally not be included together as covariates in
+#'         the same regression model, as doing so would introduce
+#'         near-perfect collinearity.
+#'   \item \code{pop_18_24} corresponds to the percent estimate of the
+#'         population aged 18--24 years reported directly in Table S0101
+#'         (Age and Sex) of the 2024 American Community Survey (ACS)
+#'         1-Year Estimates.
+#'   \item \code{bachelors} was obtained from World Population Review
+#'         using U.S. Census Bureau estimates for 2024.
+#'   \item \code{urban} was obtained from World Population Review and is
+#'         based on 2020 U.S. Census Bureau data, the most recent Census
+#'         estimate of urbanization by state available at the time this
+#'         dataset was compiled. All other explanatory variables in this
+#'         dataset reflect 2023--24 estimates.
+#' }
+#'
+#' @source
+#' Pew Research Center. 2023--24 Religious Landscape Study.
+#'
+#' Pew Research Center (2025). Americans' Views on Abortion Differ by State.
+#'
+#' World Population Review (2024). Per Capita Income by State
+#' (Mean Household Income 2024 column).
+#'
+#' World Population Review (2024). Male to Female Ratio by State.
+#'
+#' World Population Review (2024). Educational Attainment by State
+#' (Bachelors or Higher 2024 column).
+#'
+#' World Population Review (2020 U.S. Census data). Most Urban States
+#' (Urban Population Pct 2020 column).
+#'
+#' U.S. Census Bureau. American Community Survey (ACS) 1-Year Estimates (2024),
+#' Table S0101: Age and Sex.
+#'
+#' @keywords datasets
+#'
+#' @examples
+#' # Load the data
+#' data(AbortionOpposition)
+#'
+#' # Quick overview
+#' head(AbortionOpposition)
+#' str(AbortionOpposition)
+#'
+#' # Summary statistics
+#' summary(AbortionOpposition)
+#'
+#' # Relationship between religious attendance and abortion opposition
+#' plot(abortion_opposition ~ religious_attendance,
+#'      data = AbortionOpposition,
+#'      pch = 19,
+#'      xlab = "Religious attendance (%)",
+#'      ylab = "Abortion opposition (proportion)")
+#'
+#' # Correlation among numeric variables
+#' cor(AbortionOpposition[, c("abortion_opposition",
+#'                         "religious_attendance",
+#'                         "income",
+#'                         "sex_ratio",
+#'                         "female",
+#'                         "pop_18_24",
+#'                         "bachelors",
+#'                         "urban")])
+"AbortionOpposition"

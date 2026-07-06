@@ -14,6 +14,8 @@
 #' parameter. Default is 0.1. Use \code{kappa = 0} for standard Scout Score.
 #' @param verbose Logical. If \code{TRUE} (default), prints the SS values for
 #' all models and the selected model. If \code{FALSE}, returns results silently.
+#' @param digits Integer specifying the number of decimal places for output.
+#' Default is \code{max(3, getOption("digits") - 3)}.
 #'
 #' @details
 #' The Scout Score criterion, originally proposed by Costa et al. (2024) for
@@ -43,9 +45,9 @@
 #' models \eqn{j} and \eqn{k}, respectively.
 #'
 #' The penalization term \eqn{\delta_{jk}} for simplex models with parametric and
-#' fixed mean links is given by:
+#' fixed mean links, as proposed by Justino and Cribari-Neto (2026), is given by:
 #'
-#' \deqn{\delta_{jk} = \frac{1}{2}[(r_j - r_k) + \kappa(|\log(\hat{\lambda}_j)| -
+#' \deqn{\delta_{jk} = 0.5[(r_j - r_k) + \kappa(|\log(\hat{\lambda}_j)| -
 #' |\log(\hat{\lambda}_k)|)]\log(n),}
 #' where \eqn{r_j} and \eqn{r_k} indicate the dimensions of their parameter vectors,
 #' and \eqn{\kappa \geq 0} controls the additional penalty associated with the link
@@ -115,7 +117,8 @@
 #'
 #' @seealso \code{\link{penalized.ic}}
 #' @export
-penalized.ss <- function(..., kappa = 0.1, verbose = TRUE) {
+penalized.ss <- function(..., kappa = 0.1, verbose = TRUE,
+                         digits = max(3, getOption("digits") - 3)) {
 
   models <- list(...)
   M <- length(models)
@@ -191,6 +194,9 @@ penalized.ss <- function(..., kappa = 0.1, verbose = TRUE) {
         # Calculate omega_ij^2
         omega2_ij <- 1/n * sum((log_ratio)^2) - (mean(log_ratio)^2)
 
+        # Protect against numerical issues
+        if (omega2_ij < 1e-10) omega2_ij <- 1e-10
+
         # Penalization delta_jk
         if (all_parametric) {
           penalty <- kappa * (abs(log(lambda_list[[i]])) -
@@ -227,10 +233,16 @@ penalized.ss <- function(..., kappa = 0.1, verbose = TRUE) {
     if (kappa == 0) {
       cat("Scout Score values:\n")
     } else {
-      cat(sprintf("Penalized Scout Score values (kappa = %.3f):\n", kappa))
+      cat(sprintf("Penalized Scout Score values (kappa = %s):\n",
+                  formatC(kappa, digits = 3, format = "f")))
     }
 
-    print(result)
+    result_print <- data.frame(
+      df = formatC(result$df, digits = 0, format = "f"),
+      SS = formatC(result$SS, digits = digits, format = "f"),
+      row.names = rownames(result)
+    )
+    print(result_print, quote = FALSE, right = TRUE)
 
     best_model_index <- which.max(SS_values)
     cat(sprintf("\nSelected model: %s\n", model_names[best_model_index]))

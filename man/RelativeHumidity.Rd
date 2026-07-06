@@ -7,20 +7,20 @@
 \format{
 A data frame with 312 observations and 11 variables:
 \describe{
-  \item{Date}{Observation date (YYYY-MM-DD)}
-  \item{RH}{Monthly mean relative humidity, originally measured in percent and
+  \item{date}{Observation date (YYYY-MM-DD)}
+  \item{rh}{Monthly mean relative humidity, originally measured in percent and
   rescaled to the unit interval (0,1)}
-  \item{Ins}{Monthly total insolation (in hours), contains 2 missing values}
-  \item{Ins2}{Monthly total insolation (in hours) with missing values imputed
+  \item{ins}{Monthly total insolation (in hours), contains 2 missing values}
+  \item{ins2}{Monthly total insolation (in hours) with missing values imputed
   via seasonal interpolation}
-  \item{Pre}{Monthly total precipitation (in mm), contains 2 missing values}
-  \item{Pre2}{Monthly total precipitation (in mm) with missing values imputed
+  \item{pre}{Monthly total precipitation (in mm), contains 2 missing values}
+  \item{pre2}{Monthly total precipitation (in mm) with missing values imputed
   via seasonal interpolation}
-  \item{Neb}{Monthly mean cloudiness (in tenths)}
-  \item{AP}{Monthly mean atmospheric pressure (in hPa)}
-  \item{MT}{Monthly mean temperature (in Degrees Celsius)}
-  \item{WS}{Monthly mean wind speed (in m/s)}
-  \item{Dir}{Monthly predominant wind direction (in degrees)}
+  \item{neb}{Monthly mean cloudiness (in tenths)}
+  \item{ap}{Monthly mean atmospheric pressure (in hPa)}
+  \item{mt}{Monthly mean temperature (in Degrees Celsius)}
+  \item{ws}{Monthly mean wind speed (in m/s)}
+  \item{dir}{Monthly predominant wind direction (in degrees)}
 }
 }
 \source{
@@ -30,15 +30,15 @@ Brazilian meteorological station
 data(RelativeHumidity)
 }
 \description{
-Monthly meteorological data including relative humidity (RH),
-temperature, insolation, cloudiness, precipitation, atmospheric pressure,
-and wind speed for a Brazilian station (2000-2025).
+Monthly meteorological data including relative humidity (rh),
+temperature, insolation, precipitation, and wind speed for a
+Brazilian station (2000-2025).
 
-The dataset contains two missing observations in the variables \code{Ins}
-and \code{Pre}, corresponding to September 2020 and November 2025. To address
+The dataset contains two missing observations in the variables \code{ins}
+and \code{pre}, corresponding to September 2020 and November 2025. To address
 these missing values, imputation was performed via seasonal interpolation using
-the \pkg{imputeTS} package, with the imputed versions stored as \code{Ins2}
-and \code{Pre2}.
+the \pkg{imputeTS} package, with the imputed versions stored as \code{ins2}
+and \code{pre2}.
 }
 \examples{
 # Load the dataset
@@ -51,8 +51,8 @@ head(RelativeHumidity)
 str(RelativeHumidity)
 
 # Insolation with and without imputation
-plot(RelativeHumidity$Ins, type = "l", col = "red",
+plot(RelativeHumidity$ins, type = "l", col = "red",
      ylab = "Insolation", main = "Missing values visible as gaps")
-points(RelativeHumidity$Ins2, type = "l", col = "blue")
+points(RelativeHumidity$ins2, type = "l", col = "blue")
 }
 \keyword{datasets}
