@@ -7,19 +7,21 @@
 scoretest(model, link.mu = c("plogit1", "plogit2"))
 }
 \arguments{
-\item{model}{An object of class \code{simplexregression}.}
+\item{model}{An object of class \code{"simplexregression"} fitted with the
+fixed logit mean link (\code{link.mu = "logit"})}
 
-\item{link.mu}{Character string specifying the link function under the
-alternative hypothesis. Options are "plogit1" or "plogit2".}
+\item{link.mu}{Character string specifying the parametric link function under the
+alternative hypothesis. Options are \code{"plogit1"} or \code{"plogit2"}.}
 }
 \value{
 An object of class \code{"htest"} containing:
 \itemize{
   \item \code{statistic}: The score test statistic,
   \item \code{parameter}: Degrees of freedom (always 1),
-  \item \code{p.value}: The p-value of the test,
+  \item \code{p.value}: The \eqn{p}-value of the test,
   \item \code{method}: Description of the test,
-  \item \code{data.name}: Model name and link function being tested.
+  \item \code{data.name}: Description of the link comparison being tested
+  (e.g., \code{"Logit vs plogit1"})
 }
 }
 \description{
@@ -33,18 +35,11 @@ logit link functions when \eqn{\lambda = 1}, it is possible to test whether the
 mean link function is logit by testing \eqn{H_0: \lambda = 1} against
 \eqn{H_1: \lambda \neq 1}.
 
-The score test statistic for this hypothesis test is given by:
-
-\deqn{S_R = \boldsymbol{U}_\lambda(\boldsymbol{\tilde{\theta}})^\top
-\boldsymbol{\tilde{K}}^{\lambda \lambda}
-\boldsymbol{U}_\lambda(\boldsymbol{\tilde{\theta}}),}
-
-where \eqn{\boldsymbol{U}_\lambda} and \eqn{\boldsymbol{\tilde{K}}^{\lambda \lambda}}
-denote, respectively, the component of the score vector and the corresponding
-element of the inverse Fisher information matrix associated with \eqn{\lambda},
-both evaluated at \eqn{\boldsymbol{\tilde{\theta}} = (\boldsymbol{\tilde{\beta}}^\top,
-\boldsymbol{\tilde{\gamma}}^\top, 1)^\top}, the maximum likelihood estimator under
-the null hypothesis. For more details see Justino and Cribari-Neto (2026).
+The score test statistic is computed from the component of the score vector
+associated with \eqn{\lambda} and the corresponding element of the inverse
+Fisher information matrix, both evaluated at the maximum likelihood estimator
+under the null hypothesis (i.e., with \eqn{\lambda} fixed at 1). For the full
+expression of the test statistic, see Justino and Cribari-Neto (2026).
 
 Under regularity conditions, the null hypothesis, and when \eqn{n} is large,
 the test statistic follows a chi-squared distribution with 1 degree of freedom.
@@ -78,4 +73,7 @@ Rao, C. R. (1948). Large sample tests of statistical hypotheses concerning
 several parameters with applications to problems of estimation.
 \emph{Mathematical Proceedings of the Cambridge Philosophical Society},
  \bold{44}(1), 50--57. \doi{10.1017/S0305004100023987}
+}
+\seealso{
+\code{\link{parametric_mean_link}}
 }

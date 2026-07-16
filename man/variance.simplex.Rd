@@ -24,10 +24,10 @@ of the mean parameter \eqn{\mu} and dispersion parameter \eqn{\sigma^2}.
 \details{
 The variance function for the simplex distribution is given by:
 \deqn{Var(Y) = \mu(1-\mu) - \frac{1}{\sqrt{2\sigma^2}} \exp(a) \Gamma(0.5, a),}
-where \eqn{a = \frac{1}{2\sigma^2[\mu(1-\mu)]^2}} and \eqn{\Gamma(0.5, a)}
+where \eqn{a = \frac{1}{2\sigma^2[\mu(1-\mu)]^2}} and \eqn{\Gamma(\cdot,\cdot)}
 is the upper incomplete gamma function.
 
-For large values of \eqn{a} (> 700), an asymptotic approximation is used
+For large values of \eqn{a (> 700)}, an asymptotic approximation is used
 to avoid numerical overflow:
 \deqn{Var(Y) \approx \mu(1-\mu) - \frac{1}{\sqrt{2\sigma^2}} \sqrt{\frac{1}{a}}.}
 }
@@ -49,4 +49,7 @@ Song, P. X.-K. and Tan, M. (2000).
 Marginal models for longitudinal continuous proportional data.
 \emph{Biometrics}, \bold{56}(2), 496--502.
 \doi{10.1111/j.0006-341X.2000.00496.x}
+}
+\seealso{
+\code{\link{dev.unit.simplex}}, \code{\link{dsimplex}}.
 }

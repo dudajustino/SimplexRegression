@@ -12,10 +12,11 @@ penalized.ss(
 )
 }
 \arguments{
-\item{...}{Two or more objects of class \code{simplexregression} to be compared.}
+\item{...}{Two or more objects of class \code{"simplexregression"} to be compared.}
 
 \item{kappa}{A numeric value controlling the additional penalty for the link mean
-parameter. Default is 0.1. Use \code{kappa = 0} for standard Scout Score.}
+parameter, \eqn{\kappa \geq 0}. Default is \code{0.1}. Use \code{kappa = 0} for
+standard Scout Score.}
 
 \item{verbose}{Logical. If \code{TRUE} (default), prints the SS values for
 all models and the selected model. If \code{FALSE}, returns results silently.}
@@ -48,41 +49,35 @@ For each candidate model \eqn{j \in {1, \ldots, M}}, the Scout Score is defined 
 \deqn{SS_j = 1 - M + \sum_{k=1, k \neq j}^M (1 + \dot{\Delta}_{jk})^2,}
 
 where \eqn{\dot{\Delta}_{jk} = \max\{0, \Delta_{jk}\}} and \eqn{\Delta_{jk}}
-denotes Vuong's test statistic comparing models \eqn{j} and \eqn{k}:
-\deqn{\Delta_{jk} = n^{-1/2} \hat{\omega}_{jk}^{-1} \left[\sum_{i=1}^n
-\log\left(\frac{f_{ji}(\hat{\boldsymbol{\theta}}_j)}{f_{ki}(\hat{
-\boldsymbol{\theta}}_k)}\right) - \delta_{jk}\right],}
+is Vuong's (1989) test statistic comparing models \eqn{j} and \eqn{k}, penalized
+by a term \eqn{\delta_{jk}} that combines the difference in parameter-vector
+dimensions with, when applicable, a link-complexity penalty controlled by
+\code{kappa}. The model with the highest Scout Score is selected as the most
+adequate. For the full derivation of \eqn{\Delta_{jk}}, \eqn{\delta_{jk}}, and
+the rationale behind the link-complexity penalty, see Justino and
+Cribari-Neto (2026) and Costa et al. (2024).
 
-with
-
-\eqn{\hat{\omega}_{jk}^2 = \frac{1}{n} \sum_{i=1}^n \left( \log
-\left( \frac{f_{ji}(\boldsymbol{\hat{\theta}}_j)}{f_{ki}
-(\boldsymbol{\hat{\theta}}_k)} \right) \right)^2 - \left( \frac{1}{n}
-\sum_{i=1}^n \log \left( \frac{f_{ji}(\boldsymbol{\hat{\theta}}_j)}
-{f_{ki}(\boldsymbol{\hat{\theta}}_k)} \right) \right)^2.}
-
-Here, \eqn{f_{ji}(\boldsymbol{\hat{\theta}}_j)} and
-\eqn{f_{ki}(\boldsymbol{\hat{\theta}}_k)} denote the fitted densities under
-models \eqn{j} and \eqn{k}, respectively.
-
-The penalization term \eqn{\delta_{jk}} for simplex models with parametric and
-fixed mean links, as proposed by Justino and Cribari-Neto (2026), is given by:
-
-\deqn{\delta_{jk} = 0.5[(r_j - r_k) + \kappa(|\log(\hat{\lambda}_j)| -
-|\log(\hat{\lambda}_k)|)]\log(n),}
-where \eqn{r_j} and \eqn{r_k} indicate the dimensions of their parameter vectors,
-and \eqn{\kappa \geq 0} controls the additional penalty associated with the link
-parameter. The term \eqn{\kappa(|\log(\hat{\lambda}_j)| - |\log(\hat{\lambda}_k)|)}
-measures link complexity on a logarithmic scale, ensuring symmetry around
-\eqn{\lambda = 1}.
+When at least one of the candidate models does not use a parametric mean
+link function, \eqn{\kappa} is internally set to \code{0} (see \strong{Important}
+below), so that \eqn{\delta_{jk}} reduces to the classical dimension penalty
+with no link-complexity term.
 
 The model with the highest Scout Score is selected as the most adequate.
 
-\strong{Important}: This penalized term \eqn{\delta_{jk}} should only be used
-when all candidate models employ a parametric link function in the mean submodel
-(use \code{kappa = 0.1}). When the set of candidate models includes specifications
-with fixed link functions, the standard unpenalized versions of these criteria
-should be applied instead (use \code{kappa = 0}).
+\strong{Important}: The penalty term \eqn{\delta_{jk}} is only applied when
+\emph{all} candidate models employ a parametric mean link function, in which
+case \code{kappa} (default \code{0.1}) controls the additional penalty. In
+any other case --- whether all candidate models use fixed mean links, or the
+set of candidate models mixes parametric and fixed mean links --- the penalty
+is disabled and the standard, unpenalized Scout Score is computed for all
+models (\code{kappa} is internally reset to \code{0}). If the user explicitly
+requested \code{kappa > 0} in either of these situations, a warning is issued;
+if \code{kappa} was left at its default value, no warning is issued, since
+falling back to the standard Scout Score is the expected behavior.
+
+\strong{Note}: all candidate models must be fitted to the same response
+vector \code{y}; the function verifies this and stops with an error if the
+response vectors differ.
 }
 \examples{
 # Simulate data
@@ -118,14 +113,14 @@ Simplex regression with a flexible logit link: Inference and application
 to cross-country impunity data.
 \emph{Applied Mathematical Modelling}, \bold{154}, 116713. \doi{10.1016/j.apm.2025.116713}
 
-Costa, E., Cribari-Neto, F., and Scher, V. T. (2024).
+Costa, E., Cribari-Neto, F. and Scher, V. T. (2024).
 Test inferences and link function selection in dynamic beta modeling of seasonal
 hydro-environmental time series with temporary abnormal regimes.
 \emph{Journal of Hydrology}, \bold{638}, 131489.
 \doi{10.1016/j.jhydrol.2024.131489}
 
 Vuong, Q. H. (1989). Likelihood ratio tests for model selection and non-nested
-hypotheses. \emph{Econometrica}, \bold{57}(2), 307-–333. \doi{10.2307/1912557}
+hypotheses. \emph{Econometrica}, \bold{57}(2), 307--333. \doi{10.2307/1912557}
 }
 \seealso{
 \code{\link{penalized.ic}}

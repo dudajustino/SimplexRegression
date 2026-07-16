@@ -7,27 +7,28 @@
 \format{
 A data frame with 44 observations and 4 variables:
 \describe{
-  \item{accuracy}{Numeric. Reading score transformed to the open (0,1) interval.
+  \item{accuracy}{Numeric. Reading score transformed to the open (0, 1) interval.
         Values originally equal to 1 were replaced with 0.99. Suitable for
         standard beta regression.}
   \item{dyslexia}{Factor. Indicates whether the child has dyslexia
-        (levels: "no", "yes"). Note that sum contrasts are typically used
+        (levels: \code{"no"}, \code{"yes"}). Note that sum contrasts are typically used
         instead of treatment contrasts in beta regression analyses of this data.}
   \item{iq}{Numeric. Non-verbal intelligence quotient, transformed to
-        z-scores (mean = 0, standard deviation = 1).}
-  \item{accuracy1}{Numeric. Unrestricted reading score in the [0,1] interval.
+        \eqn{z}-scores (mean = 0, standard deviation = 1).}
+  \item{accuracy1}{Numeric. Unrestricted reading score in the [0, 1] interval.
         This version preserves the original maximum value of 1 and can be used
-        with extended-support beta mixture regression models.}
+        with extended--support beta mixture regression models.}
 }
 }
 \source{
-Pammer, K. & Kevan, A. (2004). The Contribution of Visual Sensitivity,
-Phonological Processing and Non-Verbal IQ to Children's Reading.
-\emph{Unpublished manuscript}, The Australian National University, Canberra.
+Pammer, K. and Kevan, A. (2007). The contribution of visual sensitivity,
+phonological processing and non-verbal IQ to children's reading.
+\emph{Scientific Studies of Reading}, \bold{11}(1), 33--53.
+\doi{10.1080/10888430709336633}
 
-Smithson, M. & Verkuilen, J. (2006). A Better Lemon Squeezer?
-Maximum-Likelihood Regression with Beta-Distributed Dependent Variables.
-\emph{Psychological Methods}, 11(1), 54-71.
+Smithson, M. and Verkuilen, J. (2006). A Better lemon squeezer?
+Maximum-likelihood regression with beta-distributed dependent variables.
+\emph{Psychological Methods}, \bold{11}(1), 54--71. \doi{10.1037/1082-989X.11.1.54}
 }
 \usage{
 data(ReadingSkills)
@@ -35,7 +36,7 @@ data(ReadingSkills)
 \description{
 This dataset examines the relationship between non-verbal IQ and reading
 accuracy in children diagnosed with dyslexia and in typical readers.
-The reading scores are proportions bounded in the (0,1) interval, making
+The reading scores are proportions bounded in the open interval (0, 1), making
 them suitable for beta regression and simplex regression analysis.
 }
 \details{
@@ -44,7 +45,7 @@ analyzed by Smithson and Verkuilen (2006) to demonstrate beta regression.
 
 The transformation procedure for \code{accuracy} was as follows:
 \enumerate{
-  \item The original test scores were scaled to the [0,1] interval using
+  \item The original test scores were scaled to the [0, 1] interval using
         the minimum and maximum possible scores in the reading test,
         resulting in \code{accuracy1}.
   \item To avoid boundary values (0 and 1) that are problematic for standard
@@ -52,7 +53,7 @@ The transformation procedure for \code{accuracy} was as follows:
         creating the \code{accuracy} variable.
 }
 
-The unrestricted \code{accuracy1} variable can be analyzed using extended-support
+The unrestricted \code{accuracy1} variable can be analyzed using extended--support
 beta regression methods (Kosmidis & Zeileis, 2025), which naturally accommodate
 boundary observations.
 }
@@ -81,12 +82,12 @@ table(ReadingSkills$accuracy == 0.99)  # Values replaced from 1
 table(ReadingSkills$accuracy1 == 1)    # Original boundary values
 }
 \references{
-Cribari-Neto, F. & Zeileis, A. (2010). Beta Regression in R.
-\emph{Journal of Statistical Software}, 34(2), 1-24.
+Cribari-Neto, F. and Zeileis, A. (2010). Beta regression in R.
+\emph{Journal of Statistical Software}, \bold{34}(2), 1--24.
 \doi{10.18637/jss.v034.i02}
 
-Kosmidis, I. & Zeileis, A. (2025). Extended-Support Beta Regression for
-[0, 1] Responses. \emph{Journal of the Royal Statistical Society C},
-forthcoming. \doi{10.1093/jrsssc/qlaf039}
+Kosmidis, I. and Zeileis, A. (2025). Extended-support beta regression for
+[0, 1] responses. \emph{Journal of the Royal Statistical Society C},
+\bold{75}(1), 139--157. \doi{10.1093/jrsssc/qlaf039}
 }
 \keyword{datasets}

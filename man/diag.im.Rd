@@ -19,7 +19,7 @@ diag.im(
 )
 }
 \arguments{
-\item{model}{An object of class \code{simplexregression}.}
+\item{model}{An object of class \code{"simplexregression"}.}
 
 \item{data}{The data frame used to fit \code{model}.}
 
@@ -38,16 +38,16 @@ and \eqn{s_{5,i}} with threshold lines and flagged-observation labels.
 Default is \code{FALSE}.}
 
 \item{verbose}{Logical; if \code{TRUE} (default), prints progress during
-leave-one-out refitting. Ignored (set to \code{FALSE}) when
+leave--one--out refitting. Ignored (set to \code{FALSE}) when
 \code{ncores > 1}, since output from parallel workers does not reach
 the main console.}
 
 \item{ncores}{Positive integer specifying the number of CPU cores to use
-for the leave-one-out loop. Default is \code{1} (sequential). Values
+for the leave--one--out loop. Default is \code{1} (sequential). Values
 greater than \code{1} activate parallel computation via
 \code{\link[parallel]{parLapply}}. If \code{ncores} exceeds
-\code{parallel::detectCores() - 1}, it is silently clamped to that
-value to avoid overloading the system. A safe explicit choice is
+\code{parallel::detectCores() - 1}, it is clamped to that value with a warning
+to avoid overloading the system. A safe explicit choice is
 \code{parallel::detectCores() - 1}.}
 
 \item{label.pos}{Position(s) for outlier labels in plot. Can be a single
@@ -82,48 +82,68 @@ requested measures:
 If \code{plot = TRUE}, the same list is returned invisibly.
 }
 \description{
-Computes leave-one-out sample influence measures \eqn{s_{3,i}}
+Computes leave--one--out sample influence measures \eqn{s_{3,i}}
 and \eqn{s_{5,i}} for simplex regression models, based on the
-information-matrix-based criteria measures proposed by Cribari-Neto,
-Vasconcellos and Santana e Silva (2025).
+information--matrix--based criteria measures proposed by Cribari-Neto,
+Vasconcellos and Santana-e-Silva (2025).
 }
 \details{
-For each observation \eqn{i}, the model is refit on the dataset with
-observation \eqn{i} removed. Let \eqn{\hat\theta} and
-\eqn{\hat\theta_{(i)}} denote the full and leave-one-out MLEs. Following
-Cribari-Neto, Vasconcellos and Santana e Silva (2025), let \eqn{A_n}
-denote the sample average of the second-order log-likelihood derivatives
-(\eqn{n^{-1}\sum_i \partial^2\ell_i/\partial\theta\partial\theta'}) and
-\eqn{B_n} denote the sample average of the outer products of the
-individual score vectors
-(\eqn{n^{-1}\sum_i (\partial\ell_i/\partial\theta)(\partial\ell_i/\partial\theta)'}),
-the two matrices that comprise the information matrix equality. Let
-\eqn{A^{(i)}_{n-1}} and \eqn{B^{(i)}_{n-1}} denote these same quantities
-recomputed with observation \eqn{i} excluded (i.e. based on \eqn{n-1}
-observations).
+Let \eqn{\boldsymbol{\theta}} denote the vector of parameters that index
+the simplex regression model, \eqn{\boldsymbol{y}} the vector of observed values of the response
+variable, and \eqn{\ell(\boldsymbol{\theta}; \boldsymbol{y})} the total
+log-likelihood function. Let
+\deqn{A_n(\boldsymbol{\theta};\boldsymbol{y}) = \dfrac{1}{n}\sum_{i=1}^n
+\dfrac{\partial^2\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}\partial\boldsymbol{\theta}'}}
+and \deqn{B_n(\boldsymbol{\theta};\boldsymbol{y}) = \dfrac{1}{n}\sum_{i=1}^n
+\dfrac{\partial\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}}
+\dfrac{\partial\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}'}}
+denote, respectively, the sample average of the second-order
+log-likelihood derivatives and the sample average of the outer products
+of the individual score vectors, both evaluated at the maximum likelihood
+estimate \eqn{\boldsymbol{\hat\theta}} obtained from the complete dataset.
+
+For each \eqn{i = 1, \ldots, n}, the model is refit on the dataset with
+observation \eqn{i} omitted, yielding the leave--one--out estimate
+\eqn{\boldsymbol{\hat\theta}_{(i)}}. The matrices \eqn{A_{n-1}^{(i)}} and
+\eqn{B_{n-1}^{(i)}} are then recomputed over the remaining \eqn{n-1}
+observations, evaluated at \eqn{\boldsymbol{\hat\theta}_{(i)}}.
 
 \strong{Measures computed:}
-\deqn{s_{3,i} = m_{3,(i)} / m_3}
-\deqn{s_{5,i} = D_i^{\mathrm{mod}} - D_i^{\mathrm{gen}}}
+\deqn{s_{3,i} = m_{3,(i)} / m_3,}
+\deqn{s_{5,i} = D_i^{\mathrm{mod}} - D_i^{\mathrm{gen}}.}
 
-Here \eqn{m_3 = \|\mathrm{vech}(P_n^{-1} B_n P_n^{-\top} - I)\|_2}, where
-\eqn{P_n} is obtained from the Cholesky decomposition of \eqn{-A_n}
-(i.e. \eqn{-A_n = P_n P_n^\top}); \eqn{m_{3,(i)}} is the same quantity
-recomputed with observation \eqn{i} excluded from the sample.
+Here \eqn{m_3 = \|\mathrm{vech}(P_n^{-1}(\boldsymbol{\hat\theta};\boldsymbol{y})
+B_n(\boldsymbol{\hat\theta};\boldsymbol{y}) P_n^{-1}(\boldsymbol{\hat\theta};
+\boldsymbol{y})' - I)\|_2}, where
+\eqn{P_n(\boldsymbol{\hat\theta};\boldsymbol{y})} is obtained from the Cholesky
+decomposition of \eqn{-A_n(\boldsymbol{\hat\theta};\boldsymbol{y})}, i.e.
+\eqn{-A_n(\boldsymbol{\hat\theta};\boldsymbol{y}) = P_n(\boldsymbol{\hat\theta};
+\boldsymbol{y}) P_n(\boldsymbol{\hat\theta};\boldsymbol{y})'}, and
+\eqn{I} is the identity matrix.
+The quantity \eqn{m_{3,(i)}} is the same
+measure recomputed using \eqn{P_{n-1}^{(i)}} and \eqn{B_{n-1}^{(i)}},
+both evaluated at \eqn{\boldsymbol{\hat\theta}_{(i)}} over the remaining
+\eqn{n-1} observations.
 
+Furthermore,
 \deqn{D_i^{\mathrm{gen}} = (n-1) \,
-  (\hat\theta - \hat\theta_{(i)})^\top (-A^{(i)}_{n-1})
-  (\hat\theta - \hat\theta_{(i)})}
-\deqn{D_i^{\mathrm{mod}} = (n-1) \,
-  (\hat\theta - \hat\theta_{(i)})^\top
-  0.5(-A^{(i)}_{n-1} + B^{(i)}_{n-1})
-  (\hat\theta - \hat\theta_{(i)})}
+  (\boldsymbol{\hat\theta} - \boldsymbol{\hat\theta}_{(i)})'
+  (-A^{(i)}_{n-1}(\boldsymbol{\hat\theta}_{(i)};\boldsymbol{y}))
+  (\boldsymbol{\hat\theta} - \boldsymbol{\hat\theta}_{(i)})}
+\deqn{D_i^{\mathrm{mod}} = 0.5(n-1) \,
+  (\boldsymbol{\hat\theta} - \boldsymbol{\hat\theta}_{(i)})'
+  (-A^{(i)}_{n-1}(\boldsymbol{\hat\theta}_{(i)};\boldsymbol{y}) +
+  B^{(i)}_{n-1}(\boldsymbol{\hat\theta}_{(i)};\boldsymbol{y}))
+  (\boldsymbol{\hat\theta} - \boldsymbol{\hat\theta}_{(i)})}
 
-If \eqn{-A^{(i)}_{n-1}} is not positive definite, \code{nearPD} is used to
-find the nearest positive-definite matrix and a message is printed.
+where \eqn{D_i^{\mathrm{gen}}} is the generalized Cook's distance and
+\eqn{D_i^{\mathrm{mod}}} is its modification proposed by Cribari-Neto,
+Vasconcellos and Santana-e-Silva (2025). For the rationale behind these
+measures and the underlying information-matrix-equality argument, see
+Cribari-Neto, Vasconcellos and Santana-e-Silva (2025).
 
 \strong{Threshold intervals} use two asymmetric IQR spreads, as proposed
-by Cribari-Neto, Vasconcellos and Santana e Silva (2025). Let
+by Cribari-Neto, Vasconcellos and Santana-e-Silva (2025). Let
 \eqn{Q(p)} denote the empirical \eqn{p}-th quantile of the relevant
 measure (\eqn{s_{3,i}} or \eqn{s_{5,i}}, computed separately for each):
 \eqn{IQR_1 = Q(0.50) - Q(0.125)} (left) and
@@ -138,13 +158,29 @@ for \eqn{s_5}:
     \eqn{z = 8.0} for \eqn{s_5}.
 }
 
+An observation \eqn{i} is flagged as influential if its measure
+(\eqn{s_{3,i}} or \eqn{s_{5,i}}) falls below the lower limit or above
+the upper limit of the corresponding interval.
+
+If \eqn{-A^{(i)}_{n-1}} is not positive definite, \code{\link[Matrix]{nearPD}}
+from the \pkg{Matrix} package is used to find the nearest positive-definite
+matrix and a message is printed.
+
+\code{parameter = "gamma"} is not available when the dispersion submodel
+is fixed (intercept-only); the function stops with an informative error
+in that case. Leave--one--out refits that fail to converge produce
+\code{NA} for that observation in \code{s3_i}/\code{s5_i}; a warning is
+issued via the refit's internal error handler and the observation is kept
+as \code{NA} in the output.
+
 \strong{Parallel computation:} when \code{ncores > 1}, the
-leave-one-out loop is distributed across workers using
+leave--one--out loop is distributed across workers using
 \code{\link[parallel]{parLapply}} from the \pkg{parallel} package
 (included in base R). Each worker receives the necessary objects and
-loads the \pkg{simplexregression} package. The random-number stream is
-initialized with \code{\link[parallel]{clusterSetRNGStream}} to ensure
-reproducibility across runs. Progress messages (\code{verbose}) are
+loads the \pkg{SimplexRegression} package. The random-number stream is
+initialized with a fixed seed via
+\code{\link[parallel]{clusterSetRNGStream}} to ensure reproducibility
+across runs. Progress messages (\code{verbose}) are
 suppressed in parallel mode because worker output does not reach the
 main console.
 }
@@ -165,7 +201,7 @@ diag.im(fit, data = ReadingSkills, type = "s3", interval = "I1",
 
 }
 \references{
-Cribari-Neto, F.; Vasconcellos, K. L. P.; Santana e Silva, J. J. (2025).
+Cribari-Neto, F.; Vasconcellos, K. L. P. and Santana-e-Silva, J. J. (2025).
 New strategies for detecting atypical observations based on the information
 matrix equality. \emph{Journal of Applied Statistics}, \bold{52},
 2873--2893. \doi{10.1080/02664763.2025.2487914}

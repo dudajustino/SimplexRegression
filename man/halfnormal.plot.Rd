@@ -15,16 +15,16 @@ halfnormal.plot(
 )
 }
 \arguments{
-\item{model}{An object of class \code{simplexregression}.}
+\item{model}{An object of class \code{"simplexregression"}.}
 
 \item{type}{Character string specifying the residual type (default: \code{"weighted"}).
 \cr See \code{\link{residuals.simplexregression}} for available options.}
 
-\item{nsim}{Number of simulations for envelope construction (default: 100).}
+\item{nsim}{Number of simulations for envelope construction (default: \code{100}).}
 
-\item{level}{Confidence level for envelope bounds (default: 0.95).}
+\item{level}{Confidence level for envelope bounds (default: \code{0.95}).}
 
-\item{seed}{Integer setting the random seed for reproducibility (default: 1987).}
+\item{seed}{Integer setting the random seed for reproducibility (default: \code{1987}).}
 
 \item{...}{Additional graphical parameters.}
 }
@@ -45,6 +45,10 @@ The envelope is based on the following steps:
   \item Computing absolute residuals and their order statistics;
   \item Obtaining envelope bounds from empirical quantiles.
 }
+
+Simulated datasets whose refitted model fails to converge are discarded and
+resampled, up to \code{5 * nsim} total attempts. If \code{nsim} converged
+fits cannot be obtained within this limit, the function stops with an error.
 
 Points outside the envelope may indicate model inadequacy.
 }

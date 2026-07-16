@@ -41,12 +41,14 @@ dev.unit.simplex(y = 0.5, mu = 0.5)
 
 }
 \references{
-Jørgensen, B. (1997).
-\emph{The Theory of Dispersion Models}.
+Jørgensen, B. (1997). \emph{The Theory of Dispersion Models}.
 Chapman and Hall, London.
 
 Song, P. X.-K. and Tan, M. (2000).
 Marginal models for longitudinal continuous proportional data.
 \emph{Biometrics}, \bold{56}(2), 496--502.
 \doi{10.1111/j.0006-341X.2000.00496.x}
+}
+\seealso{
+\code{\link{variance.simplex}}, \code{\link{dsimplex}}.
 }

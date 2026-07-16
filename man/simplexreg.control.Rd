@@ -18,26 +18,26 @@ simplexreg.control(
 )
 }
 \arguments{
-\item{method}{Characters string specifying the method argument passed to \code{optim}
-(default: "BFGS").}
+\item{method}{Character string specifying the optimization method
+passed to \code{optim} (default: \code{"BFGS"}).}
 
 \item{maxit}{Integer specifying the maximum number of iterations for \code{optim}
-(default: 5000).}
+(default: \code{5000}).}
 
-\item{gradient}{Logical; use analytical gradient? (default: TRUE).}
+\item{gradient}{Logical; use analytical gradient? (default: \code{TRUE}).}
 
-\item{hessian}{Logical; compute Hessian via \code{optim}? (default: FALSE).}
+\item{hessian}{Logical; compute Hessian via \code{optim}? (default: \code{FALSE}).}
 
-\item{trace}{Logical; trace optimization? (default: FALSE).}
+\item{trace}{Logical; trace optimization? (default: \code{FALSE}).}
 
 \item{start}{An optional vector with starting values for all parameters.}
 
 \item{fsmaxit}{Integer specifying maximal number of additional Fisher scoring
-iterations (default: 500).}
+iterations (default: \code{500}).}
 
-\item{fstol}{Numeric tolerance for convergence in Fisher scoring (default: 1e-8).}
+\item{fstol}{Numeric tolerance for convergence in Fisher scoring (default: \code{1e-8}).}
 
-\item{reltol}{Relative convergence tolerance (default: 1e-8).}
+\item{reltol}{Relative convergence tolerance (default: \code{sqrt(.Machine$double.eps)}).}
 
 \item{...}{Additional parameters passed to \code{optim}.}
 }
@@ -60,15 +60,16 @@ it converges if the threshold \code{fstol} is attained for the absolute value of
 step size.
 
 Starting values can be supplied via \code{start} or estimated by \code{\link{lm.wfit}},
-using the link-transformed response. For parametric mean link functions (\code{plogit1},
-\code{plogit2}), the link parameter \eqn{\lambda} is jointly estimated with the regression
+using the link-transformed response. For parametric mean link functions (\code{"plogit1"},
+\code{"plogit2"}), the link parameter \eqn{\lambda} is jointly estimated with the regression
 coefficients. Covariances are derived analytically using the expected Fisher information
 matrix. The Fisher scoring uses analytical gradients and the expected information matrix to
 refine the maximum likelihood estimates obtained from \code{optim}.
 
-The main parameters of interest are the coefficients \eqn{\beta} in the linear predictor of
-the mean submodel and the coefficients \eqn{\delta} in the linear predictor of the dispersion
-submodel. For parametric links, the additional link parameter \eqn{\lambda} is also
+The main parameters of interest are the coefficient vector \eqn{\boldsymbol{\beta}}
+in the linear predictor of the mean submodel and the coefficient vector
+\eqn{\boldsymbol{\gamma}} in the linear predictor of the dispersion submodel.
+For parametric links, the additional link parameter \eqn{\lambda} is also
 estimated and reported. The dispersion parameter \eqn{\sigma^2} can be modeled either
 as constant (when the dispersion formula contains only an intercept) or as varying
 across observations through a linear predictor.

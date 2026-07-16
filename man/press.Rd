@@ -7,7 +7,7 @@
 press(..., type = c("standardized", "biasvariance"))
 }
 \arguments{
-\item{...}{One or more objects of class \code{simplexregression}.}
+\item{...}{One or more objects of class \code{"simplexregression"}.}
 
 \item{type}{Character string specifying the type of residual to use.
 Options are \code{"standardized"} (default) or \code{"biasvariance"}
@@ -29,19 +29,29 @@ Espinheira and Silva (2026).
 The PRESS statistic for the simplex regression model is given by:
 \deqn{\text{PRESS} = \sum_{i=1}^{n} \left(\frac{r_i}{1 - h_{ii}}\right)^2,}
 where \eqn{r_i} denotes the residual for observation \eqn{i} and
-\eqn{h_{ii}} is the \eqn{i}-th diagonal element of the hat matrix.
+\eqn{\hat{h}_{ii}} is the \eqn{i}-th diagonal element of the hat matrix
+(see \code{\link{hatvalues.simplexregression}}).
 
 The \eqn{P^2} statistic is a cross-validation analog of \eqn{R^2}, defined
 for the simplex regression mode as:
 \deqn{P^2 = 1 - \frac{\text{PRESS}}{\left(\frac{n}{n-r}\right)^2 \text{SST}},}
-where \eqn{\text{SST} = \sum_{i=1}^{n}(\hat{y}_i - \bar{\hat{y}})^2} and
-\eqn{r} is the number of estimated parameters.
+where \eqn{r} is the number of estimated parameters,
+\eqn{\text{SST} = \sum_{i=1}^{n}(\check{y}_i - \bar{\check{\boldsymbol{y}}})^2},
+with \eqn{\bar{\check{y}}} is the mean of the transformed fitted values
+\eqn{\check{y}_i} defined by Espinheira and Silva (2026).
 
 The adjusted \eqn{P^2} is given by:
 \deqn{P^2_c = 1 - (1 - P^2)\frac{n-1}{n-r}.}
 
 The \code{type} argument controls which residuals \eqn{r_i} are used in
-the PRESS computation.
+the PRESS computation. Only \code{"standardized"} and \code{"biasvariance"}
+residuals are supported, as these are the residual types for which the PRESS-based
+cross-validation analog is defined in Espinheira and Silva (2026)
+
+Values of \eqn{P^2} and \eqn{P^2_c} closer to 1 indicate better predictive
+performance of the model. Since PRESS is nonnegative, both measures are bounded
+above by 1. Hence,
+\deqn{P^2, P^2_c \in (-\infty, 1].}
 }
 \examples{
 data(ReadingSkills, package = "SimplexRegression")
@@ -61,12 +71,12 @@ press(fit, fit1, type = "biasvariance")
 
 }
 \references{
-Espinheira, P. L., Silva, A. O. (2026). Prediction in the nonlinear simplex model.
+Espinheira, P. L. and Silva, A. O. (2026). Prediction in the nonlinear simplex model.
 \emph{International Journal of Data Science and Analytics}, \bold{22}, 161.
 \doi{10.1007/s41060-026-01114-9}
 
-Espinheira, P. L., Silva, A. O. (2020). Residual and influence analysis to a
-general class of simplex regression. \emph{TEST}, \bold{29}, 523–-552.
+Espinheira, P. L. and Silva, A. O. (2020). Residual and influence analysis to a
+general class of simplex regression. \emph{TEST}, \bold{29}, 523--552.
 \doi{10.1007/s11749-019-00665-3}
 }
 \seealso{

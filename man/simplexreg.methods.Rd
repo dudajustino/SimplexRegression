@@ -21,7 +21,6 @@
 \alias{AIC.simplexregression}
 \alias{BIC.simplexregression}
 \alias{hatvalues.simplexregression}
-\alias{cooks.distance.simplexregression}
 \alias{bread.simplexregression}
 \alias{estfun.simplexregression}
 \alias{coeftest.simplexregression}
@@ -80,8 +79,6 @@ HQIC(object, ...)
 
 \method{hatvalues}{simplexregression}(model, ...)
 
-\method{cooks.distance}{simplexregression}(model, type = c("pearson", "weighted"), ...)
-
 \method{bread}{simplexregression}(x, ...)
 
 \method{estfun}{simplexregression}(x, ...)
@@ -91,11 +88,11 @@ HQIC(object, ...)
 \method{lrtest}{simplexregression}(object, ...)
 }
 \arguments{
-\item{digits}{Number of digits to printing.}
+\item{digits}{Number of digits for printing.}
 
 \item{...}{Additional arguments.}
 
-\item{object, x}{An object of class \code{simplexregression}.}
+\item{object, x}{An object of class \code{"simplexregression"}.}
 
 \item{model}{Character specifying for which component of the model
 coefficients/covariance should be extracted.}
@@ -103,8 +100,8 @@ coefficients/covariance should be extracted.}
 \item{newdata}{Optional data frame for prediction.}
 
 \item{type}{Character indicating type of predictions: fitted means of the
-response (default, "response"), corresponding linear
-predictor ("link") or fitted dispersion parameter ("dispersion").}
+response (default, \code{"response"}), corresponding linear
+predictor (\code{"link"}) or fitted dispersion parameter (\code{"dispersion"}).}
 
 \item{formula}{A model formula or terms object.}
 
@@ -112,12 +109,12 @@ predictor ("link") or fitted dispersion parameter ("dispersion").}
 
 \item{evaluate}{If true evaluate the new call else return the call.}
 
-\item{nsim}{number of response vectors to simulate. Defaults to 1.}
+\item{nsim}{number of response vectors to simulate. Defaults to \code{1}.}
 
 \item{seed}{an object specifying if and how the random number generator
 should be initialized.}
 
-\item{k}{weight of the penalty term in AIC. Default is 2.}
+\item{k}{weight of the penalty term in AIC. Default is \code{2}.}
 
 \item{vcov.}{a specification of the covariance matrix of the estimated coefficients.}
 
@@ -146,8 +143,7 @@ The return value depends on the method called:
   \item \code{simulate}: a data frame with \code{nsim} columns;
   \item \code{AIC}, \code{BIC}, \code{HQIC}: numeric scalar (single model)
     or data frame (multiple models);
-  \item \code{hatvalues}: numeric vector of leverage values;
-  \item \code{cooks.distance}: numeric vector of Cook's distances;
+  \item \code{hatvalues}: numeric vector of hat values;
   \item \code{bread}: numeric matrix;
   \item \code{estfun}: numeric matrix of score contributions;
   \item \code{coeftest}: object of class \code{"coeftest"};
@@ -155,8 +151,8 @@ The return value depends on the method called:
 }
 }
 \description{
-Methods for extracting information from fitted simplex regression model objects
-of class \code{simplexregression}.
+Methods for extracting information from fitted model objects
+of class \code{"simplexregression"}.
 }
 \examples{
 data(ReadingSkills, package = "SimplexRegression")
@@ -173,7 +169,6 @@ AIC(fit)
 BIC(fit)
 HQIC(fit)
 hatvalues(fit)
-cooks.distance(fit)
 
 }
 \seealso{

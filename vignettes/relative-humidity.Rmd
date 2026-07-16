@@ -141,16 +141,16 @@ head(RelativeHumidity, 5)
 | Variable | Description |
 |----------|-------------|
 | `date`   | Observation date (end of month) |
-| `rh`     | Monthly average relative humidity, rescaled to $(0,1)$ |
+| `rh`     | Monthly average relative humidity, rescaled to $(0, 1)$ |
 | `ins`    | Total insolation (hours), with two missing values |
 | `ins2`   | Total insolation with imputed missing values |
 | `pre`    | Total precipitation (mm), with two missing values |
 | `pre2`   | Total precipitation with imputed missing values |
-| `neb`    | Average cloudiness (tenths) |
+| `cld`    | Average cloudiness (tenths) |
 | `ap`     | Average atmospheric pressure (hPa) |
-| `mt`     | Average maximum temperature (°C) |
+| `tmax`   | Average maximum temperature (°C) |
 | `ws`     | Average wind speed (m/s) |
-| `dir`    | Predominant wind direction (degrees) |
+| `wd`     | Predominant wind direction (degrees) |
 
 ## Data preparation
 
@@ -187,13 +187,13 @@ unit-interval distribution such as the simplex.
 All models fitted in this vignette share the same formula structure. The
 two-part formula `y ~ x | z` specifies the mean submodel (left of `|`) and
 the dispersion submodel (right of `|`) simultaneously. The mean submodel
-includes insolation (`ins2`), maximum temperature (`mt`), wind speed (`ws`),
+includes insolation (`ins2`), maximum temperature (`tmax`), wind speed (`ws`),
 harmonic terms (`hs`, `hc`) to capture seasonality, a rainy-season dummy,
 and its interaction with wind speed. The dispersion submodel contains only
 precipitation (`pre2`), allowing the variability of RH to depend on rainfall.
 
 ```{r formula}
-formula <- rh ~ ins2 + mt + ws + hs + hc + dummy + I(dummy * ws) | pre2
+formula <- rh ~ ins2 + tmax + ws + hs + hc + dummy + I(dummy * ws) | pre2
 ```
 
 # Parametric Mean Link Functions
@@ -283,7 +283,7 @@ summary(fit_loglog)
 All regression coefficients are statistically significant at the 5% level.
 The harmonic terms (`hs`, `hc`) and the rainy-season dummy capture the
 strong seasonal pattern in RH, while insolation (`ins2`), maximum temperature
-(`mt`), and wind speed (`ws`) explain the within-season variation. The
+(`tmax`), and wind speed (`ws`) explain the within-season variation. The
 Nagelkerke and Ferrari–Cribari-Neto pseudo-$R^2$ values both exceed 0.95,
 indicating an excellent fit. The model converged in 18 BFGS iterations
 followed by 7 Fisher scoring steps.

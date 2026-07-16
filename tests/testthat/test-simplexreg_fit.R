@@ -93,7 +93,7 @@ test_that("simplexreg object contains all required components", {
                 "mu.fv", "mu.lp", "mu.x", "mu.link", "mu.df",
                 "sigma2.fv", "sigma2.lp", "sigma2.x", "sigma2.link", "sigma2.df",
                 "lambda.fv", "df.residual", "nobs", "loglik", "vcov",
-                "residuals", "AIC", "BIC", "HQ", "R2_FC", "R2_N",
+                "residuals", "AIC", "BIC", "HQIC", "R2_FC", "R2_N",
                 "zstat", "pvalues", "y", "converged")
   for (comp in required) {
     expect_true(comp %in% names(fit_plogit1),
@@ -214,8 +214,8 @@ test_that("simplexreg loglik is finite", {
   expect_true(is.finite(fit_logit$loglik))
 })
 
-test_that("simplexreg AIC, BIC, HQ are finite", {
-  for (ic in c("AIC", "BIC", "HQ")) {
+test_that("simplexreg AIC, BIC, HQIC are finite", {
+  for (ic in c("AIC", "BIC", "HQIC")) {
     expect_true(is.finite(fit_plogit1[[ic]]),
                 label = paste(ic, "is finite"))
   }

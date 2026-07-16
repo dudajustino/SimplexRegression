@@ -17,7 +17,7 @@ diag.distances(
 )
 }
 \arguments{
-\item{model}{An object of class \code{simplexregression}.}
+\item{model}{An object of class \code{"simplexregression"}.}
 
 \item{data}{The data frame used to fit \code{model}.}
 
@@ -30,11 +30,11 @@ of distances. If \code{TRUE}, produces an index plot with the ad hoc
 threshold and flagged-observation labels.}
 
 \item{verbose}{Logical; if \code{TRUE} (default), prints progress during
-leave-one-out refitting. Ignored when \code{ncores > 1}, since output
+leave--one--out refitting. Ignored when \code{ncores > 1}, since output
 from parallel workers does not reach the main console.}
 
 \item{ncores}{Positive integer specifying the number of CPU cores to use
-for the leave-one-out loop. Default is \code{1} (sequential). Values
+for the leave--one--out loop. Default is \code{1} (sequential). Values
 greater than \code{1} activate parallel computation via
 \code{\link[parallel]{parLapply}}. If \code{ncores} exceeds
 \code{parallel::detectCores() - 1}, it is clamped to that value with a
@@ -56,7 +56,7 @@ to the \code{type} argument of \code{plot()}.}
 If \code{plot = FALSE}, a list containing:
 \describe{
   \item{\code{distances}}{Numeric vector of length \eqn{n} with the
-    leave-one-out distances.}
+    leave--one--out distances.}
   \item{\code{threshold}}{Named numeric scalar with the ad hoc upper
     threshold.}
   \item{\code{outliers}}{Data frame of flagged observations (index and
@@ -67,36 +67,77 @@ If \code{plot = FALSE}, a list containing:
 If \code{plot = TRUE}, the same list is returned invisibly.
 }
 \description{
-Computes leave-one-out influence measures based on
+Computes leave--one--out influence measures based on
 distributional distances (Wasserstein with \eqn{p_W = 1} and \eqn{p_W = 2} or
 Hellinger) for simplex regression models, as proposed by Justino and
 Cribari-Neto (2026).
 }
 \details{
-For each observation \eqn{i}, the model is refit on the dataset with
-observation \eqn{i} removed. The chosen distance between the full-model
-and leave-one-out fitted distributions is then computed pointwise across
-all \eqn{n} observations and summed to produce the scalar influence
-measure \eqn{d_i}.
+Let \eqn{\boldsymbol{\hat{\mu}}} and \eqn{\boldsymbol{\hat{\sigma}^2}} denote the
+vectors of maximum likelihood estimates obtained by fitting the model to the complete
+dataset. For each \eqn{i = 1, \ldots, n}, the model is refit after
+omitting observation \eqn{i}, yielding the leave--one--out estimate vectors
+\eqn{\boldsymbol{\hat{\mu}}^{(i)}} and \eqn{\boldsymbol{\hat{\sigma}^2}^{(i)}}.
+The fitted simplex density (see \code{dsimplex}) for observation \eqn{j} is,
+\eqn{f(y; \hat{\mu}_j, \hat{\sigma}^2_j)} under the full data and
+\eqn{f(y; \hat{\mu}_j^{(i)}, \hat{\sigma}^{2(i)}_j)} under the fit with
+observation \eqn{i} deleted.
 
-\strong{Ad hoc threshold} uses an asymmetric IQR spread adjusted for
-skewness, as proposed by Justino and Cribari-Neto (2026). Let \eqn{Q(p)} denote the
-empirical \eqn{p}-th quantile of the distances \eqn{d_i}, the threshold is
+\strong{Hellinger distance.} For observation \eqn{j}, under deletion of
+observation \eqn{i},
+\deqn{H_j^{(i)} = H\big(f(y;\hat{\mu}_j,\hat{\sigma}^2_j),\,
+f(y;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)\big)
+= \sqrt{1 - \rho_j^{(i)}},}
+\deqn{\rho_j^{(i)} = \int_0^1 \sqrt{f(y;\hat{\mu}_j,\hat{\sigma}^2_j)\,
+f(y;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)}\, dy,}
+where \eqn{\rho_j^{(i)}} is Bhattacharyya's coefficient, evaluated via
+numerical integration (\code{\link[pracma]{quadgk}}) from the \pkg{pracma}
+package. The overall influence measure for the deletion of observation
+\eqn{i} is the aggregate distance \eqn{I_i^H = \sum_{j=1}^n H_j^{(i)}}.
+
+\strong{Wasserstein distance.} Let \eqn{F(y;\hat{\mu}_j,\hat{\sigma}^2_j)}
+and \eqn{F(y;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)} denote the simplex
+cumulative distribution functions (see \code{psimplex}) fitted for observation \eqn{j} with the
+full data and with observation \eqn{i} deleted, respectively. For
+\eqn{p_W = 1},
+\deqn{W_{1,j}^{(i)} = \int_0^1 \big|F(y;\hat{\mu}_j,\hat{\sigma}^2_j) -
+F(y;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)\big|\, dy,}
+computed by numerically integrating the absolute difference between the
+fitted simplex CDFs. For general \eqn{p_W \geq 1}, with
+\eqn{F^{-1}(u;\hat{\mu}_j,\hat{\sigma}^2_j)} and
+\eqn{F^{-1}(u;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)} denoting the
+corresponding fitted simplex quantile functions (see \code{qsimplex}),
+\deqn{W_{p_W,j}^{(i)} = \left(\int_0^1 \big|F^{-1}(u;\hat{\mu}_j,\hat{\sigma}^2_j) -
+F^{-1}(u;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)\big|^{p_W}\, du\right)^{1/p_W},}
+computed by numerically integrating the absolute difference between the
+fitted simplex quantile functions raised to the power \eqn{p_W}. As
+in the Hellinger case, the total influence measure for observation
+\eqn{i} is \eqn{I_i^{W} = \sum_{j=1}^n W_{p_W,j}^{(i)}}.
+
+Because neither the simplex density nor its quantile function admits a
+closed-form expression, every distance computed by this function relies
+on numerical integration. For \eqn{n > 500} this may be slow; consider
+using a subset or a faster integration method.
+
+\strong{Ad hoc threshold} for identifying influential observations uses an
+asymmetric interquartile range (IQR) adjusted for skewness, as proposed
+by Justino and Cribari-Neto (2026). Let \eqn{Q(p)} denote the empirical
+\eqn{p}-th quantile of the distances \eqn{I_i}, the threshold is
 \deqn{\text{threshold} = Q(0.75) + (1 + a)(Q(0.75) - Q(0.25))}
 where \eqn{a} is the sample skewness of the distances. Observations with
-\eqn{d_i} above this threshold are flagged as potentially influential.
+\eqn{I_i} above this threshold are flagged as potentially influential.
 
-\strong{Warning:} for \eqn{n > 500}, the numerical integration used
-internally by the distance functions may be slow. Consider using a subset
-or a faster integration method.
+For the full derivation and rationale behind these measures, see Justino
+and Cribari-Neto (2026).
 
 \strong{Parallel computation:} when \code{ncores > 1}, the
-leave-one-out loop is distributed across workers using
+leave--one--out loop is distributed across workers using
 \code{\link[parallel]{parLapply}} from the \pkg{parallel} package
 (included in base R). Each worker receives the necessary objects and
-loads the \pkg{simplexregression} package. The random-number stream is
-initialized with \code{\link[parallel]{clusterSetRNGStream}} to ensure
-reproducibility across runs. Progress messages (\code{verbose}) are
+loads the \pkg{SimplexRegression} package. The random-number stream is
+initialized with a fixed seed via
+\code{\link[parallel]{clusterSetRNGStream}} to ensure reproducibility
+across runs. Progress messages (\code{verbose}) are
 suppressed in parallel mode because worker output does not reach the
 main console.
 }

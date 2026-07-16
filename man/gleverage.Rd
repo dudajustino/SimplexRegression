@@ -10,7 +10,7 @@ gleverage(model)
 \method{gleverage}{simplexregression}(model)
 }
 \arguments{
-\item{model}{An object of class \code{simplexregression}.}
+\item{model}{An object of class \code{"simplexregression"}.}
 }
 \value{
 A numeric vector of generalized leverage values.
@@ -20,7 +20,7 @@ Compute the generalized leverage values for simplex regression
 models with parametric or fixed mean link function.
 }
 \details{
-\code{gleverage} computing generalized leverage values as suggested by Wei, Hu,
+\code{gleverage} computes generalized leverage values as suggested by Wei, Hu,
 and Fung (1998). Generalized leverage extends the concept of hat values to account for both
 mean and dispersion parameters. High leverage values indicate observations
 that have potentially large influence on parameter estimates.
@@ -45,9 +45,9 @@ Simplex regression with a flexible logit link: Inference and application
 to cross-country impunity data.
 \emph{Applied Mathematical Modelling}, \bold{154}, 116713. \doi{10.1016/j.apm.2025.116713}
 
-Wei, B. C., Hu, Y. Q., and Fung, W. K. (1998).
-Generalized Leverage and Its Applications.
-\emph{Scandinavian Journal of Statistics}, \bold{25}, 25–37.
+Wei, B. C., Hu, Y. Q. and Fung, W. K. (1998).
+Generalized leverage and its applications.
+\emph{Scandinavian Journal of Statistics}, \bold{25}, 25--37.
 }
 \seealso{
 \code{\link{hatvalues.simplexregression}},

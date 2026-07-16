@@ -7,18 +7,18 @@
 simplexreg.nul(y, link.mu, weights = NULL)
 }
 \arguments{
-\item{y}{Numeric response vector (0 < y < 1).}
+\item{y}{Numeric response vector \eqn{(0 < y < 1)}.}
 
 \item{link.mu}{Mean link function: parametric ("plogit1", "plogit2") or fixed
 ("logit", "probit", "loglog", "cloglog", "cauchit").}
 
-\item{weights}{Optional vector of weights (default: NULL).}
+\item{weights}{Optional vector of weights (default: \code{NULL}).}
 }
 \value{
 Numeric value of the null model log-likelihood
 }
 \description{
-Computes the log-likelihood for the null (intercept-only) for a
+Computes the log-likelihood for the null (intercept-only) model in
 simplex regression with a parametric or fixed mean link.
 }
 \keyword{internal}

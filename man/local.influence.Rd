@@ -17,7 +17,7 @@ local.influence(
 )
 }
 \arguments{
-\item{model}{An object of class \code{simplexregression}.}
+\item{model}{An object of class \code{"simplexregression"}.}
 
 \item{scheme}{Character string specifying the perturbation scheme:
 \code{"case.weight"} or \code{"response"}.}
@@ -33,7 +33,7 @@ or \code{"gamma"} (dispersion submodel).}
 \item{plot}{Logical; if \code{TRUE}, produces an index plot of the selected
 measure. Default is \code{FALSE}.}
 
-\item{threshold}{Numeric threshold for identifying influential observations in.
+\item{threshold}{Numeric threshold for identifying influential observations.
 If \code{NULL} (default), no observations are highlighted.}
 
 \item{label.pos}{Position(s) for outlier labels in plot. Can be a single value
@@ -75,6 +75,12 @@ The index plot of \code{dmax} can be used to detect observations that are
 jointly influential for parameters. The index plot of the normal curvature
 \code{Ci} can be used to detect observations that are individually influential
 for parameters.
+
+Computing these measures requires inverting the observed information matrix
+\eqn{L} and certain of its sub-blocks. If \eqn{L} or a relevant sub-block is
+singular (e.g., due to near-collinear predictors in the mean or dispersion
+submodel), the function stops with an informative error rather than
+propagating R's raw \code{solve} error.
 }
 \examples{
 data(ReadingSkills, package = "SimplexRegression")
@@ -94,8 +100,8 @@ local.influence(fit, scheme = "response",
 
 }
 \references{
-Espinheira, P. L., Silva, A. O. (2020). Residual and influence analysis to a
-general class of simplex regression. \emph{TEST}, \bold{29}, 523–-552.
+Espinheira, P. L. and Silva, A. O. (2020). Residual and influence analysis to a
+general class of simplex regression. \emph{TEST}, \bold{29}, 523--552.
 \doi{10.1007/s11749-019-00665-3}
 }
 \seealso{

@@ -12,11 +12,11 @@ penalized.ic(
 )
 }
 \arguments{
-\item{...}{One or more objects of class \code{simplexregression} fitted with a
-parametric mean link functions ("plogit1" or "plogit2").}
+\item{...}{One or more objects of class \code{"simplexregression"} fitted with a
+parametric mean link functions (\code{"plogit1"} or \code{"plogit2"}).}
 
 \item{kappa}{A numeric value controlling the additional penalty for the link
-mean parameter. Default is 0.1.}
+mean parameter, \eqn{\kappa \geq 0}. Default is \code{0.1}.}
 
 \item{verbose}{Logical. If \code{TRUE} (default), prints the criteria values.
 If \code{FALSE}, returns results silently.}
@@ -35,6 +35,8 @@ A data frame with rows named after the candidate models and four columns:
 When \code{verbose = TRUE}, the results are also printed to the console and
 the data frame is returned invisibly. When \code{verbose = FALSE}, the data
 frame is returned visibly without printing.
+When \code{kappa = 0}, the columns are named \code{AIC}, \code{BIC}, and
+\code{HQIC} instead of \code{AICc}, \code{BICc}, and \code{HQICc}.
 }
 \description{
 Implements the Akaike, Schwarz, and Hannan–Quinn information
@@ -60,8 +62,8 @@ where:
 }
 
 \strong{Important}: These penalized versions of the criteria should only be used
-when the candidate model employ a parametric link function in the mean submodel
-(use \code{kappa = 0.1}). When candidate models includes specifications
+when the candidate models employ a parametric link function in the mean submodel
+(use \code{kappa = 0.1}). When candidate models include specifications
 with fixed link functions, the standard unpenalized versions of these criteria
 should be applied instead (use \code{kappa = 0}).
 }
@@ -95,10 +97,10 @@ Akaike, H. (1973). Information theory and an extension of the maximum
 likelihood principle. \emph{Akadémiai Kiadó}, 267--281.
 
 Schwarz, G. E. (1978). Estimating the dimension of a model. \emph{Annals of
-Statistics}, \bold{6}(2), 461-–464. \doi{10.1214/aos/1176344136}
+Statistics}, \bold{6}(2), 461--464. \doi{10.1214/aos/1176344136}
 
-Hannan, E. J. and Quinn, B. G. (1979). The Determination of the Order of an
-Autoregression. \emph{Journal of the Royal Statistical Society Series B:
+Hannan, E. J. and Quinn, B. G. (1979). The determination of the order of an
+autoregression. \emph{Journal of the Royal Statistical Society Series B:
 Statistical Methodology}, \bold{41}(2), 190--195.
 \doi{10.1111/j.2517-6161.1979.tb01072.x}
 }

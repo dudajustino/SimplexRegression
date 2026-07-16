@@ -37,8 +37,9 @@ simplexreg.fit(
 )
 }
 \arguments{
-\item{formula}{A two-part formula: y ~ x | 1 or y ~ x (mean submodel, constant dispersion),
-or y ~ x | z (submodels for both mean and dispersion).}
+\item{formula}{A two-part formula: \code{y ~ x} or \code{y ~ x | 1}
+(mean submodel, constant dispersion), or \code{y ~ x | z} (submodels for both
+mean and dispersion).}
 
 \item{data}{A data frame containing the variables in formula.}
 
@@ -54,22 +55,22 @@ One or more \code{\link{offset}} terms can be included in the formula instead
 or as well, and if more than one is specified their sum is used. See
 \code{\link{model.offset}}.}
 
-\item{link.mu}{Character specification of the link function in the mean submodel,
-(parametric functions: "plogit1", "plogit2"; fixed functions: "logit", "probit",
-"loglog", "cloglog", "cauchit").}
+\item{link.mu}{Character specification of the link function in the mean submodel
+(parametric functions: \code{"plogit1"}, \code{"plogit2"}; or fixed functions:
+\code{"logit"}, \code{"probit"}, \code{"loglog"}, \code{"cloglog"}, \code{"cauchit"}).}
 
 \item{link.sigma2}{Character specification of the link function in the dispersion
-submodel ("log", "sqrt", "identity").}
+submodel (\code{"log"}, \code{"sqrt"}, \code{"identity"}).}
 
 \item{contrasts}{An optional list. See the \code{contrasts.arg} argument of
 \code{\link[stats]{model.matrix.default}}.}
 
 \item{control}{A list of control arguments specified via \code{\link{simplexreg.control}}.}
 
-\item{model, y, x}{Logicals. If TRUE the corresponding components of the fit
+\item{model, y, x}{Logicals. If \code{TRUE} the corresponding components of the fit
 (model frame, response, model matrix) are returned. For \code{\link{simplexreg.fit}},
 \code{x} should be a numeric regressor matrix and \code{y} should be the numeric response
-vector (with values in (0,1)).}
+vector (with values in (0, 1)).}
 
 \item{...}{Additional arguments passed to \code{\link{simplexreg.control}}.}
 
@@ -80,44 +81,46 @@ vector (with values in (0,1)).}
 \item{z_names}{Column names for dispersion design matrix (includes intercept).}
 }
 \value{
-An object of class \code{simplexregression}, i.e.,
+An object of class \code{"simplexregression"}, i.e.,
 a list with components as follows:
 \itemize{
-  \item \code{coefficients}: a list with elements \code{mean} and \code{dispersion}
-  containing the estimated coefficients from the respective submodels, and (for
-  parametric mean link functions) an additional element \code{lambda} with the
-  estimated link parameter,
+  \item \code{coefficients}: A list with elements \code{mean} and \code{dispersion},
+  containing the estimated regression coefficients \eqn{\hat{\boldsymbol{\beta}}} and
+  \eqn{\hat{\boldsymbol{\gamma}}} of the mean and dispersion submodels, respectively.
+  For parametric mean link functions, the list also includes an additional element,
+  \code{lambda}, containing the estimated link parameter \eqn{\hat{\lambda}}.
   \item \code{fitted.values}: a vector of fitted mean values,
   \item \code{optim}: a list containing \code{start} (initial values),
   \code{convergence} (convergence code), \code{counts} (number of iterations) and
   \code{method} (optimization method) from the optimization procedure,
-  \item \code{scoring} number of iterations from the optimization procedure via Fisher scoring,
+  \item \code{scoring}: number of iterations from the optimization procedure via
+  Fisher scoring,
   \item \code{mu.fv}: a vector of fitted mean values,
-  \item \code{mu.lp}: a vector of linear predictors for the mean submodel,
+  \item \code{mu.lp}: a vector of fitted mean linear predictor,
   \item \code{mu.x}: design matrix for the mean model (with intercept),
   \item \code{mu.link}: character string specifying the mean link function,
   \item \code{mu.df}: degrees of freedom for the mean model,
   \item \code{sigma2.fv}: a vector of fitted dispersion values,
-  \item \code{sigma2.lp}: a vector of linear predictors for the dispersion model,
+  \item \code{sigma2.lp}: a vector of fitted dispersion linear predictor,
   \item \code{sigma2.x}: design matrix for the dispersion model (with intercept),
   \item \code{sigma2.link}: character string specifying the dispersion link function,
   \item \code{sigma2.df}: degrees of freedom for the dispersion model,
-  \item \code{lambda.fv}: estimated value of the link parameter (NA for mean
-  fixed links),
+  \item \code{lambda.fv}: estimated value of the parametric link function parameter
+  (\code{NA} for mean fixed links),
   \item \code{df.residual}: residual degrees of freedom,
   \item \code{nobs}: number of observations,
   \item \code{loglik}: maximized log-likelihood value,
   \item \code{vcov}: variance-covariance matrix of the parameter estimates,
   \item \code{residuals}: a vector of quantile residuals,
-  \item \code{AIC}, \code{BIC}, \code{HQ}: Akaike, Schwarz, and Hannan-Quinn
+  \item \code{AIC}, \code{BIC}, \code{HQIC}: Akaike, Schwarz, and Hannan-Quinn
   information criteria,
   \item \code{R2_N}, \code{R2_FC}: Nagelkerke, and Ferrari and Cribari-Neto
   pseudo R-squared measures,
-  \item \code{zstat}: z-statistics for the coefficient tests,
-  \item \code{pvalues}: p-values for the coefficient tests,
+  \item \code{zstat}: \eqn{z}-statistics for the coefficient tests,
+  \item \code{pvalues}: \eqn{p}-values for the coefficient tests,
   \item \code{y}: the response vector,
-  \item \code{x-names}: column names of the mean design matrix,
-  \item \code{z-names}: column names of the dispersion design matrix,
+  \item \code{x_names}: column names of the mean design matrix,
+  \item \code{z_names}: column names of the dispersion design matrix,
   \item \code{control}: the control arguments passed to the \code{optim} call,
   \item \code{converged}: logical indicating successful convergence of \code{optim},
   \item \code{call}: the original function call,
@@ -136,8 +139,8 @@ a list with components as follows:
 }
 \description{
 Fit simplex regression models for rates and proportions via
-maximum likelihood estimation, modeling both the mean \eqn{\mu} (via parametric
-or fixed link function) and the dispersion parameter \eqn{\sigma^2}.
+maximum likelihood estimation, modeling both the mean (via parametric
+or fixed link function) and the dispersion parameter.
 }
 \details{
 Simplex regression, introduced by Song and Tan (2000) and extended by
@@ -150,17 +153,27 @@ proposed by Barndorff-Nielsen and Jørgensen (1991), which is indexed by the mea
 Similar to generalized linear models (GLMs), simplex regression relates
 the mean of the response variable and the dispersion parameter to their respective
 linear predictors through link functions. This package implements five fixed link
-functions ("logit", "probit", "loglog", "cloglog", "cauchit") and two parametric
-link functions ("plogit1", "plogit2") for the mean submodel. For the dispersion
-submodel, the links "log", "sqrt" and "identity" are supported.
+functions (\code{"logit"}, \code{"probit"}, \code{"loglog"}, \code{"cloglog"},
+\code{"cauchit"}) and two parametric link functions (\code{"plogit1"},
+\code{"plogit2"}) for the mean submodel. For the dispersion submodel, the
+links \code{"log"}, \code{"sqrt"} and \code{"identity"} are supported.
 
 The model is specified through a two-part formula separated by \code{|}. The
 left side contains the predictors for the mean submodel and the right side contains
 the predictors for the dispersion submodel:
 \itemize{
-  \item Mean submodel: \eqn{g(\mu_i, \lambda) = x_i'\beta} (parametric link)
-  or \eqn{g(\mu_i) = x_i'\beta} (fixed link),
-  \item Dispersion submodel: \eqn{h(\sigma^2_i) = z_i'\gamma}.
+  \item Mean submodel: \eqn{g(\mu_i, \lambda) = \boldsymbol{x}_i'\boldsymbol{\beta}}
+  (parametric link) or \eqn{g(\mu_i) = \boldsymbol{x}_i'\boldsymbol{\beta}} (fixed link),
+  where \eqn{g(\cdot)} is the mean link function, \eqn{\lambda} is the
+  extra shape parameter of the parametric link,
+  \eqn{\boldsymbol{x}_i} is the vector of covariates for the \eqn{i}-th observation in
+  the mean submodel, and \eqn{\boldsymbol{\beta}} is the corresponding
+  vector of regression coefficients.
+  \item Dispersion submodel: \eqn{h(\sigma^2_i) = \boldsymbol{z}_i'\boldsymbol{\gamma}},
+  where \eqn{h(\cdot)} is the dispersion link function, \eqn{\boldsymbol{z}_i} is the
+  vector of covariates for the \eqn{i}-th observation in the dispersion
+  submodel, and \eqn{\boldsymbol{\gamma}} is the corresponding vector of
+  regression coefficients.
 }
 
 Formula examples: \code{y ~ x1 + x2 | z1 + z2} (variable dispersion) or
@@ -171,13 +184,13 @@ The parametric mean link functions include a parameter \eqn{\lambda} that
 is estimated along with other model parameters. Parameter estimation is performed
 via maximum likelihood using the \code{optim} function with analytical gradient
 and initial values obtained from an auxiliary linear regression of the transformed
-response. Subsequently, the optim result may be enhanced by an additional Fisher
+response. Subsequently, the \code{optim} result may be enhanced by an additional Fisher
 scoring iteration using analytical gradients and expected information. The Fisher
 scoring is just a refinement to move the gradients even closer to zero and can be
 disabled by setting \code{fsmaxit = 0} in the control arguments.
 
 Methods for extracting and analyzing results are implemented for objects
-of class \code{simplexregression}, allowing the use of generic functions such as
+of class \code{"simplexregression"}, allowing the use of generic functions such as
 \code{\link{summary}}, \code{\link{print}}, \code{\link{fitted}}, \code{\link{coef}},
 \code{\link{formula}}, \code{\link{logLik}}, \code{\link{vcov}}, \code{\link{predict}},
 \code{\link{terms}}, \code{\link{model.frame}}, \code{\link{model.matrix}},
@@ -204,8 +217,7 @@ Some parametric models on the simplex.
 \emph{Journal of Multivariate Analysis}, \bold{39}(1), 106--116.
 \doi{10.1016/0047-259X(91)90008-P}
 
-Jørgensen, B. (1997).
-\emph{The Theory of Dispersion Models}.
+Jørgensen, B. (1997). \emph{The Theory of Dispersion Models}.
 Chapman and Hall, London.
 
 Song, P. X.-K. and Tan, M. (2000).
@@ -213,7 +225,7 @@ Marginal models for longitudinal continuous proportional data.
 \emph{Biometrics}, \bold{56}(2), 496--502.
 \doi{10.1111/j.0006-341X.2000.00496.x}
 
-Song, P. X.-K., Qiu, Z., and Tan, M. (2004).
+Song, P. X.-K.; Qiu, Z. and Tan, M. (2004).
 Modelling heterogeneous dispersion in marginal models for longitudinal
 proportional data.
 \emph{Biometrical Journal}, \bold{46}(5), 540--553.
@@ -233,7 +245,4 @@ Regression analysis of proportional data using simplex distribution.
 \code{\link{predict.simplexregression}}, \code{\link{residuals.simplexregression}},
 \code{\link{penalized.ic}}, \code{\link{penalized.ss}},
 \code{\link{scoretest}}
-}
-\author{
-Maria Eduarda da Cruz Justino and Francisco Cribari-Neto.
 }
