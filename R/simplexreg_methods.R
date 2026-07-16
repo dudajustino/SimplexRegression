@@ -21,24 +21,24 @@ is_parametric <- function(object) {
 
 #' @title Methods for simplexregression Objects
 #' @description
-#' Methods for extracting information from fitted simplex regression model objects
-#' of class \code{simplexregression}.
+#' Methods for extracting information from fitted model objects
+#' of class \code{"simplexregression"}.
 #'
-#' @param object,x An object of class \code{simplexregression}.
+#' @param object,x An object of class \code{"simplexregression"}.
 #' @param model Character specifying for which component of the model
 #' coefficients/covariance should be extracted.
-#' @param digits Number of digits to printing.
+#' @param digits Number of digits for printing.
 #' @param newdata Optional data frame for prediction.
 #' @param formula A model formula or terms object.
 #' @param type Character indicating type of predictions: fitted means of the
-#' response (default, "response"), corresponding linear
-#' predictor ("link") or fitted dispersion parameter ("dispersion").
+#' response (default, \code{"response"}), corresponding linear
+#' predictor (\code{"link"}) or fitted dispersion parameter (\code{"dispersion"}).
 #' @param formula. Changes to the formula.
 #' @param evaluate If true evaluate the new call else return the call.
-#' @param nsim number of response vectors to simulate. Defaults to 1.
+#' @param nsim number of response vectors to simulate. Defaults to \code{1}.
 #' @param seed an object specifying if and how the random number generator
 #' should be initialized.
-#' @param k weight of the penalty term in AIC. Default is 2.
+#' @param k weight of the penalty term in AIC. Default is \code{2}.
 #' @param vcov. a specification of the covariance matrix of the estimated coefficients.
 #' @param df the degrees of freedom to be used.
 #' @param ... Additional arguments.
@@ -67,8 +67,7 @@ is_parametric <- function(object) {
 #'   \item \code{simulate}: a data frame with \code{nsim} columns;
 #'   \item \code{AIC}, \code{BIC}, \code{HQIC}: numeric scalar (single model)
 #'     or data frame (multiple models);
-#'   \item \code{hatvalues}: numeric vector of leverage values;
-#'   \item \code{cooks.distance}: numeric vector of Cook's distances;
+#'   \item \code{hatvalues}: numeric vector of hat values;
 #'   \item \code{bread}: numeric matrix;
 #'   \item \code{estfun}: numeric matrix of score contributions;
 #'   \item \code{coeftest}: object of class \code{"coeftest"};
@@ -92,7 +91,6 @@ is_parametric <- function(object) {
 #' BIC(fit)
 #' HQIC(fit)
 #' hatvalues(fit)
-#' cooks.distance(fit)
 #'
 #' @aliases print.simplexregression summary.simplexregression coef.simplexregression
 #' @aliases vcov.simplexregression logLik.simplexregression fitted.simplexregression
@@ -100,7 +98,7 @@ is_parametric <- function(object) {
 #' @aliases deviance.simplexregression formula.simplexregression terms.simplexregression
 #' @aliases model.frame.simplexregression model.matrix.simplexregression update.simplexregression
 #' @aliases simulate.simplexregression AIC.simplexregression BIC.simplexregression
-#' @aliases hatvalues.simplexregression cooks.distance.simplexregression bread.simplexregression
+#' @aliases hatvalues.simplexregression bread.simplexregression
 #' @aliases estfun.simplexregression coeftest.simplexregression lrtest.simplexregression
 
 NULL
@@ -234,7 +232,7 @@ summary.simplexregression <- function(object, ...) {
     loglik = object$loglik,
     aic = object$AIC,
     bic = object$BIC,
-    hqic = object$HQ,
+    hqic = object$HQIC,
     nobs = object$nobs,
     df.residual = object$df.residual,
     iterations = c("optim" = object$iterations, "scoring" = object$scoring),
@@ -690,23 +688,6 @@ hatvalues.simplexregression <- function(model, ...) {
   )
 
   rowSums((Xw %*% Inv) * Xw)
-}
-
-#' @rdname simplexreg.methods
-#' @importFrom stats residuals hatvalues cooks.distance
-#' @export
-cooks.distance.simplexregression <- function(model, type = c("pearson", "weighted"), ...) {
-  type <- match.arg(type)
-  h <- hatvalues(model)
-
-  switch(type,
-         "pearson" = {
-           h * (residuals(model, type = "pearson") ^ 2) / (2*((1-h)^2))
-         },
-         "weighted" = {
-           (residuals(model, type = "weighted") ^ 2) * (h / (1 - h))
-         }
-  )
 }
 
 #' @rdname simplexreg.methods

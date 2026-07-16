@@ -15,7 +15,7 @@
 #' response perturbation schemes for simplex regression models with
 #' parametric or fixed mean link function.
 #'
-#' @param model An object of class \code{simplexregression}.
+#' @param model An object of class \code{"simplexregression"}.
 #' @param scheme Character string specifying the perturbation scheme:
 #' \code{"case.weight"} or \code{"response"}.
 #' @param parameter Character string indicating the parameter block:
@@ -26,7 +26,7 @@
 #' \code{"dmax"} (maximum influence direction).
 #' @param plot Logical; if \code{TRUE}, produces an index plot of the selected
 #' measure. Default is \code{FALSE}.
-#' @param threshold Numeric threshold for identifying influential observations in.
+#' @param threshold Numeric threshold for identifying influential observations.
 #' If \code{NULL} (default), no observations are highlighted.
 #' @param label.pos Position(s) for outlier labels in plot. Can be a single value
 #' (applied to all labels) or a vector. Values: 1 = below, 2 = left, 3 = above,
@@ -60,6 +60,12 @@
 #' \code{Ci} can be used to detect observations that are individually influential
 #' for parameters.
 #'
+#' Computing these measures requires inverting the observed information matrix
+#' \eqn{L} and certain of its sub-blocks. If \eqn{L} or a relevant sub-block is
+#' singular (e.g., due to near-collinear predictors in the mean or dispersion
+#' submodel), the function stops with an informative error rather than
+#' propagating R's raw \code{solve} error.
+#'
 #' @examples
 #' data(ReadingSkills, package = "SimplexRegression")
 #' fit <- simplexreg(accuracy ~ dyslexia * iq | dyslexia + iq + I(iq^2),
@@ -77,8 +83,8 @@
 #'                 parameter = "theta", type = "dmax", plot = TRUE)
 #'
 #' @references
-#' Espinheira, P. L., Silva, A. O. (2020). Residual and influence analysis to a
-#' general class of simplex regression. \emph{TEST}, \bold{29}, 523–-552.
+#' Espinheira, P. L. and Silva, A. O. (2020). Residual and influence analysis to a
+#' general class of simplex regression. \emph{TEST}, \bold{29}, 523--552.
 #' \doi{10.1007/s11749-019-00665-3}
 #'
 #' @seealso \code{\link{hatvalues.simplexregression}},
@@ -158,6 +164,18 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
     t(Delta)%*%(I-M)%*%Delta
   }
 
+  safe_solve <- function(A, what) {
+    tryCatch(
+      solve(A),
+      error = function(e) {
+        stop("Failed to compute local influence measures. ",
+             "The ", what, " is singular. ",
+             "This may occur with near-collinear predictors. ",
+             "Try removing redundant covariates or refitting with a reduced formula.")
+      }
+    )
+  }
+
   if(parametric){
     lambda <- model$lambda.fv
     Dlink.mu <- parametric_mean_link_inv_deriv1(eta1, lambda, link_mu)
@@ -206,7 +224,8 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
       cbind(Llambdadelta, Llambdalambda)
     )
 
-    sub_deltalambda_inv <- solve(sub_deltalambda)
+    sub_deltalambda_inv <- safe_solve(sub_deltalambda,
+                                      "dispersion+lambda information sub-block")
     B1 <- matrix(0, nrow = r, ncol = r)
     B1[(p+1):(r), (p+1):(r)] <- sub_deltalambda_inv
 
@@ -216,7 +235,8 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
       cbind(Llambdabeta, Llambdalambda)
     )
 
-    sub_betalambda_inv <- solve(sub_betalambda)
+    sub_betalambda_inv <- safe_solve(sub_betalambda,
+                                     "mean+lambda information sub-block")
     B2 <- matrix(0, nrow = r, ncol = r)
     B2[c(1:p, r), c(1:p, r)] <- sub_betalambda_inv
 
@@ -237,12 +257,12 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
     Ldeltadelta <- L[(p+1):r,(p+1):r]
 
     # For influence on BETA
-    sub_delta_inv <- solve(Ldeltadelta)
+    sub_delta_inv <- safe_solve(Ldeltadelta, "dispersion information sub-block")
     B1 <- matrix(0, nrow = r, ncol = r)
     B1[(p+1):r, (p+1):r] <- sub_delta_inv
 
     # For influence on DELTA
-    sub_beta_inv <- solve(Lbetabeta)
+    sub_beta_inv <- safe_solve(Lbetabeta, "mean information sub-block")
     B2 <- matrix(0, nrow = r, ncol = r)
     B2[1:p, 1:p] <- sub_beta_inv
 
@@ -275,7 +295,7 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
     }
   }
 
-  L_inv <- solve(L)
+  L_inv <- safe_solve(L, "full observed information matrix")
 
   compute_block <- function(Bmat) {
     BX <- B(Delta, L_inv, Bmat)
@@ -341,19 +361,19 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
 
 
 # ==============================================================================
-# 2. GENERALIZED LEVERAGE
+# 2. GENERALIZED LEVERAGE AND COOKS DISTANCE
 # ==============================================================================
 
 #' @title Generalized Leverage Values for Simplex Regression Models
 #' @description Compute the generalized leverage values for simplex regression
 #' models with parametric or fixed mean link function.
 #'
-#' @param model An object of class \code{simplexregression}.
+#' @param model An object of class \code{"simplexregression"}.
 #'
 #' @return A numeric vector of generalized leverage values.
 #'
 #' @details
-#' \code{gleverage} computing generalized leverage values as suggested by Wei, Hu,
+#' \code{gleverage} computes generalized leverage values as suggested by Wei, Hu,
 #' and Fung (1998). Generalized leverage extends the concept of hat values to account for both
 #' mean and dispersion parameters. High leverage values indicate observations
 #' that have potentially large influence on parameter estimates.
@@ -381,9 +401,9 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
 #' to cross-country impunity data.
 #' \emph{Applied Mathematical Modelling}, \bold{154}, 116713. \doi{10.1016/j.apm.2025.116713}
 #'
-#' Wei, B. C., Hu, Y. Q., and Fung, W. K. (1998).
-#' Generalized Leverage and Its Applications.
-#' \emph{Scandinavian Journal of Statistics}, \bold{25}, 25–37.
+#' Wei, B. C., Hu, Y. Q. and Fung, W. K. (1998).
+#' Generalized leverage and its applications.
+#' \emph{Scandinavian Journal of Statistics}, \bold{25}, 25--37.
 #'
 #' @importFrom stats plogis
 #' @export
@@ -497,17 +517,61 @@ gleverage.simplexregression <- function(model){
   rowSums((D %*% L_inv) * t(Lty))
 }
 
+
+
+#' @title Cook's Distance for Simplex Regression Models
+#' @description Computes Cook's distance for simplex regression models with
+#' parametric or fixed mean link function.
+#'
+#' @param model An object of class \code{"simplexregression"}.
+#' @param type Character string indicating the type of residual used in the
+#' influence measure: \code{"pearson"} (default) or \code{"weighted"}.
+#' @param ... Currently not used.
+#'
+#' @return A numeric vector of Cook's distance values.
+#'
+#' @details
+#' Cook's distance measures the influence of each observation on the estimated
+#' regression coefficients. It combines the leverage of an observation (see
+#' \code{\link{hatvalues.simplexregression}}) with the magnitude of its residual.
+#' Observations with high Cook's distance may have a disproportionate effect
+#' on the fitted model.
+#'
+#' @seealso \code{\link{hatvalues.simplexregression}},
+#' \code{\link{gleverage.simplexregression}}, \code{\link{residuals.simplexregression}}.
+#'
+#' @references
+#' Cook, R. D. (1977). Detection of influential observation in linear
+#' regression. \emph{Technometrics}, \bold{19}(1), 15--18.
+#'
+#' @importFrom stats residuals hatvalues cooks.distance
+#' @export
+cooks.distance.simplexregression <- function(model, type = c("pearson", "weighted"),
+                                             ...) {
+  type <- match.arg(type)
+  h <- hatvalues(model)
+
+  switch(type,
+         "pearson" = {
+           h * (residuals(model, type = "pearson") ^ 2) / (2*((1-h)^2))
+         },
+         "weighted" = {
+           (residuals(model, type = "weighted") ^ 2) * (h / (1 - h))
+         }
+  )
+}
+
 # ==============================================================================
 # 3. s_{j,i} MEASURES
 # ==============================================================================
 
 #' @title Sample Influence Measures for Simplex Regression Models
-#' @description Computes leave-one-out sample influence measures \eqn{s_{3,i}}
+#' @description Computes leave--one--out sample influence measures \eqn{s_{3,i}}
 #' and \eqn{s_{5,i}} for simplex regression models, based on the
-#' information-matrix-based criteria measures proposed by Cribari-Neto,
-#' Vasconcellos and Santana e Silva (2025).
+#' information--matrix--based criteria measures proposed by Cribari-Neto,
+#' Vasconcellos and Santana-e-Silva (2025).
 #'
-#' @param model An object of class \code{simplexregression}.
+#' @param model An object of class \code{"simplexregression"}.
 #' @param data The data frame used to fit \code{model}.
 #' @param type Character vector specifying measure(s): \code{"s3"}, \code{"s5"},
 #'   or both (default).
@@ -520,15 +584,15 @@ gleverage.simplexregression <- function(model){
 #'   and \eqn{s_{5,i}} with threshold lines and flagged-observation labels.
 #'   Default is \code{FALSE}.
 #' @param verbose Logical; if \code{TRUE} (default), prints progress during
-#'   leave-one-out refitting. Ignored (set to \code{FALSE}) when
+#'   leave--one--out refitting. Ignored (set to \code{FALSE}) when
 #'   \code{ncores > 1}, since output from parallel workers does not reach
 #'   the main console.
 #' @param ncores Positive integer specifying the number of CPU cores to use
-#'   for the leave-one-out loop. Default is \code{1} (sequential). Values
+#'   for the leave--one--out loop. Default is \code{1} (sequential). Values
 #'   greater than \code{1} activate parallel computation via
 #'   \code{\link[parallel]{parLapply}}. If \code{ncores} exceeds
-#'   \code{parallel::detectCores() - 1}, it is silently clamped to that
-#'   value to avoid overloading the system. A safe explicit choice is
+#'   \code{parallel::detectCores() - 1}, it is clamped to that value with a warning
+#'   to avoid overloading the system. A safe explicit choice is
 #'   \code{parallel::detectCores() - 1}.
 #' @param label.pos Position(s) for outlier labels in plot. Can be a single
 #'   value (applied to all labels) or a vector. Values: 1 = below, 2 = left,
@@ -559,42 +623,62 @@ gleverage.simplexregression <- function(model){
 #' If \code{plot = TRUE}, the same list is returned invisibly.
 #'
 #' @details
-#' For each observation \eqn{i}, the model is refit on the dataset with
-#' observation \eqn{i} removed. Let \eqn{\hat\theta} and
-#' \eqn{\hat\theta_{(i)}} denote the full and leave-one-out MLEs. Following
-#' Cribari-Neto, Vasconcellos and Santana e Silva (2025), let \eqn{A_n}
-#' denote the sample average of the second-order log-likelihood derivatives
-#' (\eqn{n^{-1}\sum_i \partial^2\ell_i/\partial\theta\partial\theta'}) and
-#' \eqn{B_n} denote the sample average of the outer products of the
-#' individual score vectors
-#' (\eqn{n^{-1}\sum_i (\partial\ell_i/\partial\theta)(\partial\ell_i/\partial\theta)'}),
-#' the two matrices that comprise the information matrix equality. Let
-#' \eqn{A^{(i)}_{n-1}} and \eqn{B^{(i)}_{n-1}} denote these same quantities
-#' recomputed with observation \eqn{i} excluded (i.e. based on \eqn{n-1}
-#' observations).
+#' Let \eqn{\boldsymbol{\theta}} denote the vector of parameters that index
+#' the simplex regression model, \eqn{\boldsymbol{y}} the vector of observed values of the response
+#' variable, and \eqn{\ell(\boldsymbol{\theta}; \boldsymbol{y})} the total
+#' log-likelihood function. Let
+#' \deqn{A_n(\boldsymbol{\theta};\boldsymbol{y}) = \dfrac{1}{n}\sum_{i=1}^n
+#' \dfrac{\partial^2\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}\partial\boldsymbol{\theta}'}}
+#' and \deqn{B_n(\boldsymbol{\theta};\boldsymbol{y}) = \dfrac{1}{n}\sum_{i=1}^n
+#' \dfrac{\partial\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}}
+#' \dfrac{\partial\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}'}}
+#' denote, respectively, the sample average of the second-order
+#' log-likelihood derivatives and the sample average of the outer products
+#' of the individual score vectors, both evaluated at the maximum likelihood
+#' estimate \eqn{\boldsymbol{\hat\theta}} obtained from the complete dataset.
+#'
+#' For each \eqn{i = 1, \ldots, n}, the model is refit on the dataset with
+#' observation \eqn{i} omitted, yielding the leave--one--out estimate
+#' \eqn{\boldsymbol{\hat\theta}_{(i)}}. The matrices \eqn{A_{n-1}^{(i)}} and
+#' \eqn{B_{n-1}^{(i)}} are then recomputed over the remaining \eqn{n-1}
+#' observations, evaluated at \eqn{\boldsymbol{\hat\theta}_{(i)}}.
 #'
 #' \strong{Measures computed:}
-#' \deqn{s_{3,i} = m_{3,(i)} / m_3}
-#' \deqn{s_{5,i} = D_i^{\mathrm{mod}} - D_i^{\mathrm{gen}}}
+#' \deqn{s_{3,i} = m_{3,(i)} / m_3,}
+#' \deqn{s_{5,i} = D_i^{\mathrm{mod}} - D_i^{\mathrm{gen}}.}
 #'
-#' Here \eqn{m_3 = \|\mathrm{vech}(P_n^{-1} B_n P_n^{-\top} - I)\|_2}, where
-#' \eqn{P_n} is obtained from the Cholesky decomposition of \eqn{-A_n}
-#' (i.e. \eqn{-A_n = P_n P_n^\top}); \eqn{m_{3,(i)}} is the same quantity
-#' recomputed with observation \eqn{i} excluded from the sample.
+#' Here \eqn{m_3 = \|\mathrm{vech}(P_n^{-1}(\boldsymbol{\hat\theta};\boldsymbol{y})
+#' B_n(\boldsymbol{\hat\theta};\boldsymbol{y}) P_n^{-1}(\boldsymbol{\hat\theta};
+#' \boldsymbol{y})' - I)\|_2}, where
+#' \eqn{P_n(\boldsymbol{\hat\theta};\boldsymbol{y})} is obtained from the Cholesky
+#' decomposition of \eqn{-A_n(\boldsymbol{\hat\theta};\boldsymbol{y})}, i.e.
+#' \eqn{-A_n(\boldsymbol{\hat\theta};\boldsymbol{y}) = P_n(\boldsymbol{\hat\theta};
+#' \boldsymbol{y}) P_n(\boldsymbol{\hat\theta};\boldsymbol{y})'}, and
+#' \eqn{I} is the identity matrix.
+#' The quantity \eqn{m_{3,(i)}} is the same
+#' measure recomputed using \eqn{P_{n-1}^{(i)}} and \eqn{B_{n-1}^{(i)}},
+#' both evaluated at \eqn{\boldsymbol{\hat\theta}_{(i)}} over the remaining
+#' \eqn{n-1} observations.
 #'
+#' Furthermore,
 #' \deqn{D_i^{\mathrm{gen}} = (n-1) \,
-#'   (\hat\theta - \hat\theta_{(i)})^\top (-A^{(i)}_{n-1})
-#'   (\hat\theta - \hat\theta_{(i)})}
-#' \deqn{D_i^{\mathrm{mod}} = (n-1) \,
-#'   (\hat\theta - \hat\theta_{(i)})^\top
-#'   0.5(-A^{(i)}_{n-1} + B^{(i)}_{n-1})
-#'   (\hat\theta - \hat\theta_{(i)})}
+#'   (\boldsymbol{\hat\theta} - \boldsymbol{\hat\theta}_{(i)})'
+#'   (-A^{(i)}_{n-1}(\boldsymbol{\hat\theta}_{(i)};\boldsymbol{y}))
+#'   (\boldsymbol{\hat\theta} - \boldsymbol{\hat\theta}_{(i)})}
+#' \deqn{D_i^{\mathrm{mod}} = 0.5(n-1) \,
+#'   (\boldsymbol{\hat\theta} - \boldsymbol{\hat\theta}_{(i)})'
+#'   (-A^{(i)}_{n-1}(\boldsymbol{\hat\theta}_{(i)};\boldsymbol{y}) +
+#'   B^{(i)}_{n-1}(\boldsymbol{\hat\theta}_{(i)};\boldsymbol{y}))
+#'   (\boldsymbol{\hat\theta} - \boldsymbol{\hat\theta}_{(i)})}
 #'
-#' If \eqn{-A^{(i)}_{n-1}} is not positive definite, \code{nearPD} is used to
-#' find the nearest positive-definite matrix and a message is printed.
+#' where \eqn{D_i^{\mathrm{gen}}} is the generalized Cook's distance and
+#' \eqn{D_i^{\mathrm{mod}}} is its modification proposed by Cribari-Neto,
+#' Vasconcellos and Santana-e-Silva (2025). For the rationale behind these
+#' measures and the underlying information-matrix-equality argument, see
+#' Cribari-Neto, Vasconcellos and Santana-e-Silva (2025).
 #'
 #' \strong{Threshold intervals} use two asymmetric IQR spreads, as proposed
-#' by Cribari-Neto, Vasconcellos and Santana e Silva (2025). Let
+#' by Cribari-Neto, Vasconcellos and Santana-e-Silva (2025). Let
 #' \eqn{Q(p)} denote the empirical \eqn{p}-th quantile of the relevant
 #' measure (\eqn{s_{3,i}} or \eqn{s_{5,i}}, computed separately for each):
 #' \eqn{IQR_1 = Q(0.50) - Q(0.125)} (left) and
@@ -609,13 +693,29 @@ gleverage.simplexregression <- function(model){
 #'     \eqn{z = 8.0} for \eqn{s_5}.
 #' }
 #'
+#' An observation \eqn{i} is flagged as influential if its measure
+#' (\eqn{s_{3,i}} or \eqn{s_{5,i}}) falls below the lower limit or above
+#' the upper limit of the corresponding interval.
+#'
+#' If \eqn{-A^{(i)}_{n-1}} is not positive definite, \code{\link[Matrix]{nearPD}}
+#' from the \pkg{Matrix} package is used to find the nearest positive-definite
+#' matrix and a message is printed.
+#'
+#' \code{parameter = "gamma"} is not available when the dispersion submodel
+#' is fixed (intercept-only); the function stops with an informative error
+#' in that case. Leave--one--out refits that fail to converge produce
+#' \code{NA} for that observation in \code{s3_i}/\code{s5_i}; a warning is
+#' issued via the refit's internal error handler and the observation is kept
+#' as \code{NA} in the output.
+#'
 #' \strong{Parallel computation:} when \code{ncores > 1}, the
-#' leave-one-out loop is distributed across workers using
+#' leave--one--out loop is distributed across workers using
 #' \code{\link[parallel]{parLapply}} from the \pkg{parallel} package
 #' (included in base R). Each worker receives the necessary objects and
-#' loads the \pkg{simplexregression} package. The random-number stream is
-#' initialized with \code{\link[parallel]{clusterSetRNGStream}} to ensure
-#' reproducibility across runs. Progress messages (\code{verbose}) are
+#' loads the \pkg{SimplexRegression} package. The random-number stream is
+#' initialized with a fixed seed via
+#' \code{\link[parallel]{clusterSetRNGStream}} to ensure reproducibility
+#' across runs. Progress messages (\code{verbose}) are
 #' suppressed in parallel mode because worker output does not reach the
 #' main console.
 #'
@@ -635,7 +735,7 @@ gleverage.simplexregression <- function(model){
 #' }
 #'
 #' @references
-#' Cribari-Neto, F.; Vasconcellos, K. L. P.; Santana e Silva, J. J. (2025).
+#' Cribari-Neto, F.; Vasconcellos, K. L. P. and Santana-e-Silva, J. J. (2025).
 #' New strategies for detecting atypical observations based on the information
 #' matrix equality. \emph{Journal of Applied Statistics}, \bold{52},
 #' 2873--2893. \doi{10.1080/02664763.2025.2487914}
@@ -645,8 +745,7 @@ gleverage.simplexregression <- function(model){
 #'
 #' @importFrom stats quantile
 #' @importFrom Matrix nearPD
-#' @importFrom parallel makeCluster stopCluster clusterSetRNGStream
-#'   clusterExport clusterEvalQ parLapply
+#' @importFrom parallel makeCluster stopCluster clusterSetRNGStream clusterExport clusterEvalQ parLapply
 #' @export
 diag.im <- function(model, data, type = c("s3", "s5"), interval = c("I1", "I2"),
                     parameter = c("theta", "beta", "gamma"),
@@ -1057,12 +1156,12 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 # ==============================================================================
 
 #' @title Distance-Based Influence Diagnostics for Simplex Regression
-#' @description Computes leave-one-out influence measures based on
+#' @description Computes leave--one--out influence measures based on
 #' distributional distances (Wasserstein with \eqn{p_W = 1} and \eqn{p_W = 2} or
 #' Hellinger) for simplex regression models, as proposed by Justino and
 #' Cribari-Neto (2026).
 #'
-#' @param model An object of class \code{simplexregression}.
+#' @param model An object of class \code{"simplexregression"}.
 #' @param data The data frame used to fit \code{model}.
 #' @param type Character string or integer specifying the distance measure:
 #'   \code{"W1"} (default, Wasserstein with \eqn{p_W = 1}),
@@ -1071,10 +1170,10 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 #'   of distances. If \code{TRUE}, produces an index plot with the ad hoc
 #'   threshold and flagged-observation labels.
 #' @param verbose Logical; if \code{TRUE} (default), prints progress during
-#'   leave-one-out refitting. Ignored when \code{ncores > 1}, since output
+#'   leave--one--out refitting. Ignored when \code{ncores > 1}, since output
 #'   from parallel workers does not reach the main console.
 #' @param ncores Positive integer specifying the number of CPU cores to use
-#'   for the leave-one-out loop. Default is \code{1} (sequential). Values
+#'   for the leave--one--out loop. Default is \code{1} (sequential). Values
 #'   greater than \code{1} activate parallel computation via
 #'   \code{\link[parallel]{parLapply}}. If \code{ncores} exceeds
 #'   \code{parallel::detectCores() - 1}, it is clamped to that value with a
@@ -1092,7 +1191,7 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 #' @return If \code{plot = FALSE}, a list containing:
 #' \describe{
 #'   \item{\code{distances}}{Numeric vector of length \eqn{n} with the
-#'     leave-one-out distances.}
+#'     leave--one--out distances.}
 #'   \item{\code{threshold}}{Named numeric scalar with the ad hoc upper
 #'     threshold.}
 #'   \item{\code{outliers}}{Data frame of flagged observations (index and
@@ -1103,30 +1202,71 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 #' If \code{plot = TRUE}, the same list is returned invisibly.
 #'
 #' @details
-#' For each observation \eqn{i}, the model is refit on the dataset with
-#' observation \eqn{i} removed. The chosen distance between the full-model
-#' and leave-one-out fitted distributions is then computed pointwise across
-#' all \eqn{n} observations and summed to produce the scalar influence
-#' measure \eqn{d_i}.
+#' Let \eqn{\boldsymbol{\hat{\mu}}} and \eqn{\boldsymbol{\hat{\sigma}^2}} denote the
+#' vectors of maximum likelihood estimates obtained by fitting the model to the complete
+#' dataset. For each \eqn{i = 1, \ldots, n}, the model is refit after
+#' omitting observation \eqn{i}, yielding the leave--one--out estimate vectors
+#' \eqn{\boldsymbol{\hat{\mu}}^{(i)}} and \eqn{\boldsymbol{\hat{\sigma}^2}^{(i)}}.
+#' The fitted simplex density (see \code{dsimplex}) for observation \eqn{j} is,
+#' \eqn{f(y; \hat{\mu}_j, \hat{\sigma}^2_j)} under the full data and
+#' \eqn{f(y; \hat{\mu}_j^{(i)}, \hat{\sigma}^{2(i)}_j)} under the fit with
+#' observation \eqn{i} deleted.
 #'
-#' \strong{Ad hoc threshold} uses an asymmetric IQR spread adjusted for
-#' skewness, as proposed by Justino and Cribari-Neto (2026). Let \eqn{Q(p)} denote the
-#' empirical \eqn{p}-th quantile of the distances \eqn{d_i}, the threshold is
+#' \strong{Hellinger distance.} For observation \eqn{j}, under deletion of
+#' observation \eqn{i},
+#' \deqn{H_j^{(i)} = H\big(f(y;\hat{\mu}_j,\hat{\sigma}^2_j),\,
+#' f(y;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)\big)
+#' = \sqrt{1 - \rho_j^{(i)}},}
+#' \deqn{\rho_j^{(i)} = \int_0^1 \sqrt{f(y;\hat{\mu}_j,\hat{\sigma}^2_j)\,
+#' f(y;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)}\, dy,}
+#' where \eqn{\rho_j^{(i)}} is Bhattacharyya's coefficient, evaluated via
+#' numerical integration (\code{\link[pracma]{quadgk}}) from the \pkg{pracma}
+#' package. The overall influence measure for the deletion of observation
+#' \eqn{i} is the aggregate distance \eqn{I_i^H = \sum_{j=1}^n H_j^{(i)}}.
+#'
+#' \strong{Wasserstein distance.} Let \eqn{F(y;\hat{\mu}_j,\hat{\sigma}^2_j)}
+#' and \eqn{F(y;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)} denote the simplex
+#' cumulative distribution functions (see \code{psimplex}) fitted for observation \eqn{j} with the
+#' full data and with observation \eqn{i} deleted, respectively. For
+#' \eqn{p_W = 1},
+#' \deqn{W_{1,j}^{(i)} = \int_0^1 \big|F(y;\hat{\mu}_j,\hat{\sigma}^2_j) -
+#' F(y;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)\big|\, dy,}
+#' computed by numerically integrating the absolute difference between the
+#' fitted simplex CDFs. For general \eqn{p_W \geq 1}, with
+#' \eqn{F^{-1}(u;\hat{\mu}_j,\hat{\sigma}^2_j)} and
+#' \eqn{F^{-1}(u;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)} denoting the
+#' corresponding fitted simplex quantile functions (see \code{qsimplex}),
+#' \deqn{W_{p_W,j}^{(i)} = \left(\int_0^1 \big|F^{-1}(u;\hat{\mu}_j,\hat{\sigma}^2_j) -
+#' F^{-1}(u;\hat{\mu}_j^{(i)},\hat{\sigma}^{2(i)}_j)\big|^{p_W}\, du\right)^{1/p_W},}
+#' computed by numerically integrating the absolute difference between the
+#' fitted simplex quantile functions raised to the power \eqn{p_W}. As
+#' in the Hellinger case, the total influence measure for observation
+#' \eqn{i} is \eqn{I_i^{W} = \sum_{j=1}^n W_{p_W,j}^{(i)}}.
+#'
+#' Because neither the simplex density nor its quantile function admits a
+#' closed-form expression, every distance computed by this function relies
+#' on numerical integration. For \eqn{n > 500} this may be slow; consider
+#' using a subset or a faster integration method.
+#'
+#' \strong{Ad hoc threshold} for identifying influential observations uses an
+#' asymmetric interquartile range (IQR) adjusted for skewness, as proposed
+#' by Justino and Cribari-Neto (2026). Let \eqn{Q(p)} denote the empirical
+#' \eqn{p}-th quantile of the distances \eqn{I_i}, the threshold is
 #' \deqn{\text{threshold} = Q(0.75) + (1 + a)(Q(0.75) - Q(0.25))}
 #' where \eqn{a} is the sample skewness of the distances. Observations with
-#' \eqn{d_i} above this threshold are flagged as potentially influential.
+#' \eqn{I_i} above this threshold are flagged as potentially influential.
 #'
-#' \strong{Warning:} for \eqn{n > 500}, the numerical integration used
-#' internally by the distance functions may be slow. Consider using a subset
-#' or a faster integration method.
+#' For the full derivation and rationale behind these measures, see Justino
+#' and Cribari-Neto (2026).
 #'
 #' \strong{Parallel computation:} when \code{ncores > 1}, the
-#' leave-one-out loop is distributed across workers using
+#' leave--one--out loop is distributed across workers using
 #' \code{\link[parallel]{parLapply}} from the \pkg{parallel} package
 #' (included in base R). Each worker receives the necessary objects and
-#' loads the \pkg{simplexregression} package. The random-number stream is
-#' initialized with \code{\link[parallel]{clusterSetRNGStream}} to ensure
-#' reproducibility across runs. Progress messages (\code{verbose}) are
+#' loads the \pkg{SimplexRegression} package. The random-number stream is
+#' initialized with a fixed seed via
+#' \code{\link[parallel]{clusterSetRNGStream}} to ensure reproducibility
+#' across runs. Progress messages (\code{verbose}) are
 #' suppressed in parallel mode because worker output does not reach the
 #' main console.
 #'
@@ -1156,9 +1296,9 @@ compute_m3 <- function(model, parameter = c("theta", "beta", "gamma")) {
 #' @seealso \code{\link{diag.im}}, \code{\link{local.influence}},
 #' \code{\link{gleverage}}.
 #'
+#' @importFrom moments skewness
 #' @importFrom pracma quadgk
-#' @importFrom parallel makeCluster stopCluster clusterSetRNGStream
-#'   clusterExport clusterEvalQ parLapply detectCores
+#' @importFrom parallel makeCluster stopCluster clusterSetRNGStream clusterExport clusterEvalQ parLapply detectCores
 #' @export
 diag.distances <- function(model, data, type = c("W1", "W2", "H"),
                            plot = FALSE, verbose = TRUE, ncores = 1,
