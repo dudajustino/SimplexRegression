@@ -7,31 +7,30 @@
 ################################################################################
 
 #' @title RESET Test for Simplex Regression
-#' @description Performs the Ramsey's RESET test for functional form in simplex
+#' @description Performs the Ramsey's RESET misspecification test in simplex
 #' regression models.
 #'
-#' @param model An object of class \code{simplexregression}.
+#' @param model An object of class \code{"simplexregression"}.
 #' @param dispersion Logical. If \code{TRUE}, includes the augmented terms
 #' in the dispersion submodel as well. Default is \code{TRUE}.
-#' @param power Integer vector specifying which powers of the linear predictor
-#' (or fitted values) to include as additional regressors. Default is \code{2}
+#' @param power Integer vector specifying which powers of the fitted mean linear predictor
+#' (or fitted mean values) to include as additional regressors. Default is \code{2}
 #' (squared term only). Use \code{power = 2:3} to include both squared and
 #' cubic terms, following the convention of \code{lmtest::resettest}.
 #' @param type Character string specifying the base for the augmented terms.
-#' \code{"lp"} (default) uses the mean linear predictor \eqn{\hat{\eta}_1};
-#' \code{"fitted"} uses the fitted mean values \eqn{\hat{\mu}} on the (0, 1)
-#' scale. For models with parametric link functions, \code{"lp"} is generally
-#' preferred as it operates on an unrestricted scale.
+#' \code{"lp"} (default) uses the fitted mean linear predictor \eqn{\boldsymbol{\hat{\eta}_1}};
+#' \code{"fitted"} uses the fitted mean values \eqn{\boldsymbol{\hat{\mu}}} on the (0, 1)
+#' scale.
 #'
 #' @details
-#' The RESET test augments the original model by adding powers of the linear
-#' predictor (or fitted values) as additional covariates. Under the null
+#' The RESET test augments the original model by adding powers of the fitted mean linear
+#' predictor (or fitted mean values) as additional covariates. Under the null
 #' hypothesis of correct functional form, these additional terms should not
 #' be significant.
 #'
-#' The likelihood ratio statistic follows a chi-squared distribution with
-#' degrees of freedom equal to the number of augmented terms added (i.e.,
-#' \code{length(power)} if \code{dispersion = FALSE}, or
+#' Under H0, the likelihood ratio statistic is asymptotically distributed
+#' as chi-squared with degrees of freedom equal to the number of augmented
+#' terms added (i.e., \code{length(power)} if \code{dispersion = FALSE}, or
 #' \code{2 * length(power)} if \code{dispersion = TRUE}).
 #'
 #' If \code{dispersion = TRUE}, the augmented terms are added to both the
@@ -42,7 +41,7 @@
 #' \itemize{
 #'   \item \code{statistic}: The likelihood ratio test statistic,
 #'   \item \code{parameter}: Degrees of freedom,
-#'   \item \code{p.value}: The p-value of the test,
+#'   \item \code{p.value}: The \eqn{p}-value of the test,
 #'   \item \code{method}: Description of the test,
 #'   \item \code{data.name}: Model formula.
 #' }
@@ -50,7 +49,8 @@
 #' @references
 #' Ramsey, J. B. (1969). Tests for specification errors in classical linear
 #' least-squares regression analysis. \emph{Journal of the Royal Statistical
-#' Society: Series B}, 31(2), 350-371.
+#' Society: Series B}, \bold{31}(2), 350--371.
+#' \doi{10.1111/j.2517-6161.1969.tb00796.x}
 #'
 #' @examples
 #' data(ReadingSkills, package = "SimplexRegression")

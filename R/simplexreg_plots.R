@@ -14,7 +14,7 @@
 #' @description Produces diagnostic plots for fitted simplex regression models with
 #' parametric or fixed mean link function.
 #'
-#' @param x An object of class \code{simplexregression}.
+#' @param x An object of class \code{"simplexregression"}.
 #' @param which Numeric vector indicating which plots to display (\code{1:7}).
 #' @param type Character string specifying the residual type (default: \code{"quantile"}).
 #' \cr See \code{\link{residuals.simplexregression}} for available options.
@@ -33,13 +33,14 @@
 #' See \code{\link[graphics]{text}} for details.
 #' @param plot.type Controls the plot symbol/type for scatter plots and index plots.
 #' If \code{NULL} (default), uses \code{pch = 1} (open circles) for residual plots
-#' (which = 1--5) and \code{type = "h"} (vertical lines) for Cook's distance and
-#' generalized leverage plots (which = 6--7). Otherwise, the value is passed
-#' directly to \code{pch} (for scatter plots) or \code{type} (for index plots).
+#' (which = 1--4) and \code{type = "h"} (vertical lines) for Cook's distance
+#' (\code{which = 6}) and generalized leverage plots (\code{which = 7}).
+#' Otherwise, the value is passed directly to \code{pch} (for scatter plots) or
+#' \code{type} (for index plots).
 #' @param ... Additional graphical parameters.
 #'
 #' @details
-#' Eight diagnostic plots are available:
+#' Seven diagnostic plots are available:
 #' \itemize{
 #'   \item Residuals vs observation index (\code{which = 1}): Identifies outliers
 #'   and temporal patterns;
@@ -107,7 +108,7 @@ plot.simplexregression <- function(x, which = 1:7,
   one.fig <- prod(par("mfcol")) == 1
 
   # Automatic plot.type defaults
-  pt_scatter <- if (is.null(plot.type)) 1    else plot.type   # pch for plots 1-5
+  pt_scatter <- if (is.null(plot.type)) 1    else plot.type   # pch for plots 1-4
   pt_index   <- if (is.null(plot.type)) "h"  else plot.type   # type for plots 6-7
 
   # Configure ask mode
@@ -226,12 +227,12 @@ plot.simplexregression <- function(x, which = 1:7,
 #' @description Produces half-normal plots with simulated envelopes for simplex
 #' regression model with parametric or fixed mean link function.
 #'
-#' @param model An object of class \code{simplexregression}.
+#' @param model An object of class \code{"simplexregression"}.
 #' @param type Character string specifying the residual type (default: \code{"weighted"}).
 #' \cr See \code{\link{residuals.simplexregression}} for available options.
-#' @param nsim Number of simulations for envelope construction (default: 100).
-#' @param seed Integer setting the random seed for reproducibility (default: 1987).
-#' @param level Confidence level for envelope bounds (default: 0.95).
+#' @param nsim Number of simulations for envelope construction (default: \code{100}).
+#' @param level Confidence level for envelope bounds (default: \code{0.95}).
+#' @param seed Integer setting the random seed for reproducibility (default: \code{1987}).
 #' @param ... Additional graphical parameters.
 #'
 #' @details
@@ -243,6 +244,10 @@ plot.simplexregression <- function(x, which = 1:7,
 #'   \item Computing absolute residuals and their order statistics;
 #'   \item Obtaining envelope bounds from empirical quantiles.
 #' }
+#'
+#' Simulated datasets whose refitted model fails to converge are discarded and
+#' resampled, up to \code{5 * nsim} total attempts. If \code{nsim} converged
+#' fits cannot be obtained within this limit, the function stops with an error.
 #'
 #' Points outside the envelope may indicate model inadequacy.
 #'
@@ -377,4 +382,6 @@ halfnormal.plot <- function (model, type = c("weighted", "quantile",
          legend = c(paste("Points outside:", cOut, "(", prop95, "%)"),
                     paste("Total points:", n)),
          bty="n", cex = 0.8)
+
+  invisible(NULL)
 }

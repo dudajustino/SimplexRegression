@@ -10,9 +10,10 @@
 #' \eqn{\lambda} equals 1, which corresponds to evaluating the null hypothesis
 #' that the mean link function is the standard logit.
 #'
-#' @param model An object of class \code{simplexregression}.
-#' @param link.mu Character string specifying the link function under the
-#' alternative hypothesis. Options are "plogit1" or "plogit2".
+#' @param model An object of class \code{"simplexregression"} fitted with the
+#' fixed logit mean link (\code{link.mu = "logit"})
+#' @param link.mu Character string specifying the parametric link function under the
+#' alternative hypothesis. Options are \code{"plogit1"} or \code{"plogit2"}.
 #'
 #' @details
 #' Given that the fixed logit link function is a particular case of the parametric
@@ -20,18 +21,11 @@
 #' mean link function is logit by testing \eqn{H_0: \lambda = 1} against
 #' \eqn{H_1: \lambda \neq 1}.
 #'
-#' The score test statistic for this hypothesis test is given by:
-#'
-#' \deqn{S_R = \boldsymbol{U}_\lambda(\boldsymbol{\tilde{\theta}})^\top
-#' \boldsymbol{\tilde{K}}^{\lambda \lambda}
-#' \boldsymbol{U}_\lambda(\boldsymbol{\tilde{\theta}}),}
-#'
-#' where \eqn{\boldsymbol{U}_\lambda} and \eqn{\boldsymbol{\tilde{K}}^{\lambda \lambda}}
-#' denote, respectively, the component of the score vector and the corresponding
-#' element of the inverse Fisher information matrix associated with \eqn{\lambda},
-#' both evaluated at \eqn{\boldsymbol{\tilde{\theta}} = (\boldsymbol{\tilde{\beta}}^\top,
-#' \boldsymbol{\tilde{\gamma}}^\top, 1)^\top}, the maximum likelihood estimator under
-#' the null hypothesis. For more details see Justino and Cribari-Neto (2026).
+#' The score test statistic is computed from the component of the score vector
+#' associated with \eqn{\lambda} and the corresponding element of the inverse
+#' Fisher information matrix, both evaluated at the maximum likelihood estimator
+#' under the null hypothesis (i.e., with \eqn{\lambda} fixed at 1). For the full
+#' expression of the test statistic, see Justino and Cribari-Neto (2026).
 #'
 #' Under regularity conditions, the null hypothesis, and when \eqn{n} is large,
 #' the test statistic follows a chi-squared distribution with 1 degree of freedom.
@@ -40,9 +34,10 @@
 #' \itemize{
 #'   \item \code{statistic}: The score test statistic,
 #'   \item \code{parameter}: Degrees of freedom (always 1),
-#'   \item \code{p.value}: The p-value of the test,
+#'   \item \code{p.value}: The \eqn{p}-value of the test,
 #'   \item \code{method}: Description of the test,
-#'   \item \code{data.name}: Model name and link function being tested.
+#'   \item \code{data.name}: Description of the link comparison being tested
+#'   (e.g., \code{"Logit vs plogit1"})
 #' }
 #'
 #' @references
@@ -73,6 +68,8 @@
 #'
 #' # Test if lambda = 1
 #' scoretest(model, link.mu = "plogit1")
+#'
+#' @seealso \code{\link{parametric_mean_link}}
 #'
 #' @importFrom stats pchisq plogis
 #'
@@ -127,7 +124,17 @@ scoretest <- function(model, link.mu = c("plogit1", "plogit2")) {
   Klambdabeta <- colSums(wi * rho * l1id1 / sigma2 * mu_x)
   Kbetabeta <- crossprod(mu_x, (wi * l1id1^2 / sigma2) * mu_x)
 
-  vcovlambda_inv <- Klambdalambda - sum(Klambdabeta * solve(Kbetabeta, Klambdabeta))
+  Kbetabeta_inv_Klambdabeta <- tryCatch(
+    solve(Kbetabeta, Klambdabeta),
+    error = function(e) {
+      stop("Failed to compute the score test statistic. ",
+           "The information matrix block for the mean submodel is singular. ",
+           "This may occur with near-collinear predictors in the mean submodel. ",
+           "Try removing redundant covariates or refitting with a reduced formula.")
+    }
+  )
+
+  vcovlambda_inv <- Klambdalambda - sum(Klambdabeta * Kbetabeta_inv_Klambdabeta)
 
   S <- Ulambda^2 / vcovlambda_inv
   df <- 1L
