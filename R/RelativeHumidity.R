@@ -2,8 +2,9 @@
 #'
 #' @description
 #' Monthly meteorological data including relative humidity (rh),
-#' temperature, insolation, precipitation, and wind speed for a
-#' Brazilian station (2000-2025).
+#' temperature, insolation, precipitation, and wind speed for the
+#' meteorological station of Brasília, Brazil (2000-2025), obtained from
+#' the National Institute of Meteorology (INMET).
 #'
 #' The dataset contains two missing observations in the variables \code{ins}
 #' and \code{pre}, corresponding to September 2020 and November 2025. To address
@@ -16,22 +17,34 @@
 #'
 #' @format A data frame with 312 observations and 11 variables:
 #' \describe{
-#'   \item{date}{Observation date (YYYY-MM-DD)}
-#'   \item{rh}{Monthly mean relative humidity, originally measured in percent and
-#'   rescaled to the unit interval (0,1)}
-#'   \item{ins}{Monthly total insolation (in hours), contains 2 missing values}
-#'   \item{ins2}{Monthly total insolation (in hours) with missing values imputed
-#'   via seasonal interpolation}
-#'   \item{pre}{Monthly total precipitation (in mm), contains 2 missing values}
-#'   \item{pre2}{Monthly total precipitation (in mm) with missing values imputed
-#'   via seasonal interpolation}
-#'   \item{neb}{Monthly mean cloudiness (in tenths)}
-#'   \item{ap}{Monthly mean atmospheric pressure (in hPa)}
-#'   \item{mt}{Monthly mean temperature (in Degrees Celsius)}
-#'   \item{ws}{Monthly mean wind speed (in m/s)}
-#'   \item{dir}{Monthly predominant wind direction (in degrees)}
+#'   \item{date}{Date. Last day of the reference month for the monthly
+#'         measurements (YYYY-MM-DD).}
+#'   \item{rh}{Numeric. Monthly mean relative humidity, originally measured
+#'         in percent and rescaled to the unit interval (0, 1).}
+#'   \item{ins}{Numeric. Monthly total insolation (in hours), contains
+#'         2 missing values.}
+#'   \item{ins2}{Numeric. Monthly total insolation (in hours) with missing
+#'         values imputed via seasonal interpolation.}
+#'   \item{pre}{Numeric. Monthly total precipitation (in mm), contains
+#'         2 missing values.}
+#'   \item{pre2}{Numeric. Monthly total precipitation (in mm) with missing
+#'         values imputed via seasonal interpolation.}
+#'   \item{cld}{Numeric. Monthly mean cloudiness (in tenths).}
+#'   \item{ap}{Numeric. Monthly mean atmospheric pressure (in hPa).}
+#'   \item{tmax}{Numeric. Monthly mean of daily maximum temperature
+#'         (in degrees Celsius).}
+#'   \item{ws}{Numeric. Monthly mean wind speed (in m/s).}
+#'   \item{wd}{Numeric. Monthly predominant wind direction, coded by
+#'         INMET/BDMEP in tens of degrees (e.g., 9 = 90 degrees, East;
+#'         32 = 320 degrees, Northwest). A value of 0 indicates calm
+#'         conditions (no wind or undefined direction). Multiply by 10
+#'         to obtain the direction in degrees (0-360).}
 #' }
-#' @source Brazilian meteorological station
+#'
+#' @source
+#' Instituto Nacional de Meteorologia (INMET). Banco de Dados
+#' Meteorológicos para Ensino e Pesquisa (BDMEP), Estação de Brasília.
+#' \url{https://bdmep.inmet.gov.br/}. Data accessed in 2026.
 #'
 #' @keywords datasets
 #'

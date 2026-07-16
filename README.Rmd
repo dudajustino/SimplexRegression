@@ -115,10 +115,10 @@ resettest(fit)
 residuals(fit, type = "quantile")   # default, approx. N(0,1)
 residuals(fit, type = "weighted")   # for halfnormal.plot
 
-# Diagnostic plots (8 types)
-plot(fit, which = 1:6)
-plot(fit, which = 7, threshold = 0.15)  # Cook's distance
-plot(fit, which = 8, threshold = 0.08)  # Generalized leverage
+# Diagnostic plots (7 types)
+plot(fit, which = 1:5)
+plot(fit, which = 6, threshold = 0.15)  # Cook's distance
+plot(fit, which = 7, threshold = 0.08)  # Generalized leverage
 
 # Half-normal plot with simulated envelope
 halfnormal.plot(fit, nsim = 100)
@@ -207,9 +207,9 @@ citation("SimplexRegression")
 ## References
 
 - Barndorff-Nielsen, O. E. and Jørgensen, B. (1991). Some parametric models on the simplex. *Journal of Multivariate Analysis*, **39**(1), 106--116.
-- Costa E., Cribari-Neto F., Scher V.T. (2024). Test inferences and link function selection in dynamic beta modeling of seasonal hydro-environmental time series with temporary abnormal regimes. *Journal of Hydrology*, **638**, 131489.
+- Costa, E., Cribari-Neto, F., Scher, V.T. (2024). Test inferences and link function selection in dynamic beta modeling of seasonal hydro-environmental time series with temporary abnormal regimes. *Journal of Hydrology*, **638**, 131489.
 - Cribari-Neto F., Justino M.E.C. (2026). Influence diagnostics in beta regression via Hellinger and Wasserstein distances. *Statistical Papers*, **67**(3), 50.
-- Cribari-Neto, F., Vasconcellos, K. L. P. and Santana e Silva, J. J. (2025). New strategies for detecting atypical observations based on the information matrix equality. *Journal of Applied Statistics*, **52**(15), 2873--2893.
+- Cribari-Neto, F., Vasconcellos, K. L. P. and Santana-e-Silva, J. J. (2025). New strategies for detecting atypical observations based on the information matrix equality. *Journal of Applied Statistics*, **52**(15), 2873--2893.
 - Espinheira P.L., Silva L.C., Lima F.P. (2026). Prediction in the nonlinear simplex model. *International Journal of Data Science and Analytics*, **22**(1), 161.
 - Espinheira, P. L. and Silva, A. O. (2020). Residual and influence analysis to a general class of simplex regression. *TEST*, **29**(2), 523--552.
 - Justino, M. E. C. and Cribari-Neto, F. (2026). Simplex regression with a flexible logit link. *Applied Mathematical Modelling*, **154**, 116713.
