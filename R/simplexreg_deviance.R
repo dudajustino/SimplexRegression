@@ -36,8 +36,7 @@
 #' dev.unit.simplex(y = 0.5, mu = 0.5)
 #'
 #' @references
-#' Jørgensen, B. (1997).
-#' \emph{The Theory of Dispersion Models}.
+#' Jørgensen, B. (1997). \emph{The Theory of Dispersion Models}.
 #' Chapman and Hall, London.
 #'
 #' Song, P. X.-K. and Tan, M. (2000).
@@ -45,6 +44,7 @@
 #' \emph{Biometrics}, \bold{56}(2), 496--502.
 #' \doi{10.1111/j.0006-341X.2000.00496.x}
 #'
+#' @seealso \code{\link{variance.simplex}}, \code{\link{dsimplex}}.
 #' @export
 dev.unit.simplex <- function(y, mu){
   # Input validation
@@ -52,7 +52,7 @@ dev.unit.simplex <- function(y, mu){
     "'y' must always be in (0, 1)" = all(y > 0 & y < 1),
     "parameter 'mu' must always be in (0, 1)" = all(mu > 0 & mu < 1)
   )
-  
+
   # Compute unit deviance
   diff <- y - mu
   yoneminy <- y * (1 - y)

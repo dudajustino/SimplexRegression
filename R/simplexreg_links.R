@@ -65,6 +65,10 @@ parametric_mean_link <- function(mu, lambda, type = c("plogit1", "plogit2")) {
     stop("All values of 'mu' must be in the interval (0, 1)")
   }
 
+  if (any(lambda <= 0)) {
+    stop("'lambda' must be positive")
+  }
+
   if(type == "plogit2") {
     mu_lambda <- pmin(pmax(mu^lambda, .Machine$double.eps), 1-.Machine$double.eps)
     result <- qlogis(mu_lambda)
@@ -81,6 +85,10 @@ parametric_mean_link <- function(mu, lambda, type = c("plogit1", "plogit2")) {
 #' @export
 parametric_mean_link_inv <- function(eta, lambda, type = c("plogit1", "plogit2")) {
   type <- match.arg(type)
+
+  if (any(lambda <= 0)) {
+    stop("'lambda' must be positive")
+  }
 
   if(type == "plogit2") {
     result <- pmin(pmax(plogis(eta)^(1/lambda), .Machine$double.eps), 1-.Machine$double.eps)
@@ -100,6 +108,10 @@ parametric_mean_link_deriv1 <- function(mu, lambda, type = c("plogit1", "plogit2
     stop("All values of 'mu' must be in the interval (0, 1)")
   }
 
+  if (any(lambda <= 0)) {
+    stop("'lambda' must be positive")
+  }
+
   if(type== "plogit2") {
     mu_lambda <- pmin(pmax(mu^lambda, .Machine$double.eps), 1-.Machine$double.eps)
     result <- lambda / (mu * (1 - mu_lambda))
@@ -117,6 +129,10 @@ parametric_mean_link_deriv1 <- function(mu, lambda, type = c("plogit1", "plogit2
 parametric_mean_link_inv_deriv1 <- function(eta, lambda, type = c("plogit1", "plogit2")) {
   type <- match.arg(type)
 
+  if (any(lambda <= 0)) {
+    stop("'lambda' must be positive")
+  }
+
   if(type == "plogit2") {
     result <- parametric_mean_link_inv(eta, lambda, type) / (lambda * (1 + exp(eta)))
   } else {
@@ -133,6 +149,10 @@ parametric_mean_link_deriv2 <- function(mu, lambda, type = c("plogit1", "plogit2
 
   if (any(mu <= 0 | mu >= 1)) {
     stop("All values of 'mu' must be in the interval (0, 1)")
+  }
+
+  if (any(lambda <= 0)) {
+    stop("'lambda' must be positive")
   }
 
   if(type == "plogit2") {
@@ -336,7 +356,7 @@ dispersion_link <- function(sigma2, type = c("log", "sqrt", "identity")) {
   result <- switch(type,
                    log = log(sigma2),
                    sqrt = sqrt(sigma2),
-                   identity = sigma2,
+                   identity = sigma2
   )
 
   return(result)

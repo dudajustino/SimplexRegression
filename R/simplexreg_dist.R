@@ -14,38 +14,57 @@
 #' @name simplex_opt
 #' @description
 #' Density, distribution function, quantile function and random generation for the
-#' simplex distribution with parameters mean \eqn{\mu} and dispersion
-#' \eqn{\sigma^2 > 0}.
+#' simplex distribution with parameters mean \eqn{\mu} and dispersion \eqn{\sigma^2}.
 #'
 #' @param x,q Numeric vector of quantiles.
 #' @param p Numeric vector of probabilities.
 #' @param mu Mean parameter (\eqn{0 < \mu < 1}).
 #' @param sigma2 Dispersion parameter (\eqn{\sigma^2 > 0}).
 #' @param n Number of observations.
-#' @param log,log.p Logical; if TRUE, probabilities/densities p are given as log(p).
-#' @param lower.tail Logical; if TRUE (default), probabilities are \eqn{P[X <= x]},
+#' @param log,log.p Logical; if \code{TRUE}, probabilities/densities \eqn{p} are given
+#' as \eqn{log(p)}.
+#' @param lower.tail Logical; if \code{TRUE} (default), probabilities are \eqn{P[X <= x]},
 #'        otherwise, \eqn{P[X > x]}.
 #'
 #' @details
-#' The probability density function of the simplex distribution is:
+#' The probability density function of the simplex distribution is given by:
 #' \deqn{f(y; \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2[y(1-y)]^3}}
 #'       \exp\left(-\frac{1}{2\sigma^2} d(y; \mu)\right),}
-#' where \eqn{y \in (0,1)}, and \eqn{d(x; \mu) = \frac{(y - \mu)^2}{y(1 - y)
-#' \mu^2(1 - \mu)^2}}
-#' is the deviance component of the simplex model.
+#' where \eqn{y \in (0, 1)}, and \eqn{d(y; \mu) = \frac{(y - \mu)^2}{y(1 - y)
+#' \mu^2(1 - \mu)^2}} is the unit deviance.
+#'
+#' The cumulative distribution function and the quantile function of the simplex
+#' distribution do not admit closed-form expressions. For small values of
+#' \eqn{\sigma^2}, \code{psimplex()} and \code{qsimplex()} use the normal
+#' approximation implied by the small-dispersion asymptotic theory (Jørgensen, 1997).
+#' Otherwise, \code{psimplex()} is computed by numerical integration of the density and
+#' \code{qsimplex()} is obtained by numerical root finding.
+#'
+#' Random generation in \code{rsimplex()} is based on the inverse Gaussian
+#' mixture (M--IG) representation of the simplex distribution,
+#' followed by the transformation \eqn{Y = X/(1 + X)}.
 #'
 #' @importFrom stats pnorm qnorm integrate rchisq runif uniroot
+#'
 #' @return \code{dsimplex} gives the density, \code{psimplex} the
 #' distribution function, \code{qsimplex} the quantile function, and
 #' \code{rsimplex} generates random deviates.
 #'
-#' Invalid arguments will result in return value NaN, with a warning.
+#' For \code{sigma2} values requiring numerical root-finding (i.e., not small
+#' enough for the normal approximation), \code{qsimplex} may return \code{NA}
+#' if \code{uniroot} fails to find a root in the given interval.
+#'
+#' Invalid arguments (\code{mu} outside (0, 1) or non-positive \code{sigma2}) will
+#' trigger an error.
 #'
 #' @references
 #' Barndorff-Nielsen, O. E. and Jørgensen, B. (1991).
 #' Some parametric models on the simplex.
 #' \emph{Journal of Multivariate Analysis}, \bold{39}(1), 106--116.
 #' \doi{10.1016/0047-259X(91)90008-P}
+#'
+#' Jørgensen B (1997). \emph{The Theory of Dispersion Models}.
+#' Chapman and Hall, London.
 #'
 #' @examples
 #' dsimplex(0.5, mu = 0.3, sigma2 = 0.5)
