@@ -85,7 +85,7 @@ resettest <- function(model, dispersion = TRUE, power = 2,
   type <- match.arg(type)
 
   METHOD <- "RESET test"
-  DNAME  <- paste(deparse(model$formula), collapse = "")
+  DNAME  <- paste(deparse(model$formula), collapse = "\n")
 
   y <- as.vector(model$y)
 

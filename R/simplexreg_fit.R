@@ -267,15 +267,15 @@ simplexreg.control <- function(method = "BFGS",
 #' summary(fit)
 #'
 #' @references
-#' Justino, M. E. C. and Cribari-Neto, F. (2026).
-#' Simplex regression with a flexible logit link: Inference and application
-#' to cross-country impunity data.
-#' \emph{Applied Mathematical Modelling}, \bold{154}, 116713. \doi{10.1016/j.apm.2025.116713}
-#'
 #' Barndorff-Nielsen, O. E. and Jørgensen, B. (1991).
 #' Some parametric models on the simplex.
 #' \emph{Journal of Multivariate Analysis}, \bold{39}(1), 106--116.
 #' \doi{10.1016/0047-259X(91)90008-P}
+#'
+#' Justino, M. E. C. and Cribari-Neto, F. (2026).
+#' Simplex regression with a flexible logit link: Inference and application
+#' to cross-country impunity data.
+#' \emph{Applied Mathematical Modelling}, \bold{154}, 116713. \doi{10.1016/j.apm.2025.116713}
 #'
 #' Jørgensen, B. (1997). \emph{The Theory of Dispersion Models}.
 #' Chapman and Hall, London.

@@ -41,7 +41,7 @@
 #' \code{qsimplex()} is obtained by numerical root finding.
 #'
 #' Random generation in \code{rsimplex()} is based on the inverse Gaussian
-#' mixture (M--IG) representation of the simplex distribution,
+#' mixture (M-IG) representation of the simplex distribution,
 #' followed by the transformation \eqn{Y = X/(1 + X)}.
 #'
 #' @importFrom stats pnorm qnorm integrate rchisq runif uniroot

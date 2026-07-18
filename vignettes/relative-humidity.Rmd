@@ -5,7 +5,7 @@ output:
     toc: true
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{relative-humidity}
+  %\VignetteIndexEntry{Modeling Relative Air Humidity with Simplex Regression}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -501,18 +501,12 @@ leverages. The default residual type is `"quantile"`. For plots 6 and 7,
 `threshold` highlights influential observations and `label.pos` controls
 label placement (1 = below, 2 = left, 3 = above, 4 = right).
 
-```{r plots-1-5, fig.height = 8, fig.cap = "Diagnostic plots (1–6) for the fitted simplex regression model with log-log link."}
-oldpar <- par(mfrow = c(3, 2))
-plot(fit_loglog, which = 1:5, reset.par = FALSE)
+```{r plots-1-7, fig.height = 8, fig.cap = "Diagnostic plots (1–7) for the fitted simplex regression model with log-log link."}
+oldpar <- par(mfrow = c(3, 3))
+plot(fit_loglog, which = 1:5, ask = FALSE)
+plot(fit_loglog, which = 6, threshold = 0.15, label.pos = c(4,2,3))
+plot(fit_loglog, which = 7, threshold = 0.08, label.pos = c(3,3,3,4))
 par(oldpar)
-```
-
-```{r plot-cook, fig.height = 4, fig.cap = "Cook's distances. Observations exceeding the threshold of 0.15 are labeled."}
-plot(fit_loglog, which = 6, threshold = 0.15, label.pos = 4)
-```
-
-```{r plot-glev, fig.height = 4, fig.cap = "Generalized leverage values. Observations exceeding 0.08 are labeled."}
-plot(fit_loglog, which = 7, threshold = 0.08, label.pos = 3)
 ```
 
 The quantile residuals are approximately standard normal, with no systematic
@@ -532,7 +526,8 @@ the influence measure: `"Ci"` for the total local influence index $C_i$,
 or `"dmax"` for the direction of maximum curvature. Observations exceeding
 `threshold` are labeled in the index plot.
 
-```{r local-influence-cw, fig.height = 4.5, fig.cap = "Total local influence $C_i$ under case-weight perturbation for all parameters."}
+```{r local-influence-cw, fig.height = 4.5, fig.cap = "Total local influence $C_i$ under case-weight and response perturbation for all parameters."}
+oldpar <- par(mfrow = c(1, 2))
 local.influence(
   fit_loglog,
   scheme    = "case.weight",
@@ -540,11 +535,8 @@ local.influence(
   type      = "Ci",
   plot      = TRUE,
   threshold = 0.5,
-  label.pos = c(3, 4, 3, 2, 2)
+  label.pos = c(3, 2, 4)
 )
-```
-
-```{r local-influence-resp, fig.height = 4.5, fig.cap = "Total local influence $C_i$ under response perturbation for all parameters."}
 local.influence(
   fit_loglog,
   scheme    = "response",
@@ -554,6 +546,7 @@ local.influence(
   threshold = 0.4,
   label.pos = 2
 )
+par(oldpar)
 ```
 
 A small set of observations is identified as locally influential under both

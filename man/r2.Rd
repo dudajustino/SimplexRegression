@@ -66,7 +66,7 @@ their direct simplex regression analogue.
 The simple correction, a function of the total number of estimated
 parameters \eqn{r} only,
 is applied to both \eqn{R^2_{FC}} and \eqn{R^2_N}:
-\deqn{R^2_{FC_c} = 1 - (1 - R^2_{FC})\frac{n-1}{n-r}, \qquad
+\deqn{R^2_{FC_c} = 1 - (1 - R^2_{FC})\frac{n-1}{n-r} \qquad \text{and} \qquad
 R^2_{N_c} = 1 - (1 - R^2_{N})\frac{n-1}{n-r}.}
 
 A second, weighted correction is defined for \eqn{R^2_N} only, penalizing
@@ -116,13 +116,14 @@ r2(fit1, fit2, alpha1 = 0.6, alpha2 = 1.5, alpha3 = "log")
 
 }
 \references{
+Bayer, F. M. and Cribari-Neto, F. (2017). Model selection criteria in beta
+regression with varying dispersion. \emph{Communications in Statistics -
+Simulation and Computation}, \bold{46}(1),
+729--746. \doi{10.1080/03610918.2014.977918}
+
 Ferrari, S. L. P. and Cribari-Neto, F. (2004). Beta regression for
 modelling rates and proportions. \emph{Journal of Applied Statistics},
 \bold{31}(7), 799--815. \doi{10.1080/0266476042000214501}
-
-Nagelkerke, N. J. D. (1991). A note on a general definition of the
-coefficient of determination. \emph{Biometrika}, \bold{78}(3), 691--692.
-\doi{10.1093/biomet/78.3.691}
 
 Hu, B. and Shao, J. (2008). Generalized linear model selection using R2.
 \emph{Journal of Statistical Planning and Inference}, \bold{138}(12),
@@ -133,10 +134,9 @@ regression -- small sample adjustments, confidence intervals and other
 issues. \emph{Statistics in Medicine}, \bold{21}(23), 3547--3562.
 \doi{10.1002/1521-4036(200204)44:3<263::AID-BIMJ263>3.0.CO;2-7}
 
-Bayer, F. M. and Cribari-Neto, F. (2017). Model selection criteria in beta
-regression with varying dispersion. \emph{Communications in Statistics -
-Simulation and Computation}, \bold{46}(1),
-729--746. \doi{10.1080/03610918.2014.977918}
+Nagelkerke, N. J. D. (1991). A note on a general definition of the
+coefficient of determination. \emph{Biometrika}, \bold{78}(3), 691--692.
+\doi{10.1093/biomet/78.3.691}
 }
 \seealso{
 \code{\link{simplexreg}}, \code{\link{press}}

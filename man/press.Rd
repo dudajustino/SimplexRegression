@@ -71,13 +71,13 @@ press(fit, fit1, type = "biasvariance")
 
 }
 \references{
-Espinheira, P. L. and Silva, A. O. (2026). Prediction in the nonlinear simplex model.
-\emph{International Journal of Data Science and Analytics}, \bold{22}, 161.
-\doi{10.1007/s41060-026-01114-9}
-
 Espinheira, P. L. and Silva, A. O. (2020). Residual and influence analysis to a
 general class of simplex regression. \emph{TEST}, \bold{29}, 523--552.
 \doi{10.1007/s11749-019-00665-3}
+
+Espinheira, P. L. and Silva, A. O. (2026). Prediction in the nonlinear simplex model.
+\emph{International Journal of Data Science and Analytics}, \bold{22}, 161.
+\doi{10.1007/s41060-026-01114-9}
 }
 \seealso{
 \code{\link{simplexreg}}, \code{\link{residuals.simplexregression}}.

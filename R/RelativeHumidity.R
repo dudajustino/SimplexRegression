@@ -43,8 +43,8 @@
 #'
 #' @source
 #' Instituto Nacional de Meteorologia (INMET). Banco de Dados
-#' Meteorológicos para Ensino e Pesquisa (BDMEP), Estação de Brasília.
-#' \url{https://bdmep.inmet.gov.br/}. Data accessed in 2026.
+#' Meteorológicos para Ensino e Pesquisa (BDMEP), Estação de Brasília
+#' (https://bdmep.inmet.gov.br). Data accessed in 2026.
 #'
 #' @keywords datasets
 #'

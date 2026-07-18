@@ -104,24 +104,24 @@ res_weighted <- residuals(fit, type = "weighted")
 
 }
 \references{
-McCullagh, P. and Nelder, J. A. (1989). \emph{Generalized Linear Models}.
-2nd ed.  Chapman and Hall, London.
-
-Jørgensen, B. (1997). \emph{The Theory of Dispersion Models}.
-Chapman and Hall, London.
-
 Dunn, P. K. and Smyth, G. K. (1996). Randomized quantile residuals.
 \emph{Journal of Computational and Graphical Statistics}, \bold{5}(3),
 236--244. \doi{10.2307/1390802}
+
+Espinheira, P. L. and Silva, A. O. (2020). Residual and influence analysis to a
+general class of simplex regression. \emph{TEST}, \bold{29}, 523--552.
+\doi{10.1007/s11749-019-00665-3}
 
 Espinheira, P. L.; Silva, L. C. M. and Cribari-Neto, F. (2021). Bias and
 variance residuals for machine learning nonlinear simplex regressions.
 \emph{Expert Systems With Applications}, \bold{185}, 115656.
 \doi{10.1016/j.eswa.2021.115656}
 
-Espinheira, P. L. and Silva, A. O. (2020). Residual and influence analysis to a
-general class of simplex regression. \emph{TEST}, \bold{29}, 523--552.
-\doi{10.1007/s11749-019-00665-3}
+Jørgensen, B. (1997). \emph{The Theory of Dispersion Models}.
+Chapman and Hall, London.
+
+McCullagh, P. and Nelder, J. A. (1989). \emph{Generalized Linear Models}.
+2nd ed.  Chapman and Hall, London.
 }
 \seealso{
 \code{\link{plot.simplexregression}}, \code{\link{halfnormal.plot}},

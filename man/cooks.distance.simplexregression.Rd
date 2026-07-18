@@ -18,7 +18,7 @@ influence measure: \code{"pearson"} (default) or \code{"weighted"}.}
 A numeric vector of Cook's distance values.
 }
 \description{
-Computes Cook's distance for simplex regression models with
+Computes approximate Cook's distances for simplex regression models with
 parametric or fixed mean link function.
 }
 \details{
@@ -27,10 +27,29 @@ regression coefficients. It combines the leverage of an observation (see
 \code{\link{hatvalues.simplexregression}}) with the magnitude of its residual.
 Observations with high Cook's distance may have a disproportionate effect
 on the fitted model.
+
+Two approximate versions are available, depending on \code{type}:
+\itemize{
+  \item \code{"pearson"}: the conventional approximate Cook's distance, based
+  on the Pearson residual, analogous to the measure used in beta regression
+  (Ferrari and Cribari-Neto, 2004).
+  \item \code{"weighted"}: the approximate Cook's distance based on the
+  weighted residual, as proposed specifically for the simplex regression
+  model by Espinheira and Silva (2026).
+}
 }
 \references{
 Cook, R. D. (1977). Detection of influential observation in linear
 regression. \emph{Technometrics}, \bold{19}(1), 15--18.
+\doi{10.2307/1268249}
+
+Espinheira, P. L. and Silva, A. O. (2026). Prediction in the nonlinear
+simplex model. \emph{International Journal of Data Science and Analytics},
+\bold{22}, 161. \doi{10.1007/s41060-026-01114-9}
+
+Ferrari, S. L. P. and Cribari-Neto, F. (2004). Beta regression for modeling
+rates and proportions. \emph{Journal of Applied Statistics}, \bold{31}(7),
+799--815. \doi{10.1080/0266476042000214501}
 }
 \seealso{
 \code{\link{hatvalues.simplexregression}},

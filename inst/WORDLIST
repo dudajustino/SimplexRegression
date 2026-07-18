@@ -24,6 +24,7 @@ Hannan
 Hellinger
 Hematocrit
 Hu
+IG
 INMET
 Instituto
 Jorgensen
@@ -56,6 +57,7 @@ Scher
 Schwarz
 Shao
 Smyth
+Technometrics
 Telford
 Vasconcellos
 Verkuilen
@@ -71,11 +73,14 @@ al
 allometric
 anthropometric
 apm
+bdmep
 biostatistics
 bobdouma
 boldsymbol
+br
 cauchit
 cloglog
+collinear
 de
 decilitre
 doi
@@ -84,6 +89,8 @@ ferritin
 flexuosa
 frac
 hPa
+https
+inmet
 insolation
 lanatus
 litre
@@ -103,6 +110,5 @@ plogit
 positivity
 qquad
 rh
-roxygenized
 simplexregression
 th

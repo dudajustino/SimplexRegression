@@ -13,20 +13,10 @@
 ## Reverse dependencies
 There are no reverse dependencies.
 
-## Summary of changes (version 0.1.4)
- 
-This is a routine update with bug fixes, new features, and documentation
+## Additional notes
+This submission adds `moments` and `parallel` to Imports. It also adds
+input validation (lambda > 0, kappa > 0) and error handling around
+solve() calls to prevent uninformative failures on invalid input or
+singular matrices, in addition to new features and documentation
 improvements. No previous CRAN comments are being addressed in this
 submission.
- 
-* Fixed `opt$counts` handling in `simplexreg.fit()`.
-* Made decimal-place formatting consistent across `summary()`, `print()`,
-  and `print.summary()` methods.
-* Added a `digits` argument to `penalized.ss()` and `penalized.ic()`.
-* `plot.simplexregression()` now accepts a cutoff/threshold argument for
-  flagging observations in residual plots.
-* Improved English wording and mathematical notation in function
-  documentation.
-* Added a new dataset, `AbortionOpposition`.
-* Standardized variable names across package datasets (converted to
-  lowercase).

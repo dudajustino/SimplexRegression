@@ -20,9 +20,6 @@
 #' \cr See \code{\link{residuals.simplexregression}} for available options.
 #' @param ask Logical; if \code{TRUE}, the user is asked before each plot.
 #' Default is \code{TRUE} when multiple plots are requested.
-#' @param reset.par Logical; if \code{TRUE}, resets graphical parameters before plotting.
-#' Set to \code{FALSE} to preserve user-defined \code{par()} settings such as \code{mfrow}.
-#' Default is \code{TRUE}.
 #' @param threshold Numeric threshold for identifying influential or outlying
 #' observations in plots 1--3 (residuals plots), 6 (Cook's distance), and
 #' 7 (generalized leverage). If \code{NULL} (default), no observations are
@@ -92,7 +89,7 @@ plot.simplexregression <- function(x, which = 1:7,
                                             "biasvariance", "score",
                                             "dualscore", "response"),
                                    ask = prod(par("mfcol")) < length(which) && interactive(),
-                                   reset.par = TRUE, threshold = NULL,
+                                   threshold = NULL,
                                    label.pos = 3, plot.type = NULL, ...) {
 
   if (!is.numeric(which) || any(which < 1) || any(which > 7))
@@ -112,16 +109,16 @@ plot.simplexregression <- function(x, which = 1:7,
   pt_index   <- if (is.null(plot.type)) "h"  else plot.type   # type for plots 6-7
 
   # Configure ask mode
-  op <- par(no.readonly = TRUE)
-  on.exit(par(op), add = TRUE)
-  if (ask) par(ask = TRUE)
-  if (reset.par) par(mar = c(3,3,2,3), oma = c(0.5,0.5,0.5,0.5), mgp = c(2,0.6,0))
+  if (ask) {
+    op <- par(ask = TRUE)
+    on.exit(par(op), add = TRUE)
+  }
 
   # Helper to merge defaults with user ...
   plot_args <- function(..., defaults) modifyList(defaults, list(...))
 
-  scatter_defaults <- list(pch = pt_scatter, cex = 1, cex.axis = 0.8, cex.lab = 1.2)
-  index_defaults   <- list(type = pt_index,  cex = 1, cex.axis = 0.8, cex.lab = 1.2)
+  scatter_defaults <- list(pch = pt_scatter, cex = 1, cex.axis = 1, cex.lab = 1.2)
+  index_defaults   <- list(type = pt_index,  cex = 1, cex.axis = 1, cex.lab = 1.2)
   user_args <- list(...)
 
   # 1. Residuals vs indices
@@ -134,7 +131,7 @@ plot.simplexregression <- function(x, which = 1:7,
     if (!is.null(threshold)) {
       idx <- which(abs(resid) > threshold)
       if (length(idx) > 0)
-        text(idx, resid[idx], labels = idx, pos = label.pos, cex = 0.8, col = "red")
+        text(idx, resid[idx], labels = idx, pos = label.pos, cex = 1, col = "red")
     }
   }
 
@@ -148,7 +145,7 @@ plot.simplexregression <- function(x, which = 1:7,
     if (!is.null(threshold)) {
       idx <- which(abs(resid) > threshold)
       if (length(idx) > 0)
-        text(x$fitted.values[idx], resid[idx], labels = idx, pos = label.pos, cex = 0.8, col = "red")
+        text(x$fitted.values[idx], resid[idx], labels = idx, pos = label.pos, cex = 1, col = "red")
     }
   }
 
@@ -162,7 +159,7 @@ plot.simplexregression <- function(x, which = 1:7,
     if (!is.null(threshold)) {
       idx <- which(abs(resid) > threshold)
       if (length(idx) > 0)
-        text(x$mu.lp[idx], resid[idx], labels = idx, pos = label.pos, cex = 0.8, col = "red")
+        text(x$mu.lp[idx], resid[idx], labels = idx, pos = label.pos, cex = 1, col = "red")
     }
   }
 
@@ -178,7 +175,7 @@ plot.simplexregression <- function(x, which = 1:7,
   # 5. Q-Q plot (qqnorm does not accept x/y, filter valid args)
   if (show[5]) {
     qq_valid <- c("pch", "cex", "cex.axis", "cex.lab", "col", "lwd")
-    args <- modifyList(list(cex = 1, cex.axis = 0.8, cex.lab = 1.2,
+    args <- modifyList(list(cex = 1, cex.axis = 1, cex.lab = 1.2,
                             xlab = "Normal quantiles", ylab = "Empirical quantiles",
                             main = NULL),
                        user_args[names(user_args) %in% qq_valid])
@@ -197,7 +194,7 @@ plot.simplexregression <- function(x, which = 1:7,
     if (!is.null(threshold)) {
       idx <- which(cook > threshold)
       if (length(idx) > 0)
-        text(idx, cook[idx], labels = idx, pos = label.pos, cex = 0.8, col = "red")
+        text(idx, cook[idx], labels = idx, pos = label.pos, cex = 1, col = "red")
     }
   }
 
@@ -212,7 +209,7 @@ plot.simplexregression <- function(x, which = 1:7,
     if (!is.null(threshold)) {
       idx <- which(glev > threshold)
       if (length(idx) > 0)
-        text(idx, glev[idx], labels = idx, pos = label.pos, cex = 0.8, col = "red")
+        text(idx, glev[idx], labels = idx, pos = label.pos, cex = 1, col = "red")
     }
   }
 
@@ -348,15 +345,11 @@ halfnormal.plot <- function (model, type = c("weighted", "quantile",
   xx <- cbind(qq, qq)
   yy <- cbind(e1, e2)
 
-  op <- par(no.readonly = TRUE)
-  on.exit(par(op), add = TRUE)
-  par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(2, 0.6, 0))
-
   # Plot defaults (can be overridden via ...)
   plot_args <- modifyList(
     list(type = "l", lty = c(1, 1), col = c("black", "black"),
          xlab = "Normal quantiles", ylab = "Empirical quantiles",
-         cex = 1, cex.axis = 0.8, cex.lab = 1.2),
+         cex = 1, cex.axis = 1, cex.lab = 1.2),
     list(...)
   )
 
@@ -381,7 +374,7 @@ halfnormal.plot <- function (model, type = c("weighted", "quantile",
   legend("topleft",
          legend = c(paste("Points outside:", cOut, "(", prop95, "%)"),
                     paste("Total points:", n)),
-         bty="n", cex = 0.8)
+         bty="n", cex = 1)
 
   invisible(NULL)
 }

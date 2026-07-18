@@ -10,7 +10,6 @@
   type = c("quantile", "pearson", "deviance", "standardized", "weighted", "variance",
     "biasvariance", "score", "dualscore", "response"),
   ask = prod(par("mfcol")) < length(which) && interactive(),
-  reset.par = TRUE,
   threshold = NULL,
   label.pos = 3,
   plot.type = NULL,
@@ -27,10 +26,6 @@
 
 \item{ask}{Logical; if \code{TRUE}, the user is asked before each plot.
 Default is \code{TRUE} when multiple plots are requested.}
-
-\item{reset.par}{Logical; if \code{TRUE}, resets graphical parameters before plotting.
-Set to \code{FALSE} to preserve user-defined \code{par()} settings such as \code{mfrow}.
-Default is \code{TRUE}.}
 
 \item{threshold}{Numeric threshold for identifying influential or outlying
 observations in plots 1--3 (residuals plots), 6 (Cook's distance), and

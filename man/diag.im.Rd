@@ -93,8 +93,9 @@ the simplex regression model, \eqn{\boldsymbol{y}} the vector of observed values
 variable, and \eqn{\ell(\boldsymbol{\theta}; \boldsymbol{y})} the total
 log-likelihood function. Let
 \deqn{A_n(\boldsymbol{\theta};\boldsymbol{y}) = \dfrac{1}{n}\sum_{i=1}^n
-\dfrac{\partial^2\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}\partial\boldsymbol{\theta}'}}
-and \deqn{B_n(\boldsymbol{\theta};\boldsymbol{y}) = \dfrac{1}{n}\sum_{i=1}^n
+\dfrac{\partial^2\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}\partial\boldsymbol{\theta}'}
+\qquad \text{and} \qquad
+B_n(\boldsymbol{\theta};\boldsymbol{y}) = \dfrac{1}{n}\sum_{i=1}^n
 \dfrac{\partial\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}}
 \dfrac{\partial\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}'}}
 denote, respectively, the sample average of the second-order
@@ -109,8 +110,8 @@ observation \eqn{i} omitted, yielding the leave--one--out estimate
 observations, evaluated at \eqn{\boldsymbol{\hat\theta}_{(i)}}.
 
 \strong{Measures computed:}
-\deqn{s_{3,i} = m_{3,(i)} / m_3,}
-\deqn{s_{5,i} = D_i^{\mathrm{mod}} - D_i^{\mathrm{gen}}.}
+\deqn{s_{3,i} = m_{3,(i)} / m_3 \qquad \text{and} \qquad
+s_{5,i} = D_i^{\mathrm{mod}} - D_i^{\mathrm{gen}}.}
 
 Here \eqn{m_3 = \|\mathrm{vech}(P_n^{-1}(\boldsymbol{\hat\theta};\boldsymbol{y})
 B_n(\boldsymbol{\hat\theta};\boldsymbol{y}) P_n^{-1}(\boldsymbol{\hat\theta};

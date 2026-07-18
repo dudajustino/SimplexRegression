@@ -320,15 +320,10 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
   )
 
   if (plot) {
-    op <- par(no.readonly = TRUE)
-    on.exit(par(op), add = TRUE)
-
     measure_name <- paste0(type, ".", parameter)
     values <- result[[measure_name]]
 
     ylab_expr <- if (type == "Ci") expression(C[i]) else expression(d[max])
-
-    par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5), mgp = c(1.92, 0.6, 0))
 
     pt <- if (is.null(plot.type)) "h" else plot.type
 
@@ -339,7 +334,7 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
            ylab     = ylab_expr,
            cex.lab  = 1.2,
            cex      = 1,
-           cex.axis = 0.8,
+           cex.axis = 1,
            ylim     = c(0, max(values, na.rm = TRUE) * 1.05)),
       list(...)
     )
@@ -350,7 +345,7 @@ local.influence <- function(model, scheme = c("case.weight", "response"),
       outliers <- which(values > threshold)
       if (length(outliers) > 0)
         text(outliers, values[outliers], labels = outliers,
-             pos = label.pos, cex = 0.8, col = "red")
+             pos = label.pos, cex = 1, col = "red")
     }
 
     invisible(result)
@@ -517,10 +512,8 @@ gleverage.simplexregression <- function(model){
   rowSums((D %*% L_inv) * t(Lty))
 }
 
-
-
 #' @title Cook's Distance for Simplex Regression Models
-#' @description Computes Cook's distance for simplex regression models with
+#' @description Computes approximate Cook's distances for simplex regression models with
 #' parametric or fixed mean link function.
 #'
 #' @param model An object of class \code{"simplexregression"}.
@@ -537,12 +530,31 @@ gleverage.simplexregression <- function(model){
 #' Observations with high Cook's distance may have a disproportionate effect
 #' on the fitted model.
 #'
+#' Two approximate versions are available, depending on \code{type}:
+#' \itemize{
+#'   \item \code{"pearson"}: the conventional approximate Cook's distance, based
+#'   on the Pearson residual, analogous to the measure used in beta regression
+#'   (Ferrari and Cribari-Neto, 2004).
+#'   \item \code{"weighted"}: the approximate Cook's distance based on the
+#'   weighted residual, as proposed specifically for the simplex regression
+#'   model by Espinheira and Silva (2026).
+#' }
+#'
 #' @seealso \code{\link{hatvalues.simplexregression}},
 #' \code{\link{gleverage.simplexregression}}, \code{\link{residuals.simplexregression}}.
 #'
 #' @references
 #' Cook, R. D. (1977). Detection of influential observation in linear
 #' regression. \emph{Technometrics}, \bold{19}(1), 15--18.
+#' \doi{10.2307/1268249}
+#'
+#' Espinheira, P. L. and Silva, A. O. (2026). Prediction in the nonlinear
+#' simplex model. \emph{International Journal of Data Science and Analytics},
+#' \bold{22}, 161. \doi{10.1007/s41060-026-01114-9}
+#'
+#' Ferrari, S. L. P. and Cribari-Neto, F. (2004). Beta regression for modeling
+#' rates and proportions. \emph{Journal of Applied Statistics}, \bold{31}(7),
+#' 799--815. \doi{10.1080/0266476042000214501}
 #'
 #' @importFrom stats residuals hatvalues cooks.distance
 #' @export
@@ -628,8 +640,9 @@ cooks.distance.simplexregression <- function(model, type = c("pearson", "weighte
 #' variable, and \eqn{\ell(\boldsymbol{\theta}; \boldsymbol{y})} the total
 #' log-likelihood function. Let
 #' \deqn{A_n(\boldsymbol{\theta};\boldsymbol{y}) = \dfrac{1}{n}\sum_{i=1}^n
-#' \dfrac{\partial^2\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}\partial\boldsymbol{\theta}'}}
-#' and \deqn{B_n(\boldsymbol{\theta};\boldsymbol{y}) = \dfrac{1}{n}\sum_{i=1}^n
+#' \dfrac{\partial^2\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}\partial\boldsymbol{\theta}'}
+#' \qquad \text{and} \qquad
+#' B_n(\boldsymbol{\theta};\boldsymbol{y}) = \dfrac{1}{n}\sum_{i=1}^n
 #' \dfrac{\partial\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}}
 #' \dfrac{\partial\ell(\boldsymbol{\theta};y_i)}{\partial\boldsymbol{\theta}'}}
 #' denote, respectively, the sample average of the second-order
@@ -644,8 +657,8 @@ cooks.distance.simplexregression <- function(model, type = c("pearson", "weighte
 #' observations, evaluated at \eqn{\boldsymbol{\hat\theta}_{(i)}}.
 #'
 #' \strong{Measures computed:}
-#' \deqn{s_{3,i} = m_{3,(i)} / m_3,}
-#' \deqn{s_{5,i} = D_i^{\mathrm{mod}} - D_i^{\mathrm{gen}}.}
+#' \deqn{s_{3,i} = m_{3,(i)} / m_3 \qquad \text{and} \qquad
+#' s_{5,i} = D_i^{\mathrm{mod}} - D_i^{\mathrm{gen}}.}
 #'
 #' Here \eqn{m_3 = \|\mathrm{vech}(P_n^{-1}(\boldsymbol{\hat\theta};\boldsymbol{y})
 #' B_n(\boldsymbol{\hat\theta};\boldsymbol{y}) P_n^{-1}(\boldsymbol{\hat\theta};
@@ -956,8 +969,6 @@ diag.im <- function(model, data, type = c("s3", "s5"), interval = c("I1", "I2"),
   # --------------------------------------------------------------------
 
   if (plot) {
-    old_par <- par(no.readonly = TRUE)
-    on.exit(par(old_par), add = TRUE)
 
     n_plots <- length(type)
     if (n_plots == 2L) par(mfrow = c(1L, 2L))
@@ -977,16 +988,14 @@ diag.im <- function(model, data, type = c("s3", "s5"), interval = c("I1", "I2"),
         ii  <- idx[k]
         pos <- lpos[((k - 1L) %% length(lpos)) + 1L]
         text(ii, vals[ii], labels = ii, pos = pos,
-             cex = 0.8, col = "red", offset = 0.3)
+             cex = 1, col = "red", offset = 0.3)
       }
     }
 
     make_plot <- function(vals, lims, ylab_expr) {
-      par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5),
-          mgp = c(2, 0.6, 0))
       plot_args <- modifyList(
         list(type = pt, pch = 1, xlab = "Observation index",
-             ylab = ylab_expr, cex.lab = 1.2, cex = 1, cex.axis = 0.8,
+             ylab = ylab_expr, cex.lab = 1.2, cex = 1, cex.axis = 1,
              ylim = make_ylim(vals, lims)),
         list(...)
       )
@@ -1471,9 +1480,6 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
   # --------------------------------------------------------------------
 
   if (plot) {
-    old_par <- par(no.readonly = TRUE)
-    on.exit(par(old_par), add = TRUE)
-
     ylab_expr <- switch(type,
                         W1 = "Wasserstein (p_W = 1) distance",
                         W2 = "Wasserstein (p_W = 2) distance",
@@ -1485,12 +1491,9 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
     y_max <- max(distances, na.rm = TRUE) *
       if (nrow(outliers) > 0L) 1.12 else 1.05
 
-    par(mar = c(3, 3, 2, 3), oma = c(0.5, 0.5, 0.5, 0.5),
-        mgp = c(2, 0.6, 0))
-
     plot_args <- modifyList(
       list(type = pt, pch = 1, xlab = "Observation index",
-           ylab = ylab_expr, cex = 1, cex.lab = 1.2, cex.axis = 0.8,
+           ylab = ylab_expr, cex = 1, cex.lab = 1.2, cex.axis = 1,
            ylim = c(0, y_max)),
       list(...)
     )
@@ -1502,7 +1505,7 @@ diag.distances <- function(model, data, type = c("W1", "W2", "H"),
         ii  <- outliers$Obs[k]
         pos <- label.pos[((k - 1L) %% length(label.pos)) + 1L]
         text(ii, distances[ii], labels = ii, pos = pos,
-             cex = 0.8, col = "red", offset = 0.3)
+             cex = 1, col = "red", offset = 0.3)
       }
     }
 

@@ -69,16 +69,16 @@
 #' \code{verbose = FALSE}.
 #'
 #' @references
-#' Justino, M. E. C. and Cribari-Neto, F. (2026).
-#' Simplex regression with a flexible logit link: Inference and application
-#' to cross-country impunity data.
-#' \emph{Applied Mathematical Modelling}, \bold{154}, 116713. \doi{10.1016/j.apm.2025.116713}
-#'
 #' Costa, E., Cribari-Neto, F. and Scher, V. T. (2024).
 #' Test inferences and link function selection in dynamic beta modeling of seasonal
 #' hydro-environmental time series with temporary abnormal regimes.
 #' \emph{Journal of Hydrology}, \bold{638}, 131489.
 #' \doi{10.1016/j.jhydrol.2024.131489}
+#'
+#' Justino, M. E. C. and Cribari-Neto, F. (2026).
+#' Simplex regression with a flexible logit link: Inference and application
+#' to cross-country impunity data.
+#' \emph{Applied Mathematical Modelling}, \bold{154}, 116713. \doi{10.1016/j.apm.2025.116713}
 #'
 #' Vuong, Q. H. (1989). Likelihood ratio tests for model selection and non-nested
 #' hypotheses. \emph{Econometrica}, \bold{57}(2), 307--333. \doi{10.2307/1912557}

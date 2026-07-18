@@ -77,21 +77,21 @@
 #' penalized.ic(fit1, fit2)
 #'
 #' @references
-#' Justino, M. E. C. and Cribari-Neto, F. (2026).
-#' Simplex regression with a flexible logit link: Inference and application
-#' to cross-country impunity data.
-#' \emph{Applied Mathematical Modelling}, \bold{154}, 116713. \doi{10.1016/j.apm.2025.116713}
-#'
 #' Akaike, H. (1973). Information theory and an extension of the maximum
 #' likelihood principle. \emph{Akadémiai Kiadó}, 267--281.
-#'
-#' Schwarz, G. E. (1978). Estimating the dimension of a model. \emph{Annals of
-#' Statistics}, \bold{6}(2), 461--464. \doi{10.1214/aos/1176344136}
 #'
 #' Hannan, E. J. and Quinn, B. G. (1979). The determination of the order of an
 #' autoregression. \emph{Journal of the Royal Statistical Society Series B:
 #' Statistical Methodology}, \bold{41}(2), 190--195.
 #' \doi{10.1111/j.2517-6161.1979.tb01072.x}
+#'
+#' Justino, M. E. C. and Cribari-Neto, F. (2026).
+#' Simplex regression with a flexible logit link: Inference and application
+#' to cross-country impunity data.
+#' \emph{Applied Mathematical Modelling}, \bold{154}, 116713. \doi{10.1016/j.apm.2025.116713}
+#'
+#' Schwarz, G. E. (1978). Estimating the dimension of a model. \emph{Annals of
+#' Statistics}, \bold{6}(2), 461--464. \doi{10.1214/aos/1176344136}
 #'
 #' @seealso \code{\link{penalized.ss}}
 #' @export
